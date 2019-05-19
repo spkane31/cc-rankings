@@ -1,7 +1,8 @@
 <section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>A productive web framework that<br/>does not compromise speed or maintainability.</p>
+  <h1><%= gettext "Welcome to %{name}!", name: "Cross Country Rankings" %></h1>
+  <p>A site for the comparison of NIRCA cross country performances.</p>
 </section>
+
 
 <section class="row">
   <article class="column">
