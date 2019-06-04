@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
+	// "os"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -60,6 +61,31 @@ func GetUrlMonthYear(month, year int) {
 	document.Find("a").Each(processElement)
 }
 
+func RemoveLeadTrailSpaces(s string) string {
+	var ret string
+	for i, r := range s {
+		if !unicode.IsSpace(r) {
+			ret = s[i:]
+			break
+		}
+	}
+	// The last two characters are spaces, I think
+	return string(ret[0:len(ret)-3])
+}
+
+func TrimString(s string) string {
+	var ret string
+	for _, r := range s {
+		if r != 10 {
+			ret = ret + string(r)
+		} else {
+			ret += " "
+		}
+	}
+	RemoveLeadTrailSpaces(ret)
+	return ret
+}
+
 func GetRaceName(sel *goquery.Selection) string {
 	// The race name is padded with spaces, and I want to remove those in the beginning 
 	// and at the end which required some odd programming
@@ -97,12 +123,15 @@ func GetRaceName(sel *goquery.Selection) string {
 	return trimmed
 }
 
-func GetRaceDate(sel *goquery.Selection) {
-	fmt.Println(len(sel.Nodes))
-	for i := range sel.Nodes {
-		name := sel.Eq(i).Text()
-		fmt.Println(name)
-	}
+func GetRaceDate(sel *goquery.Selection) (string, string) {
+	var date string
+	var course string
+	date = sel.Eq(0).Text()
+	course = sel.Eq(2).Text()
+
+	course = TrimString(course)
+	
+	return date, course
 }
 
 func ScrapePage(link string) {
@@ -118,10 +147,11 @@ func ScrapePage(link string) {
 	
 	// This will get the title, ie. the Race Name
 	sel := document.Find("h3 .white-underline-hover")
-	GetRaceName(sel)
-
-	// sel = document.Find("div .panel-heading-normal-text")
-	// GetRaceDate(sel)
+	name := GetRaceName(sel)
+	log.Println("Scraping ", name)
+	sel = document.Find("div .panel-heading-normal-text")
+	date, course := GetRaceDate(sel)
+	fmt.Printf("\nCourse: %v\nDate: %v", course, date)
 }
 
 
@@ -129,20 +159,6 @@ func main() {
 	
 	log.Println("Scraping TFRRS!")
 	GetUrlMonthYear(11, 2018)
-
-	ScrapePage(links[1])
-
-
 	log.Printf("Found %d Links!", len(links))
-	// log.Println(links)
-	response, err := http.Get("https://www.tfrrs.org/results_search.html")
-	check(err)
-	defer response.Body.Close()
-
-	// fmt.Println(response)
-
-	// document, err := goquery.NewDocumentFromReader(response.Body)
-	// check(err)
-
-	// document.Find("a").Each(processElement)
+	ScrapePage(links[1])
 }
