@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-	// "os"
+	// "reflect"
+	"os"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -139,11 +140,15 @@ func ScrapePage(link string) {
 	log.Printf("https://wwww.tfrrs.org" + link)
 	
 	response, err := http.Get("https://www.tfrrs.org" + link)
+
 	check(err)
 	defer response.Body.Close()
 	
 	document, err := goquery.NewDocument("https://www.tfrrs.org" + link)
 	check(err)
+
+	mens_results, womens_results := ScrapeResults(document)
+	// fmt.Println(mens_results, womens_results)
 	
 	// This will get the title, ie. the Race Name
 	sel := document.Find("h3 .white-underline-hover")
@@ -151,13 +156,21 @@ func ScrapePage(link string) {
 	log.Println("Scraping ", name)
 	sel = document.Find("div .panel-heading-normal-text")
 	date, course := GetRaceDate(sel)
-	fmt.Printf("\nCourse: %v\nDate: %v", course, date)
+	// fmt.Printf("\nCourse: %v\nDate: %v", course, date)
+
+	WriteResults(mens_results, womens_results, name, date, course)
 }
 
-
+var HomePath string
 func main() {
 	
 	log.Println("Scraping TFRRS!")
+
+	os.MkdirAll("RaceResults", os.ModePerm)
+	HomePath, err := os.Getwd()
+	HomePath = HomePath + "/RaceResults/"
+	check(err)
+	fmt.Println(HomePath)
 	GetUrlMonthYear(11, 2018)
 	log.Printf("Found %d Links!", len(links))
 	ScrapePage(links[1])
