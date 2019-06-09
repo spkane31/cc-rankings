@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"net/http"
 	"log"
 	"net/url"
@@ -26,7 +26,6 @@ func check(e error) {
 func processElement(index int, element *goquery.Selection) {
 	href, exists := element.Attr("href")
 	if exists {
-		// fmt.Println(href)
 		ParseUrl(href)
 	}
 }
@@ -94,7 +93,7 @@ func GetRaceName(sel *goquery.Selection) string {
 	var letterOcurred bool
 	var index int
 	
-	fmt.Println(len(sel.Nodes))
+	// fmt.Println(len(sel.Nodes))
 	
 	for i := range sel.Nodes {
 		name := sel.Eq(i).Text()
@@ -137,7 +136,7 @@ func GetRaceDate(sel *goquery.Selection) (string, string) {
 
 func ScrapePage(link string) {
 	// This function will scrape a race page and create the CSV, and the JSON File
-	log.Printf("https://wwww.tfrrs.org" + link)
+	// log.Printf("https://wwww.tfrrs.org" + link)
 	
 	response, err := http.Get("https://www.tfrrs.org" + link)
 
@@ -148,7 +147,10 @@ func ScrapePage(link string) {
 	check(err)
 
 	mens_results, womens_results := ScrapeResults(document)
-	// fmt.Println(mens_results, womens_results)
+	if len(*mens_results) == 0 || len(*womens_results) == 0 {
+		// This is a scenario with funky formatting on the page, for now I am ignoring it
+		return 
+	}
 	
 	// This will get the title, ie. the Race Name
 	sel := document.Find("h3 .white-underline-hover")
@@ -156,22 +158,37 @@ func ScrapePage(link string) {
 	log.Println("Scraping ", name)
 	sel = document.Find("div .panel-heading-normal-text")
 	date, course := GetRaceDate(sel)
-	// fmt.Printf("\nCourse: %v\nDate: %v", course, date)
 
 	WriteResults(mens_results, womens_results, name, date, course)
 }
 
 var HomePath string
+
 func main() {
 	
 	log.Println("Scraping TFRRS!")
-
 	os.MkdirAll("RaceResults", os.ModePerm)
 	HomePath, err := os.Getwd()
 	HomePath = HomePath + "/RaceResults/"
 	check(err)
-	fmt.Println(HomePath)
+
 	GetUrlMonthYear(11, 2018)
+	log.Println(links)
 	log.Printf("Found %d Links!", len(links))
-	ScrapePage(links[1])
+
+	// Invoke as goroutines to maximize efficiency
+	for i := 0; i < len(links); i += 4 {
+		if i < len(links) {ScrapePage(links[i])}
+		if i+1 < len(links) {
+			go ScrapePage(links[i+1])
+		}
+		if i+2 < len(links) {
+			go ScrapePage(links[i+2])
+		}
+		if i+3 < len(links) {
+			go ScrapePage(links[i+3])
+		}
+	}
+
+	log.Println("Finished!")
 }
