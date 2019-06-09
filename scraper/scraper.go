@@ -1,7 +1,7 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"net/http"
 	"log"
 	"net/url"
@@ -165,7 +165,22 @@ func ScrapePage(link string) {
 var HomePath string
 
 func main() {
-	
+	fmt.Println("Testing Connections for now!")
+	db := ConnectToPSQL()
+
+	CreateRunner(db, "sean", "kane")//, "UC", "SR")
+	// InsertRunner(db, "nick", "dehaven", "UC", "JR")
+	// InsertRunner(db, "evan", "sargent", "OSU", "FR")
+
+	// QueryRunnerFromID(db, 1)
+	// QueryRunnerFromID(db, 2)
+	// QueryRunnerFromID(db, 3)
+
+	// r := GetRunners(db, 2)
+	// fmt.Println(r)
+
+
+	os.Exit(1)
 	log.Println("Scraping TFRRS!")
 	os.MkdirAll("RaceResults", os.ModePerm)
 	HomePath, err := os.Getwd()
