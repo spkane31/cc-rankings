@@ -1,0 +1,2 @@
+<h1>Team Details</h1>
+<b><%= get_name(@team) %> </b> (<%= @team.id %>)
