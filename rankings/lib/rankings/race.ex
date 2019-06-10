@@ -8,6 +8,7 @@ defmodule Rankings.Race do
     field :distance, :integer
     field :gender, :string
     field :correction, :float
+    has_many :race_instances, Rankings.RaceInstance
   end
 
   def changeset(struct, params) do
