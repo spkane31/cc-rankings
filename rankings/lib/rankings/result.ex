@@ -6,5 +6,6 @@ defmodule Rankings.Result do
     field :unit, :string
     field :rating, :float
     field :time, :string
+    belongs_to :race_instance, Rankings.RaceInstance
   end
 end
