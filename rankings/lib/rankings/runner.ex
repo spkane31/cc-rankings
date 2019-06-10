@@ -2,7 +2,6 @@ defmodule Rankings.Runner do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Rankings.Repo
   alias Rankings
 
   schema "runners" do
@@ -10,6 +9,7 @@ defmodule Rankings.Runner do
     field :last_name, :string
     field :year, :string
     belongs_to :team, Rankings.Team
+    has_many :results, Rankings.Result
   end
 
   def changeset(struct, params) do

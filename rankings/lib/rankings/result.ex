@@ -1,9 +1,9 @@
 defmodule Rankings.Result do
   use Ecto.Schema
 
-  schema "races" do
+  schema "results" do
     field :distance, :integer
-    field :unit, :string
+    # field :unit, :string # THIS NEEDS TO BE ADDED
     field :rating, :float
     field :time, :string
     belongs_to :race_instance, Rankings.RaceInstance

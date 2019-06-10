@@ -20,6 +20,14 @@ defmodule RankingsWeb.Router do
     get "/users/:id", UserController, :show
     get "/runners", RunnerController, :index
     get "/runners/:id", RunnerController, :show
+    get "/teams", TeamController, :index
+    get "/teams/:id", TeamController, :show
+    get "/races", RaceController, :index
+    get "/races/:id", RaceController, :show
+    get "/raceinstance", RaceInstanceController, :index
+    get "/raceinstance/:id", RaceInstanceController, :show
+    get "/result", ResultController, :index
+    get "/result/:id", ResultController, :show
     get "/", PageController, :index
   end
 

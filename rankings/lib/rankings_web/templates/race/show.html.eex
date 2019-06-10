@@ -1,0 +1,2 @@
+<h1>Race Details</h1>
+<b><%= get_name(@race) %> </b> (<%= @race.id %>)
