@@ -1,0 +1,2 @@
+<h1>Runner Profile</h1>
+<b><%= get_first_name(@runner) %> </b> (<%= @runner.id %>)
