@@ -1,19 +1,26 @@
 <h1>Runner Profile</h1>
-<b><%= get_first_name(@runner) %> </b> (<%= @runner.id %>)
+<b><%= get_name(@runner) %> </b> <br>
 
 <%= if @team != nil do %>
-  <%= @team %>
+  <b>Team: </b>
+  <%= link @runner.team.name, to: Routes.team_path(@conn, :show, @runner.team.id) %>
 <% end %>
 
 <h2> Recent Results</h1>
 <table>
   <tr>
+    <td>Race</td>
     <td>Distance</td>
     <td>Time</td>
     <td>Rating</td>
   </tr>
   <%= for result <- @results do %>
     <tr>
+      <%= if result.race_instance == nil do %>
+      <td>N/A</td>
+      <%= else %>
+      <td><%= result.race_instance.date %>
+      <%= end %>
       <td><%= result.distance %>
       <td><%= result.time %>
       <td><%= result.rating %>

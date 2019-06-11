@@ -33,4 +33,25 @@ defmodule Rankings.Runner do
   def list_runners do
     Repo.all(Rankings.Runner)
   end
+
+  def get_team_name(id) do
+    r = get_runner(id)
+    r = Repo.preload(r, [:team])
+    if r.team == nil do
+      ""
+    else
+      r.team.name
+    end
+    # r.team.name
+  end
+
+  def get_results(id) do
+    r = get_runner(id)
+    r = Repo.preload(r, [:results])
+    if r.results == nil do
+      ""
+    else
+      r.results
+    end
+  end
 end

@@ -1,2 +1,13 @@
-<h1>Team Details</h1>
-<b><%= get_name(@team) %> </b> (<%= @team.id %>)
+<h1><%= get_name(@team) %> Details</h1>
+
+<h2>Team Members</h2>
+<table>
+  <tr>
+    <td>Name</td>
+  </tr>
+  <%= for runner <- @runners do %>
+    <tr>
+      <td><%= get_runner_name(runner) %></td>
+    </tr>
+  <% end %>
+</table>

@@ -14,4 +14,5 @@ defmodule RankingsWeb.ResultView do
   def get_rating(%Result{rating: rating}) do
     rating
   end
+
 end
