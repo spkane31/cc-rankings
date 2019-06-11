@@ -16,6 +16,8 @@ defmodule RankingsWeb.Router do
   scope "/", RankingsWeb do
     pipe_through :browser
 
+    get "/", PageController, :index
+
     get "/users", UserController, :index
     get "/users/:id", UserController, :show
     get "/runners", RunnerController, :index
@@ -24,11 +26,10 @@ defmodule RankingsWeb.Router do
     get "/teams/:id", TeamController, :show
     get "/races", RaceController, :index
     get "/races/:id", RaceController, :show
-    get "/raceinstance", RaceInstanceController, :index
-    get "/raceinstance/:id", RaceInstanceController, :show
-    get "/result", ResultController, :index
-    get "/result/:id", ResultController, :show
-    get "/", PageController, :index
+    get "/raceinstances", RaceInstanceController, :index
+    get "/raceinstances/:id", RaceInstanceController, :show
+    get "/results", ResultController, :index
+    get "/results/:id", ResultController, :show
   end
 
   # Other scopes may use custom stacks.

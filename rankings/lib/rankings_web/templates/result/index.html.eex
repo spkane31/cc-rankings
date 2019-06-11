@@ -1,0 +1,12 @@
+<h1>Recent Results</h1>
+
+<table>
+  <%= for result <- @results do %>
+    <tr>
+      <td>Distance: <%= get_distance(result) %></td>
+      <td>Time: <%= get_time(result) %></td>
+      <td>Ranking: <%= get_rating(result) %></td>
+      <td><%= link "View", to: Routes.result_path(@conn, :show, result.id) %></td>
+    </tr>
+  <% end %>
+</table>
