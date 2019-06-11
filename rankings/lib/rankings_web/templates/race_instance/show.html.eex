@@ -9,7 +9,7 @@
   </tr>
   <%= for result <- @results do %>
     <tr>
-      <td><%= result.runner_id %></td>
+      <td><%= get_runner_name(result.runner_id) %></td>
       <td>Team</td>
       <td><%= result.time %></td>
       <td><%= result.rating %></td>

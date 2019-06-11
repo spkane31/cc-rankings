@@ -16,4 +16,10 @@ defmodule RankingsWeb.RaceInstanceView do
     team
   end
 
+  alias Rankings.Repo
+  def get_runner_name(id) do
+    runner = Repo.get(Runner, id)
+    runner.first_name <> " " <> runner.last_name
+  end
+
 end
