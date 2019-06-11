@@ -42,7 +42,6 @@ defmodule Rankings.Runner do
     else
       r.team.name
     end
-    # r.team.name
   end
 
   def get_results(id) do

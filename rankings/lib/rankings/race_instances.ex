@@ -24,11 +24,11 @@ defmodule Rankings.RaceInstance do
     Repo.all(Rankings.RaceInstance)
   end
 
+  alias Rankings.Result
+  import Ecto.Query
   def get_results(id) do
-    instance = Repo.get(Rankings.RaceInstance, id) |> Repo.preload(:results)
-    results = instance.results
-    results = Repo.preload(results, :runner)
-    results
+    query = from(r in Result, where: r.race_instance_id == ^id, preload: [:runner])
+    Repo.all(query)
   end
 
 end

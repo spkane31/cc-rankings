@@ -13,7 +13,7 @@ defmodule RankingsWeb.RunnerController do
     runner = Runner.get_runner(id) |> Repo.preload(:team)
     # runner = Repo.preload(runner, [:team, :results])
     team = Runner.get_team_name(id)
-    results = Runner.get_results(id) |> Repo.preload([:race_instance, :runner])
+    results = Repo.get(Runner, 1) |> Repo.preload([{:results, :runner}]) #Runner.get_results(id) |> Repo.preload({:race_instance, :runner})
     render(conn, "show.html", runner: runner, team: team, results: results)
   end
 end
