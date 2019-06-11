@@ -15,7 +15,7 @@
       <td><%= result.runner.first_name %>
       <td><%= get_distance(result) %></td>
       <td><%= get_time(result) %></td>
-      <td><%= get_rating(result) %></td>
+      <td><%= link get_rating(result), to: Routes.result_path(@conn, :show, result.id) %></td>
     </tr>
     <%= end %>
   <% end %>
