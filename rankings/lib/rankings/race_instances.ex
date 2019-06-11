@@ -24,4 +24,11 @@ defmodule Rankings.RaceInstance do
     Repo.all(Rankings.RaceInstance)
   end
 
+  def get_results(id) do
+    instance = Repo.get(Rankings.RaceInstance, id) |> Repo.preload(:results)
+    results = instance.results
+    results = Repo.preload(results, :runner)
+    results
+  end
+
 end

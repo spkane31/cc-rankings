@@ -1,1 +1,15 @@
 <h1>Race Results</h1>
+
+<table>
+  <tr>
+    <td>Name</td>
+    <td>Time</td>
+    <td>Rating</td>
+  </tr>
+  <%= for result <- @results do %>
+  <tr>
+    <td><%= link get_name(result.runner), to: Routes.runner_path(@conn, :show, result.runner.id) %>
+    <td><%= result.time %>
+    <td><%= result.rating %>
+  </tr>
+  <% end %>
