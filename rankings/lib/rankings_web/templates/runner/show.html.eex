@@ -1,2 +1,22 @@
 <h1>Runner Profile</h1>
 <b><%= get_first_name(@runner) %> </b> (<%= @runner.id %>)
+
+<%= if @team != nil do %>
+  <%= @team %>
+<% end %>
+
+<h2> Recent Results</h1>
+<table>
+  <tr>
+    <td>Distance</td>
+    <td>Time</td>
+    <td>Rating</td>
+  </tr>
+  <%= for result <- @results do %>
+    <tr>
+      <td><%= result.distance %>
+      <td><%= result.time %>
+      <td><%= result.rating %>
+    </tr>
+  <% end %>
+<table>

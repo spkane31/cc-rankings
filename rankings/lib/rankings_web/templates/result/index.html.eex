@@ -1,12 +1,22 @@
 <h1>Recent Results</h1>
 
 <table>
+  <tr>
+    <td>Last Name</td>
+    <td>First Name</td>
+    <td>Distance</td>
+    <td>Time</td>
+    <td>Ranking</td>
+  </tr>
   <%= for result <- @results do %>
+    <%= if result.runner != nil do %>
     <tr>
-      <td>Distance: <%= get_distance(result) %></td>
-      <td>Time: <%= get_time(result) %></td>
-      <td>Ranking: <%= get_rating(result) %></td>
-      <td><%= link "View", to: Routes.result_path(@conn, :show, result.id) %></td>
+      <td><%= link result.runner.last_name, to: Routes.runner_path(@conn, :show, result.runner.id) %>
+      <td><%= result.runner.first_name %>
+      <td><%= get_distance(result) %></td>
+      <td><%= get_time(result) %></td>
+      <td><%= get_rating(result) %></td>
     </tr>
+    <%= end %>
   <% end %>
 </table>
