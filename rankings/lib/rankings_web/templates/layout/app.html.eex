@@ -27,4 +27,13 @@
     </main>
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
+
+  <footer>
+    <div>Created and Maintained by Sean Kane 2019</div>
+    <div><a href="https://github.com/spkane31/cc-rankings/issues">Issues</a></div>
+    <div><a href="https://github.com/spkane31/cc-rankings">Project Home</a></div>
+    <div><a href="https://github.com/spkane31/cc-rankings/blob/master/License.txt">License</a></div>
+    <div>
+  </footer>
+
 </html>
