@@ -21,7 +21,7 @@ defmodule RankingsWeb.RunnerView do
     team
   end
 
-  def get_results(%Runner{results: results}) do
-    results
-  end
+  # def get_results(%Runner{results: results}) do
+  #   results
+  # end
 end

@@ -7,6 +7,12 @@
 # General application configuration
 use Mix.Config
 
+config :rankings, Rankings.Repo,
+  database: "rankings_repo",
+  username: "user",
+  password: "pass",
+  hostname: "localhost"
+
 config :rankings,
   ecto_repos: [Rankings.Repo]
 

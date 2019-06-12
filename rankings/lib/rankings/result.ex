@@ -1,6 +1,6 @@
 defmodule Rankings.Result do
   use Ecto.Schema
-  import Ecto.Query
+  # import Ecto.Query
 
   schema "results" do
     field :distance, :integer
@@ -24,6 +24,4 @@ defmodule Rankings.Result do
   def list_results do
     Repo.all(Rankings.Result) |> Repo.preload(:runner)
   end
-  # For getting results based on a race_instance_id
-  # alias Result
 end
