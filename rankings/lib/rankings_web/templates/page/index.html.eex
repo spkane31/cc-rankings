@@ -3,6 +3,14 @@
   <p>A site for the comparison of NIRCA cross country performances.</p>
 </section>
 
+<section>
+  <h3>Teams: <%= @teams %>
+  <h3>Runners: <%= @runners %>
+  <h3>Races: <%= @races %>
+  <h3>Results: <%= @results %>
+  <h3>Race Instances: <%= @instances %>
+</section>
+
 
 <section class="row">
   <article class="column">

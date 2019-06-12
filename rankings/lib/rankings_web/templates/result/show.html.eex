@@ -1,0 +1,13 @@
+<h1>Result Details</h1>
+
+<p>Runner: </p>
+
+<p>Distance: <%= get_distance(@result) %></p>
+
+<p>Time: <%= get_time(@result) %></p>
+
+<p>Course: </p>
+
+<p>Date: </p>
+
+<p>Correction Factor: </p>

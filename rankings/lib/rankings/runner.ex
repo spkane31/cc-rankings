@@ -2,14 +2,15 @@ defmodule Rankings.Runner do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias Rankings.Repo
   alias Rankings
+  alias Rankings.Result
 
   schema "runners" do
     field :first_name, :string
     field :last_name, :string
     field :year, :string
     belongs_to :team, Rankings.Team
+    has_many :results, Rankings.Result
   end
 
   def changeset(struct, params) do
@@ -32,5 +33,31 @@ defmodule Rankings.Runner do
 
   def list_runners do
     Repo.all(Rankings.Runner)
+  end
+
+  def get_team_name(id) do
+    r = get_runner(id)
+    r = Repo.preload(r, [:team])
+    if r.team == nil do
+      ""
+    else
+      r.team.name
+    end
+  end
+
+  import Ecto.Query
+  def get_athlete_results(id) do
+    Repo.all(from r in Result, where: r.runner_id == ^id)
+    |> Repo.preload([ {:race_instance, :race}])
+  end
+
+  def get_results(id) do
+    r = get_runner(id)
+    r = Repo.preload(r, [:results])
+    if r.results == nil do
+      ""
+    else
+      r.results
+    end
   end
 end

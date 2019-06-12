@@ -1,0 +1,19 @@
+<%# Result Instance :show Page %>
+<h1>Race Results</h1>
+
+<table>
+  <tr>
+    <td>Name</td>
+    <td>Team</td>
+    <td>Time</td>
+    <td>Rating</td>
+  </tr>
+  <%= for result <- @results do %>
+    <tr>
+      <td><%= link get_runner_name(result.runner_id), to: Routes.runner_path(@conn, :show, result.runner.id) %></td>
+      <td><%= link get_runner_team(result.runner_id), to: Routes.team_path(@conn, :show, 1 ) %></td>
+      <td><%= result.time %></td>
+      <td><%= link result.rating, to: Routes.result_path(@conn, :show, result.id) %></td>
+    </tr>
+  <% end %>
+</table>

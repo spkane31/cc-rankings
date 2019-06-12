@@ -1,0 +1,13 @@
+<h1><%= get_name(@team) %> Details</h1>
+
+<h2>Team Members</h2>
+<table>
+  <tr>
+    <td>Name</td>
+  </tr>
+  <%= for runner <- @runners do %>
+    <tr>
+      <td><%= link get_runner_name(runner), to: Routes.runner_path(@conn, :show, runner.id) %></td>
+    </tr>
+  <% end %>
+</table>

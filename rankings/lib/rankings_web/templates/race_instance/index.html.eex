@@ -1,0 +1,10 @@
+<h1>Recent Races</h1>
+
+<table>
+  <%= for instance <- @instances do %>
+    <tr>
+      <td><b><%= get_date(instance) %></b> (<%= instance.id %>)</td>
+      <td><%= link "View", to: Routes.race_instance_path(@conn, :show, instance.id) %></td>
+    </tr>
+  <% end %>
+</table>

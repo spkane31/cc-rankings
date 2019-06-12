@@ -1,3 +1,13 @@
 /* This file is for your main application css. */
 
 @import "./phoenix.css";
+
+footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: slategray;
+  color: white;
+  text-align: center;
+}

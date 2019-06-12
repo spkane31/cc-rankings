@@ -1,0 +1,10 @@
+<h1>Listing Races</h1>
+
+<table>
+  <%= for race <- @races do %>
+    <tr>
+      <td><b><%= get_name(race) %></b> (<%= race.id %>)</td>
+      <td><%= link "View", to: Routes.race_path(@conn, :show, race.id) %></td>
+    </tr>
+  <% end %>
+</table>
