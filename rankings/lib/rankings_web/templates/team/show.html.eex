@@ -7,7 +7,7 @@
   </tr>
   <%= for runner <- @runners do %>
     <tr>
-      <td><%= get_runner_name(runner) %></td>
+      <td><%= link get_runner_name(runner), to: Routes.runner_path(@conn, :show, runner.id) %></td>
     </tr>
   <% end %>
 </table>

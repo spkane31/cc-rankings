@@ -11,7 +11,7 @@
   <%= for result <- @results do %>
     <tr>
       <td><%= link get_runner_name(result.runner_id), to: Routes.runner_path(@conn, :show, result.runner.id) %></td>
-      <td><%= get_runner_team(result.runner_id) %></td>
+      <td><%= link get_runner_team(result.runner_id), to: Routes.team_path(@conn, :show, 1 ) %></td>
       <td><%= result.time %></td>
       <td><%= link result.rating, to: Routes.result_path(@conn, :show, result.id) %></td>
     </tr>

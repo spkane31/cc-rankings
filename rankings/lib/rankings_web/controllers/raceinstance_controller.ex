@@ -2,7 +2,7 @@ defmodule RankingsWeb.RaceInstanceController do
   use RankingsWeb, :controller
 
   alias Rankings.RaceInstance
-  # alias Rankings.Repo
+  alias Rankings.Repo
 
   def index(conn, _params) do
     instances = RaceInstance.list_race_instances()
@@ -11,7 +11,7 @@ defmodule RankingsWeb.RaceInstanceController do
 
   alias Rankings.Result
   def show(conn, %{"id" => id}) do
-    results = RaceInstance.get_results(id)
+    results = RaceInstance.get_results(1) |> Repo.preload([{:runner, :team}])
     render(conn, "show.html", results: results)
   end
 end

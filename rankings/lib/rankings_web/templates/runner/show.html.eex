@@ -22,7 +22,7 @@
       <td>N/A</td>
       <%= else %>
       <td><%= result.race_instance.date %></td>
-      <td><%= result.race_instance.race.name %></td>
+      <td><%= link result.race_instance.race.name, to: Routes.race_path(@conn, :show, result.race_instance.race.id) %></td>
       <%= end %>
       <td><%= result.distance %>
       <td><%= result.time %>
