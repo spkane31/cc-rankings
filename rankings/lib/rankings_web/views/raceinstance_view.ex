@@ -29,4 +29,9 @@ defmodule RankingsWeb.RaceInstanceView do
     team.name
   end
 
+  alias Rankings.Result
+  def get_runner_id(%Result{runner_id: id}) do
+    id
+  end
+
 end

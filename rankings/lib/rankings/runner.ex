@@ -3,6 +3,7 @@ defmodule Rankings.Runner do
   import Ecto.Changeset
 
   alias Rankings
+  alias Rankings.Result
 
   schema "runners" do
     field :first_name, :string
@@ -42,6 +43,12 @@ defmodule Rankings.Runner do
     else
       r.team.name
     end
+  end
+
+  import Ecto.Query
+  def get_athlete_results(id) do
+    Repo.all(from r in Result, where: r.runner_id == ^id)
+    |> Repo.preload([ {:race_instance, :race}])
   end
 
   def get_results(id) do
