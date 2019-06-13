@@ -12,7 +12,7 @@ const (
 	port = 5432
 	user = "postgres"
 	password = "postgres"
-	dbname = "rankings_test"
+	dbname = "rankings_dev"
 )
 
 func CreateConnectionString() string {
@@ -24,8 +24,6 @@ func CreateConnectionString() string {
 func ConnectToPSQL() *sql.DB {
 	db, err := sql.Open("postgres", CreateConnectionString())
 	check(err)
-	// Probably want the below to be in a different function
-	// defer db.Close()
 
 	// Let's ping the database to check that the connection worked
 	err = db.Ping()
