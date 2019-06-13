@@ -6,7 +6,7 @@ defmodule RankingsWeb.RunnerController do
   alias Rankings.Repo
 
   def index(conn, _params) do
-    runners = Runner.list_runners()
+    runners = Runner.list_runners() |> Repo.preload(:team)
     render(conn, "index.html", runners: runners)
   end
 

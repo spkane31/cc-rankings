@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	// "fmt"
 
 	_ "github.com/lib/pq"
 )
@@ -16,35 +16,32 @@ type Runner struct {
 	Year			string
 }
 
-func FindRunner(db *sql.DB, first, last string) (int, error) {
+func FindRunner(db *sql.DB, first, last, year string) (int, error) {
 	var id int
 	// TODO - Add a team check here too!
-	queryStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2);`
-	row := db.QueryRow(queryStatement, first, last)
+	queryStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3);`
+	row := db.QueryRow(queryStatement, first, last, year)
 	err := row.Scan(&id)
-	return id, err
-	// # TODO get rid of this, here for importing reason
-	fmt.Println(1)
 	return id, err
 }
 
-func AddRunner(db *sql.DB, first, last string) int {
+func AddRunner(db *sql.DB, first, last, year string) int {
 	// This will create a new runner given their name, and return the ID
 
 	// First we should probably check for a runner
-	checkStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2);`
-	row := db.QueryRow(checkStatement, first, last)
-	var id int
-	err := row.Scan(&id)
-	fmt.Println(err)
+	checkStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3);`
+	// row := db.QueryRow(checkStatement, first, last, year)
+	// var id int
+	// err := row.Scan(&id)
+	id, err := FindRunner(db, first, last, year)
 	if err == sql.ErrNoRows {
 		// If their is no hit on the query, then we create a new runner, requery, and return the id
-		sqlStatement := `INSERT INTO runners (first_name, last_name) VALUES ($1, $2)`
+		sqlStatement := `INSERT INTO runners (first_name, last_name, year) VALUES ($1, $2, $3)`
 	
-		_, err := db.Exec(sqlStatement, first, last)
+		_, err := db.Exec(sqlStatement, first, last, year)
 		check(err)
 		
-		row := db.QueryRow(checkStatement, first, last)
+		row := db.QueryRow(checkStatement, first, last, year)
 		err = row.Scan(&id)
 
 		return id

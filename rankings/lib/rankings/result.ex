@@ -4,7 +4,7 @@ defmodule Rankings.Result do
 
   schema "results" do
     field :distance, :integer
-    # field :unit, :string # THIS NEEDS TO BE ADDED
+    field :unit, :string
     field :rating, :float
     field :time, :string
     belongs_to :runner, Rankings.Runner
@@ -14,7 +14,7 @@ defmodule Rankings.Result do
   alias Rankings.Repo
 
   def get_result(id) do
-    Repo.get(Rankings.Result, id) |> Repo.preload(:runner)
+    Repo.get(Rankings.Result, id) |> Repo.preload([{:runner, :team}])
   end
 
   def get_result!(id) do
