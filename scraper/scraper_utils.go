@@ -8,14 +8,18 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
-	_ "fmt"
+	"fmt"
 	"net/http"
 	"log"
 	"net/url"
 	"unicode"
+	"reflect"
 
 	"github.com/PuerkitoBio/goquery"
 )
+
+var _, _, _ = fmt.Println, reflect.TypeOf, unicode.IsSymbol
+
 
 func RemoveLeadingSpaces(s string) string {
 	// ret := s
@@ -32,18 +36,71 @@ func RemoveLeadingSpaces(s string) string {
 	return s[count:len(s)]
 }
 
-func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string) { 
+func DetermineRaces(str string) []string {
+	// Takes the raw string and returns a list of the distances and genders
+	var ret []string
+
+	raw := strings.Split(str, " ")
+	for i := 0; i < len(raw); i++ {
+		if len(raw[i]) > 0 {
+			ret = append(ret, strings.ToUpper(raw[i]))
+		}
+	}
+
+	var final []string
+	for i := range ret {
+		var s strings.Builder
+		for _, j := range ret[i] {
+			if unicode.IsNumber(j) || unicode.IsLetter(j) {
+				s.WriteString(string(j))
+			}
+		}
+		final = append(final, s.String())
+	}
+	final = final[1:]
+
+	ret = []string{}
+	for i := 0; i < len(final)-1; i+=2 {
+		var temp strings.Builder
+		temp.WriteString(final[i])
+		temp.WriteString(" ")
+		temp.WriteString(final[i+1])
+		ret = append(ret, temp.String())
+	}
+	return ret
+}
+
+func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string, *[]string) { 
 	var m_results [][]string
 	var w_results [][]string
 	var name string
 	var year string
 	var time string
 	var team string
+
+	races_elem := doc.Find("ol")
+	races := races_elem.Text()
+
+	r := DetermineRaces(races)
+
 	sel := doc.Find(".color-xc")
 	if len(sel.Nodes) > 4 {
-		return &m_results, &w_results
+		return &m_results, &w_results, &r
 	}
-	womens_results := sel.Eq(1)
+	
+	var womens_results *goquery.Selection
+	var mens_results *goquery.Selection
+	fmt.Println(r)
+	if r[0][:5] == "WOMEN" {
+		womens_results = sel.Eq(1)
+		mens_results = sel.Eq(3)
+	} else {
+		// Mens
+		womens_results = sel.Eq(3)
+		mens_results = sel.Eq(1)
+	}
+
+	womens_results = sel.Eq(1)
 	row := womens_results.Find("tr")
 	for i := range row.Nodes {
 		cells := row.Eq(i).Find("td")
@@ -69,7 +126,7 @@ func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string) {
 
 	}
 
-	mens_results := sel.Eq(3)
+	mens_results = sel.Eq(3)
 	row = mens_results.Find("tr")
 	for i := range row.Nodes {
 		cells := row.Eq(i).Find("td")
@@ -100,16 +157,15 @@ func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string) {
 
 	}
 	
-	return &m_results, &w_results
+	return &m_results, &w_results, &r
 }
 
-func WriteResults(mens, womens *[][]string, name, date, course string) {
+func WriteResults(mens, womens *[][]string, name, date, course string, races *[]string) {
 	path := filepath.Join(HomePath, "RaceResults")
 	path = filepath.Join(path, strings.Replace(name[0:len(name)-1], " ", "", -1))
-	// path := HomePath + "RaceResults" + strings.Replace(name, " ", "", -1)
-	// fmt.Println(path)
+	
 	os.MkdirAll(path, os.ModePerm)
-
+	
 	m_file, err := os.Create(filepath.Join(path, "mens.csv"))
 	check(err)
 	w_file, err := os.Create(filepath.Join(path, "womens.csv"))
@@ -131,6 +187,17 @@ func WriteResults(mens, womens *[][]string, name, date, course string) {
 		check(err)
 	}
 
+
+	var mens_dist string
+	var womens_dist string
+	if (*races)[0][0:5] == "WOMEN" && len(*races) > 1{
+		womens_dist = strings.Split((*races)[0], " ")[1]
+		mens_dist = strings.Split((*races)[1], " ")[1]
+	} else if len(*races) > 1 {
+		womens_dist = strings.Split((*races)[1], " ")[1]
+		mens_dist = strings.Split((*races)[0], " ")[1]
+	}
+
 	// Now to create the raceSummary.json file with more details
 	data := make(map[string]string)
 	data["mens_results"] = filepath.Join(path, "mens.csv")
@@ -140,6 +207,8 @@ func WriteResults(mens, womens *[][]string, name, date, course string) {
 	data["course"] = course
 	data["date"] = date
 	data["name"] = name
+	data["mens_distance"] = mens_dist
+	data["womens_distance"] = womens_dist
 	WriteJSON(data, filepath.Join(path, "raceSummary.json"))
 }
 
@@ -271,7 +340,7 @@ func ScrapePage(link string) {
 	document, err := goquery.NewDocument("https://www.tfrrs.org" + link)
 	check(err)
 
-	mens_results, womens_results := ScrapeResults(document)
+	mens_results, womens_results, races := ScrapeResults(document)
 	if len(*mens_results) == 0 || len(*womens_results) == 0 {
 		// This is a scenario with funky formatting on the page, for now I am ignoring it
 		return 
@@ -284,5 +353,5 @@ func ScrapePage(link string) {
 	sel = document.Find("div .panel-heading-normal-text")
 	date, course := GetRaceDate(sel)
 
-	WriteResults(mens_results, womens_results, name, date, course)
+	WriteResults(mens_results, womens_results, name, date, course, races)
 }
