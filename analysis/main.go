@@ -15,6 +15,8 @@ func main() {
 	fmt.Println("Establishing DB connection...")
 	db := ConnectToPSQL()
 
+	// FindConnections(db)
+
 	FindAllConnections(db)
 	log.Println("Finished")
 }

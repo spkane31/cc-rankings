@@ -17,14 +17,29 @@ type Result struct {
 }
 
 func CreateResult(db *sql.DB, gender string, details []string, raceSummary map[string]string) int {
+	// First create the team NOw we have the runner_id, check for the team
+	if details[1] == "Matthew" && details[0] == "Thomas" {
+		fmt.Println(details, details[2])
+		debug = true
+	} else {
+		debug = false
+	}
+	team_id, err := FindTeam(db, details[2])
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("No team found, creating a new one")}
+		team_id = AddTeam(db, details[2])
+	}
+	if debug {fmt.Printf("Team ID: %d\n", team_id)}
+	
 	// This will create a new runner given their name, and return the ID
 	if debug {fmt.Println("\nCreating a new Result")}
 	var id int
-	runner_id, err := FindRunner(db, details[1], details[0], details[3])
+	runner_id, err := FindRunner(db, details[1], details[0], details[3], team_id)
+
 	if err == sql.ErrNoRows {
 		if debug {fmt.Println("No Runner found, creating a new one")}
 		// Order is last name, first name
-		runner_id = AddRunner(db, details[1], details[0], details[3])
+		runner_id = AddRunner(db, details[1], details[0], details[3], team_id)
 	}
 
 	if runner_id == 0 {
@@ -33,13 +48,7 @@ func CreateResult(db *sql.DB, gender string, details []string, raceSummary map[s
 	}
 	if debug {fmt.Printf("Runner ID: %d\n", runner_id)}
 
-	// NOw we have the runner_id, check for the team
-	team_id, err := FindTeam(db, details[2])
-	if err == sql.ErrNoRows {
-		if debug {fmt.Println("No team found, creating a new one")}
-		team_id = AddTeam(db, details[2])
-	}
-	if debug {fmt.Printf("Team ID: %d\n", team_id)}
+	
 
 	// Now lets connect the runner to the team
 	ConnectRunnerTeam(db, runner_id, team_id)

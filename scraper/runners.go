@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
-	// "fmt"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
+
+var _ = fmt.Printf
 
 type Runner struct {
 	ID 				int
@@ -16,32 +18,32 @@ type Runner struct {
 	Year			string
 }
 
-func FindRunner(db *sql.DB, first, last, year string) (int, error) {
+func FindRunner(db *sql.DB, first, last, year string, team_id int) (int, error) {
 	var id int
 	// TODO - Add a team check here too!
-	queryStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3);`
-	row := db.QueryRow(queryStatement, first, last, year)
+	queryStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3 AND team_id=$4);`
+	row := db.QueryRow(queryStatement, first, last, year, team_id)
 	err := row.Scan(&id)
 	return id, err
 }
 
-func AddRunner(db *sql.DB, first, last, year string) int {
+func AddRunner(db *sql.DB, first, last, year string, team_id int) int {
 	// This will create a new runner given their name, and return the ID
 
 	// First we should probably check for a runner
-	checkStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3);`
+	checkStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3 AND team_id=$4);`
 	// row := db.QueryRow(checkStatement, first, last, year)
 	// var id int
 	// err := row.Scan(&id)
-	id, err := FindRunner(db, first, last, year)
+	id, err := FindRunner(db, first, last, year, team_id)
 	if err == sql.ErrNoRows {
 		// If their is no hit on the query, then we create a new runner, requery, and return the id
-		sqlStatement := `INSERT INTO runners (first_name, last_name, year) VALUES ($1, $2, $3)`
+		sqlStatement := `INSERT INTO runners (first_name, last_name, year, team_id) VALUES ($1, $2, $3, $4)`
 	
-		_, err := db.Exec(sqlStatement, first, last, year)
+		_, err := db.Exec(sqlStatement, first, last, year, team_id)
 		check(err)
 		
-		row := db.QueryRow(checkStatement, first, last, year)
+		row := db.QueryRow(checkStatement, first, last, year, team_id)
 		err = row.Scan(&id)
 
 		return id

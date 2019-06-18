@@ -31,15 +31,16 @@ func main() {
 		fmt.Println("Testing Connections for now!")
 		db := ConnectToPSQL()
 		directories := []string{
-			"NCAADivisionIWestRegionCrossCountryChampionships",
-			"NCAADivisionISouthRegionCrossCountryChampionships",
-			"NCAADivisionISoutheastRegionCrossCountryChampionships",
-			"NCAADivisionISouthCentralRegionCrossCountryChampionships",
-			"NCAADivisionINortheastRegionCrossCountryChampionships",
-			"NCAADivisionIMountainRegionCrossCountryChampionships",
-			"NCAADivisionIMidwestRegionCrossCountryChampionships",
-			"NCAADivisionIMidAtlanticRegionCrossCountryChampionships",
-			"NCAADICrossCountryChampionships",
+			"NCAADivisionIWestRegionCrossCountryChampionship",
+			"NCAADivisionISouthRegionCrossCountryChampionship",
+			"NCAADivisionISoutheastRegionCrossCountryChampionship",
+			"NCAADivisionISouthCentralRegionCrossCountryChampionship",
+			"NCAADivisionINortheastRegionCrossCountryChampionship",
+			"NCAADivisionIMountainRegionCrossCountryChampionship",
+			"NCAADivisionIMidwestRegionCrossCountryChampionship",
+			"NCAADivisionIMidAtlanticRegionCrossCountryChampionship",
+			"NCAADivisionIGreatLakesRegionCrossCountryChampionship",
+			"NCAADICrossCountryChampionship",
 		}
 
 		// dir := "RaceResults/NCAADivisionIWestRegionCrossCountryChampionships/"

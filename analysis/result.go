@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"strconv"
+	"math"
 	_ "github.com/lib/pq"
 )
 
@@ -58,7 +59,7 @@ func Analyze(db *sql.DB, runners []Runner) {
 						e1, has := graph[p]
 						if has == false {
 							fmt.Printf("New Edge: %v->%v\n", runner.results[j].race_instance_id, runner.results[i].race_instance_id)
-
+							fmt.Println(runner)
 							e = Edge{
 								runner.results[j].race_instance_id, 
 								runner.results[i].race_instance_id,
@@ -85,17 +86,16 @@ func Analyze(db *sql.DB, runners []Runner) {
 			}
 		}
 	}
-	for i := 1; i < 9; i++ {
-		p := Pair{i, 9}
+	for i := 1; i < 10; i++ {
+		p := Pair{i, 10}
 		e, has := graph[p]
 		if has == false {
-			p = Pair{9, i}
+			p = Pair{10, i}
 			e, has = graph[p]
 		}
 		if has == true {
-			PrintEdgeNames(db, i, 9)
-			fmt.Printf("Total Connections: %v\tTotal Time: %v\tWeight: %v", e.count, e.total_time, e.total_time / float64(e.count))
-			fmt.Println(e.total_time / float64(e.count))
+			PrintEdgeNames(db, i, 10)
+			fmt.Printf("Total Connections: %v\tTotal Time: %v\tWeight: %v\n", e.count, e.total_time, math.Round(e.total_time / float64(e.count)))
 		}
 	}
 }

@@ -7,7 +7,7 @@ import (
 
 )
 
-func AddTeam(db *sql.DB, name string) int {
+func GetTeam(db *sql.DB, name string) int {
 	checkStatement := `SELECT id FROM teams WHERE (name=$1);`
 	row := db.QueryRow(checkStatement, name)
 	var id int
