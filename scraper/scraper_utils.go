@@ -67,10 +67,34 @@ func DetermineRaces(str string) []string {
 		temp.WriteString(final[i+1])
 		ret = append(ret, temp.String())
 	}
+	FilterRaces(ret)
 	return ret
+
 }
 
-func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string, *[]string) { 
+func FilterRaces(races []string) []string {
+	var ret []string
+	var temp strings.Builder
+	for _, r := range races {
+		fmt.Printf("%v, ", r)
+		if r == "MEN" || r == "MENS" || r == "MEN'S" {
+			if temp.String() != "" {
+				ret = append(ret, temp.String())
+			}
+			temp.WriteString(r)
+		} else if r == "WOMEN" || r == "WOMENS" || r == "WOMEN'S" {
+			if temp.String() != "" {
+				ret = append(ret, temp.String())
+			}
+			temp.WriteString(r)
+		}
+	}
+
+	fmt.Printf("Filter: %v\n", ret)
+	return ret
+} 
+
+func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string, map[string]string) { 
 	var m_results [][]string
 	var w_results [][]string
 	var name string
@@ -78,29 +102,115 @@ func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string, *[]string) 
 	var time string
 	var team string
 
-	races_elem := doc.Find("ol")
-	races := races_elem.Text()
+	all_races := doc.Find("div .row")
+	
+	var womens_index int
+	var mens_index int
+	var womens_dist string
+	var mens_dist string
+	for i := range all_races.Nodes {
+		title := all_races.Eq(i).Find("h3")
+		title_str := strings.ToUpper(title.Text())
+		// fmt.Println(title_str)
+		if (strings.Contains(title_str, "WOMEN") || strings.Contains(title_str, "(W)")) && strings.Contains(title_str, "INDIVIDUAL") {
+			// fmt.Println("WOMENS RACE")
+			womens_index = i
+			if len(all_races.Nodes) == 8 {
+				womens_index--
+			}
+		} else if (strings.Contains(title_str, "MEN") || strings.Contains(title_str, "(M)"))  && strings.Contains(title_str, "INDIVIDUAL") {
+			// fmt.Println("MENS RACE")
+			mens_index = i
+			if len(all_races.Nodes) == 8 {
+				mens_index--
+			}
+		}
+		if strings.Contains(title_str, "10K") {
+			// fmt.Println("10K!")
+			if strings.Contains(title_str, "WOMEN") || strings.Contains(title_str, "(W)") {
+				womens_dist = "10K"
+			} else {
+				mens_dist = "10K"
+			}
+		} else if strings.Contains(title_str, "6K") {
+			// fmt.Println("6K!")
+			if strings.Contains(title_str, "WOMEN") || strings.Contains(title_str, "(W)") {
+				womens_dist = "6K"
+			} else {
+				mens_dist = "6K"
+			}
+		} else if strings.Contains(title_str, "8K") {
+			// fmt.Println("8K!")
+			if strings.Contains(title_str, "WOMEN") || strings.Contains(title_str, "(W)") {
+				womens_dist = "8K"
+			} else {
+				mens_dist = "8K"
+			}
+		} else if strings.Contains(title_str, "5K") {
+			// fmt.Println("5K!")
+			if strings.Contains(title_str, "WOMEN") || strings.Contains(title_str, "(W)") {
+				womens_dist = "5K"
+			} else {
+				mens_dist = "5K"
+			}
+		}
+		// fmt.Println(womens_dist, mens_dist)
+	}
 
-	r := DetermineRaces(races)
+	// fmt.Println(mens_index, womens_index, mens_dist, womens_dist)
+
+	m := make(map[string]string)
+	m["mens_distance"] = mens_dist
+	m["womens_distance"] = womens_dist
+	// os.Exit(1)
+
+
+
+
+
+
+	// races_elem := doc.Find("ol")
+	// races := races_elem.Text()
+
+	// r := DetermineRaces(races)
+	// fmt.Println(r)
 
 	sel := doc.Find(".color-xc")
-	if len(sel.Nodes) > 4 {
-		return &m_results, &w_results, &r
-	}
+	// if len(sel.Nodes) > 4 {
+	// 	return &m_results, &w_results, &r
+	// }
 	
 	var womens_results *goquery.Selection
 	var mens_results *goquery.Selection
-	fmt.Println(r)
-	if r[0][:5] == "WOMEN" {
+	if womens_index < mens_index {
 		womens_results = sel.Eq(1)
 		mens_results = sel.Eq(3)
 	} else {
-		// Mens
 		womens_results = sel.Eq(3)
 		mens_results = sel.Eq(1)
 	}
 
-	womens_results = sel.Eq(1)
+	if len(all_races.Nodes) == 8 {
+		if womens_index < mens_index {
+			womens_results = sel.Eq(3)
+			mens_results = sel.Eq(6)
+		} else {
+			womens_results = sel.Eq(6)
+			mens_results = sel.Eq(3)
+		}
+	}
+
+	// fmt.Println(r)
+	// if r[0][:5] == "WOMEN" {
+	// 	womens_results = sel.Eq(womens_index)
+	// 	mens_results = sel.Eq(mens_index)
+	// } else {
+	// 	// Mens
+	// 	womens_results = sel.Eq(3)
+	// 	mens_results = sel.Eq(1)
+	// }
+
+	// womens_results = sel.Eq(1)
 	row := womens_results.Find("tr")
 	for i := range row.Nodes {
 		cells := row.Eq(i).Find("td")
@@ -126,7 +236,7 @@ func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string, *[]string) 
 
 	}
 
-	mens_results = sel.Eq(3)
+	// mens_results = sel.Eq(3)
 	row = mens_results.Find("tr")
 	for i := range row.Nodes {
 		cells := row.Eq(i).Find("td")
@@ -157,10 +267,10 @@ func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string, *[]string) 
 
 	}
 	
-	return &m_results, &w_results, &r
+	return &m_results, &w_results, m
 }
 
-func WriteResults(mens, womens *[][]string, name, date, course string, races *[]string) {
+func WriteResults(mens, womens *[][]string, name, date, course string, data map[string]string) {
 	path := filepath.Join(HomePath, "RaceResults")
 	path = filepath.Join(path, strings.Replace(name[0:len(name)-1], " ", "", -1))
 	
@@ -182,24 +292,24 @@ func WriteResults(mens, womens *[][]string, name, date, course string, races *[]
 	writer = csv.NewWriter(w_file)
 	defer writer.Flush()
 
-	for _, value := range *mens {
+	for _, value := range *womens {
 		err := writer.Write(value)
 		check(err)
 	}
 
 
-	var mens_dist string
-	var womens_dist string
-	if (*races)[0][0:5] == "WOMEN" && len(*races) > 1{
-		womens_dist = strings.Split((*races)[0], " ")[1]
-		mens_dist = strings.Split((*races)[1], " ")[1]
-	} else if len(*races) > 1 {
-		womens_dist = strings.Split((*races)[1], " ")[1]
-		mens_dist = strings.Split((*races)[0], " ")[1]
-	}
+	// var mens_dist string
+	// var womens_dist string
+	// if (*races)[0][0:5] == "WOMEN" && len(*races) > 1{
+	// 	womens_dist = strings.Split((*races)[0], " ")[1]
+	// 	mens_dist = strings.Split((*races)[1], " ")[1]
+	// } else if len(*races) > 1 {
+	// 	womens_dist = strings.Split((*races)[1], " ")[1]
+	// 	mens_dist = strings.Split((*races)[0], " ")[1]
+	// }
 
 	// Now to create the raceSummary.json file with more details
-	data := make(map[string]string)
+	// data := make(map[string]string)
 	data["mens_results"] = filepath.Join(path, "mens.csv")
 	data["womens_results"] = filepath.Join(path, "womens.csv")
 	data["mens_count"] = strconv.Itoa(len(*mens))
@@ -207,8 +317,8 @@ func WriteResults(mens, womens *[][]string, name, date, course string, races *[]
 	data["course"] = course
 	data["date"] = date
 	data["name"] = name
-	data["mens_distance"] = mens_dist
-	data["womens_distance"] = womens_dist
+	// data["mens_distance"] = mens_dist
+	// data["womens_distance"] = womens_dist
 	WriteJSON(data, filepath.Join(path, "raceSummary.json"))
 }
 
@@ -314,7 +424,7 @@ func GetRaceName(sel *goquery.Selection) string {
 		}
 		
 	}
-	return trimmed
+	return strings.Replace(trimmed, "\n", "", -1)
 }
 
 func GetRaceDate(sel *goquery.Selection) (string, string) {
@@ -339,19 +449,21 @@ func ScrapePage(link string) {
 	
 	document, err := goquery.NewDocument("https://www.tfrrs.org" + link)
 	check(err)
+	
+	sel := document.Find("h3 .white-underline-hover")
+	name := GetRaceName(sel)
+	log.Println("Scraping ", name)
 
-	mens_results, womens_results, races := ScrapeResults(document)
+	mens_results, womens_results, m := ScrapeResults(document)
 	if len(*mens_results) == 0 || len(*womens_results) == 0 {
 		// This is a scenario with funky formatting on the page, for now I am ignoring it
 		return 
 	}
 	
 	// This will get the title, ie. the Race Name
-	sel := document.Find("h3 .white-underline-hover")
-	name := GetRaceName(sel)
-	log.Println("Scraping ", name)
+	
 	sel = document.Find("div .panel-heading-normal-text")
 	date, course := GetRaceDate(sel)
 
-	WriteResults(mens_results, womens_results, name, date, course, races)
+	WriteResults(mens_results, womens_results, name, date, course, m)
 }

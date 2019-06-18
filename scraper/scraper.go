@@ -87,13 +87,11 @@ func main() {
 	check(err)
 
 	GetUrlMonthYear(11, 2018)
-	log.Println(links)
+	// log.Println(links)
 	log.Printf("Found %d Links!", len(links))
-	fmt.Println(links[1])
-	ScrapePage(links[1])
 
 	// Invoke as goroutines to maximize efficiency
-	for i := 0; i < len(links); i += 4 {
+	for i := 0; i < len(links); i += 1 {
 		if i < len(links) {ScrapePage(links[i])}
 		if i+1 < len(links) {
 			go ScrapePage(links[i+1])
