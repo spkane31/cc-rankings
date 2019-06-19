@@ -26,7 +26,7 @@ var HomePath string
 var debug bool
 
 func main() {
-	if true {
+	if false {
 		debug = false
 		fmt.Println("Testing Connections for now!")
 		db := ConnectToPSQL()
@@ -87,12 +87,19 @@ func main() {
 	HomePath = HomePath + "/RaceResults/"
 	check(err)
 
-	GetUrlMonthYear(11, 2018)
+	// links = []string{
+	// 	"/results/xc/14624/Monmouth_University_XC_Tune-Up",
+	// }
+
+	GetUrlMonthYear(9, 2018)
 	// log.Println(links)
 	log.Printf("Found %d Links!", len(links))
 
+	// ScrapePage(links[0])
+	// os.Exit(1)
+
 	// Invoke as goroutines to maximize efficiency
-	for i := 0; i < len(links); i += 1 {
+	for i := 0; i < len(links); i += 4 {
 		if i < len(links) {ScrapePage(links[i])}
 		if i+1 < len(links) {
 			go ScrapePage(links[i+1])
