@@ -11,3 +11,4 @@ erl_crash.dump
 scraper/RaceResults/*
 scraper/scraper
 analysis/analysis
+venv/

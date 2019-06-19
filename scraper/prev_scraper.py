@@ -97,13 +97,14 @@ def getNIRCAResults(URL):
     return mens, womens #,  raceName
 
 def getTFRRSResults(URL):
+  print(URL)
 
   headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
   
   s = requests.session()
   
   r = s.get(URL, headers=headers)
-  print(r)
+  # print(r)
   soup = BeautifulSoup(r.content, 'html.parser')
   # <div class="col-lg-12">
   races = soup.find_all('div', class_='row')#, class_='col-lg-12')
@@ -112,7 +113,7 @@ def getTFRRSResults(URL):
   # print(len(date_loc))
   date = date_loc[0].get_text().replace("\n", " ")
   loc = date_loc[1].get_text().replace("\n", " ")
-  print(date, loc)
+  # print(date, loc)
 
   race_name = soup.find_all('a', class_='white-underline-hover')
   race_name = race_name[0].get_text().replace("\n", " ")
@@ -135,16 +136,33 @@ def getTFRRSResults(URL):
         new_race_name = ""
         finished = False
         for i in info:
-          if str.upper(i) in ['MEN', 'M', 'MENS', '(M)']:
+          if str.upper(i) in ['MEN', 'M', 'MENS', '(M)', "MEN'S"]:
             details['gender'] = 'MENS'
-          if str.upper(i) in ['WOMEN', 'W', 'WOMENS', '(W)']:
+          if str.upper(i) in ['WOMEN', 'W', 'WOMENS', '(W)', "WOMEN'S"]:
             details['gender'] = 'WOMENS'
           if str.upper(i) in ['INDIVIDUAL']:
             details['valid'] = True
           elif str.upper(i) in ['TEAM']:
             details['valid'] = False
-          if str.upper(i) in ['8K', '6K', '5K', '5 MILE']:
-            details['distance'] = str.upper(i)
+          if str.upper(i) in ['8K', '6K', '5K', '5 MILE', '10K', '10000', '6000', '8000', '5000', '(10K', '(6K', '(8K', '(5K']:
+            if str.upper(i) == '10000':
+              details['distance'] = '10K'
+            elif str.upper(i) == '6000':
+              details['distance'] = '6K'
+            elif str.upper(i) == '8000':
+              details['distance'] = '8K'
+            elif str.upper(i) == '5000':
+              details['distance'] = '5K'
+            elif str.upper(i) == '(10K':
+              details['distance'] = '10K'
+            elif str.upper(i) == '(6K':
+              details['distance'] = '6K'
+            elif str.upper(i) == '(8K':
+              details['distance'] = '8K'
+            elif str.upper(i) == '(5K':
+              details['distance'] = '5K'
+            else:
+              details['distance'] = str.upper(i)
 
           if str.upper(i) in ["RESULTS", "RESULT", "INDIVIDUAL"]:
             finished = True
@@ -160,7 +178,7 @@ def getTFRRSResults(URL):
         m.append(details)
   write_results(m)
   
-  quit()
+  # quit()
 
 def getResults(results):
   results = results.find_all('tr')
@@ -184,7 +202,6 @@ def write_results(m):
   race = race.replace(' ', '')
   race = race.replace('/', '')
   race = race.replace(',', '')
-  print('race: ', race)
   directory = os.path.join(directory, race)
 
 
@@ -211,24 +228,26 @@ def write_results(m):
     file = os.path.join(directory, results_file_name+'.csv')
     json_data[file_name]['file'] = file
     try:
-      np.savetxt(os.path.join(directory, results_file_name+'.csv'), race['results'], delimiter=", ", fmt="%s")
-      # print('saved')
+      new_file = (results_file_name + '.csv').replace('"', '')
+      new_file = (results_file_name + '.csv').replace("'", '')
+      np.savetxt(os.path.join(directory, new_file), race['results'], delimiter=", ", fmt="%s")
     except:
       pass
-    # print("DATA: ", json_data)
 
   with open(directory+'/raceSummary.json', 'w') as f:
     json.dump(json_data, f)
 
-  with open(directory+'/raceSummary.json', 'r') as f:
-    data = f.read()
-    json_data = json.loads(data)
-  pprint.pprint(json_data)
+  # with open(directory+'/raceSummary.json', 'r') as f:
+  #   data = f.read()
+  #   json_data = json.loads(data)
+  # pprint.pprint(json_data)
 
 
 
 
 allRaces = getTFRRSLinks(11, 2018)
+# print(allRaces[-1], allRaces[-2])
+# quit()
 # print(allRaces)
 # getTFRRSResults('https://www.tfrrs.org/results/xc/14671/Roy_Griak_Invitational')
 # quit()
@@ -236,19 +255,20 @@ allRaces = getTFRRSLinks(11, 2018)
 
 for race in allRaces:
   getTFRRSResults('http:'+race)
-# print(allRaces)
-# quit()
-for a in allRaces:
-    link = a[0][2:]
-    # print(link)
-    race = a[1]
-    date = a[2]
-    mens, womens = getNIRCAResults(link)
-    # print(mens)
-    print('\nSaving results from ' + str(race))
-    saveRaceResults(race, mens, womens, date)
-    # print(mens)
-    # quit()
+
+# # print(allRaces)
+# # quit()
+# for a in allRaces:
+#     link = a[0][2:]
+#     # print(link)
+#     race = a[1]
+#     date = a[2]
+#     mens, womens = getNIRCAResults(link)
+#     # print(mens)
+#     print('\nSaving results from ' + str(race))
+#     saveRaceResults(race, mens, womens, date)
+#     # print(mens)
+#     # quit()
     
 
 # quit()
