@@ -198,10 +198,6 @@ func ScrapeResults(doc *goquery.Document) (*[][]string, *[][]string, map[string]
 	// fmt.Println(r)
 
 	sel := doc.Find(".color-xc")
-	// if len(sel.Nodes) > 4 {
-	// 	return &m_results, &w_results, &r
-	// }
-
 	
 	// fmt.Println(mens_index, womens_index)
 	var womens_results *goquery.Selection

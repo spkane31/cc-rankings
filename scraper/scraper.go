@@ -31,16 +31,23 @@ func main() {
 		fmt.Println("Testing Connections for now!")
 		db := ConnectToPSQL()
 		directories := []string{
-			"NCAADivisionIWestRegionCrossCountryChampionship",
-			"NCAADivisionISouthRegionCrossCountryChampionship",
-			"NCAADivisionISoutheastRegionCrossCountryChampionship",
-			"NCAADivisionISouthCentralRegionCrossCountryChampionship",
-			"NCAADivisionINortheastRegionCrossCountryChampionship",
-			"NCAADivisionIMountainRegionCrossCountryChampionship",
-			"NCAADivisionIMidwestRegionCrossCountryChampionship",
-			"NCAADivisionIMidAtlanticRegionCrossCountryChampionship",
-			"NCAADivisionIGreatLakesRegionCrossCountryChampionship",
-			"NCAADICrossCountryChampionship",
+			// "NCAADivisionIWestRegionCrossCountryChampionship",
+			// "NCAADivisionISouthRegionCrossCountryChampionship",
+			// "NCAADivisionISoutheastRegionCrossCountryChampionship",
+			// "NCAADivisionISouthCentralRegionCrossCountryChampionship",
+			// "NCAADivisionINortheastRegionCrossCountryChampionship",
+			// "NCAADivisionIMountainRegionCrossCountryChampionship",
+			// "NCAADivisionIMidwestRegionCrossCountryChampionship",
+			// "NCAADivisionIMidAtlanticRegionCrossCountryChampionship",
+			// "NCAADivisionIGreatLakesRegionCrossCountryChampionship",
+			// "NCAADICrossCountryChampionship",
+			"BigSkyConferenceChampionship",
+			"2018SunBeltConferenceCrossCountryChampionship",
+			"AmericanAthleticConferenceChampionship",
+			"Big12CrossCountryChampionship",
+			"Big8ConferenceChampionshi",
+			"BIGEASTCrossCountryChampionship",
+
 		}
 
 		// dir := "RaceResults/NCAADivisionIWestRegionCrossCountryChampionships/"
@@ -66,7 +73,8 @@ func main() {
 				} else {
 					check(err)
 					// fmt.Println(line)
-		
+					fmt.Println(line)
+					break
 					CreateResult(db, "MALE", line, data)
 					// os.Exit(1)
 				}
