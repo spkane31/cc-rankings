@@ -9,6 +9,7 @@ erl_crash.dump
 /config/*.secret.exs
 
 scraper/RaceResults/*
+scraper/RaceResults2/*
 scraper/scraper
 analysis/analysis
 venv/
