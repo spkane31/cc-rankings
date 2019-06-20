@@ -1,10 +1,10 @@
 defmodule Rankings.Result do
   use Ecto.Schema
-  import Ecto.Query
+  # import Ecto.Query
 
   schema "results" do
     field :distance, :integer
-    # field :unit, :string # THIS NEEDS TO BE ADDED
+    field :unit, :string
     field :rating, :float
     field :time, :string
     belongs_to :runner, Rankings.Runner
@@ -14,7 +14,7 @@ defmodule Rankings.Result do
   alias Rankings.Repo
 
   def get_result(id) do
-    Repo.get(Rankings.Result, id) |> Repo.preload(:runner)
+    Repo.get(Rankings.Result, id) |> Repo.preload([{:runner, :team}])
   end
 
   def get_result!(id) do
@@ -24,6 +24,4 @@ defmodule Rankings.Result do
   def list_results do
     Repo.all(Rankings.Result) |> Repo.preload(:runner)
   end
-  # For getting results based on a race_instance_id
-  # alias Result
 end

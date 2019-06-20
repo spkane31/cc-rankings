@@ -10,7 +10,7 @@ defmodule Rankings.Runner do
     field :last_name, :string
     field :year, :string
     belongs_to :team, Rankings.Team
-    has_many :results, Rankings.Result
+    has_many :instances, Rankings.Result
   end
 
   def changeset(struct, params) do

@@ -2,10 +2,12 @@ package main
 
 import (
 	"database/sql"
-  "fmt"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
+
+var _ = fmt.Printf
 
 type Runner struct {
 	ID 				int
@@ -16,28 +18,36 @@ type Runner struct {
 	Year			string
 }
 
-func CreateRunner(db *sql.DB, first, last string) int {
+func FindRunner(db *sql.DB, first, last, year string, team_id int) (int, error) {
+	var id int
+	// TODO - Add a team check here too!
+	queryStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3 AND team_id=$4);`
+	row := db.QueryRow(queryStatement, first, last, year, team_id)
+	err := row.Scan(&id)
+	return id, err
+}
+
+func AddRunner(db *sql.DB, first, last, year string, team_id int) int {
 	// This will create a new runner given their name, and return the ID
 
 	// First we should probably check for a runner
-	checkStatement := `SELECT id FROM runners WHERE first_name=$1, last_name=$2;`
-	row := db.QueryRow(checkStatement, first, last)
-	var id int
-	err := row.Scan(&id)
+	checkStatement := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3 AND team_id=$4);`
+	// row := db.QueryRow(checkStatement, first, last, year)
+	// var id int
+	// err := row.Scan(&id)
+	id, err := FindRunner(db, first, last, year, team_id)
 	if err == sql.ErrNoRows {
 		// If their is no hit on the query, then we create a new runner, requery, and return the id
-		sqlStatement := `INSERT INTO runners (first_name, last_name) VALUES ($1, $2)`
+		sqlStatement := `INSERT INTO runners (first_name, last_name, year, team_id) VALUES ($1, $2, $3, $4)`
 	
-		result, err := db.Exec(sqlStatement, first, last)
+		_, err := db.Exec(sqlStatement, first, last, year, team_id)
 		check(err)
-		fmt.Println(result)
-		// return 
-		row := db.QueryRow(checkStatement, first, last)
+		
+		row := db.QueryRow(checkStatement, first, last, year, team_id)
 		err = row.Scan(&id)
 
 		return id
 	}
-	fmt.Println(id)
 	return id
 }
 
@@ -57,4 +67,16 @@ func AddYearToRunner(db *sql.DB, id int, year string) int {
 		return -1
 	}
 	return id
+}
+
+func ConnectRunnerTeam(db *sql.DB, runner, team int) int { 
+	updateStatement := `UPDATE runners SET team_id=$1 WHERE id=$2`
+	res, err := db.Exec(updateStatement, team, runner)
+	check(err)
+	count, err := res.RowsAffected()
+	if count == 0 {
+		return -1
+	} else {
+		return 0
+	}
 }
