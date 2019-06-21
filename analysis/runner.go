@@ -18,6 +18,7 @@ type Runner struct {
 	first_name string
 	last_name string
 	year string
+	gender string
 	team_id string
 	results []Result
 }
@@ -41,7 +42,7 @@ func FindConnections(db *sql.DB) {
 	conns := 0
 	csvFile, err := os.Open("../scraper/RaceResults/NCAADICrossCountryChampionship/mens.csv")
 	check(err)
-	query := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2);`
+	query := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND gender='MALE');`
 	
 	reader := csv.NewReader(bufio.NewReader(csvFile))
 	var id int
@@ -116,12 +117,13 @@ func FindAllConnections(db *sql.DB) {
 	}
 	fmt.Printf("%v Connections!\n", count)
 
-	connections := BuildRunnerConnections(db, &allResults)
+	mens, womens := BuildRunnerConnections(db, &allResults)
 	// os.Exit(1)
-	Analyze(db, *connections)
+	Analyze(db, *mens)
+	Analyze(db, *womens)
 }
 
-func BuildRunnerConnections(db *sql.DB, results *[]Result) *[]Runner {
+func BuildRunnerConnections(db *sql.DB, results *[]Result) (*[]Runner, *[]Runner) {
 	// We want to build an array Runners that has all the results for each runner contained
 	fmt.Println("Building Runner Connections!")
 	var runners []Runner
@@ -161,12 +163,26 @@ func BuildRunnerConnections(db *sql.DB, results *[]Result) *[]Runner {
 		}
 	}
 
+	// This can be made quicker, but now I want to organize into two lists, one for men and one for women.
+	// TODO - Make this more efficient
+	var mens_runners []Runner
+	var womens_runners []Runner
+
+	for _, runner := range runners {
+		if runner.gender == "MENS" {
+			mens_runners = append(mens_runners, runner)
+		} else {
+			womens_runners = append(womens_runners, runner)
+		}
+	}
+
 	// for i := range runners {
 	// 	if len(runners[i].results) < 2 {
 	// 		os.Exit(1)
 	// 	}
 	// }
-	return &runners
+	fmt.Println(len(mens_runners), len(womens_runners))
+	return &mens_runners, &womens_runners
 }
 
 
@@ -201,6 +217,6 @@ func FindRunner(db *sql.DB, id int) (*Runner, error) {
 	var ret Runner
 	queryStatement := `SELECT * FROM runners WHERE (id=$1);`
 	row := db.QueryRow(queryStatement, id)
-	err := row.Scan(&ret.id, &ret.first_name, &ret.last_name, &ret.year, &ret.team_id)
+	err := row.Scan(&ret.id, &ret.first_name, &ret.last_name, &ret.year, &ret.team_id, &ret.gender)
 	return &ret, err
 }
