@@ -43,9 +43,18 @@ def getNIRCALinks(URL):
     # allRaces = [link, date, location]
     return allRaces
 
-def getTFRRSLinks(month, year):
+def getTFRRSLinks(month=None, year=None, meet_name=None, state=None):
   headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
-  data = {'meet_name': 'Roy Griak', 'sport': 'xc', 'state': ''}#, 'month': str(month), 'year': str(year)}
+  data = {'meet_name': '', 'sport': 'xc', 'state': '', 'month': '', 'year': ''}
+  if month != None:
+    data['month'] = str(month)
+  if year != None:
+    data['year'] = str(year)
+  if meet_name != None:
+    data['meet_name'] = meet_name
+  if state != None:
+    data['state'] = state
+
   s = requests.session()
   
   r = s.get(TFRRS_RACES, headers=headers, params=data)
@@ -240,7 +249,7 @@ def getTFRRSResults(URL):
         except:
           print("\t\tThis didn't work!!! No gender")
           return
-  write_results(m)
+  return write_results(m)
   
   # quit()
 
@@ -255,6 +264,7 @@ def getResults(results):
   
 def write_results(m):
   if not len(m): return
+  count = 0
   directory = 'RaceResults2/'
   json_data = {}
 
@@ -280,7 +290,18 @@ def write_results(m):
   race = race.replace('&', '')
 
   race = race.upper()
+  
   year = json_data['date'].split()[-1]
+  year = year.replace(' ', '')
+  year = year.replace('/', '')
+  year = year.replace(',', '')
+  year = year.replace(')', '')
+  year = year.replace('(', '')
+  year = year.replace('*', '')
+  year = year.replace("'", '')
+  year = year.replace('"', '')
+  year = year.replace('|', '')
+  year = year.replace('&', '')
 
   directory = os.path.join(directory, race)
 
@@ -324,6 +345,7 @@ def write_results(m):
       new_file = (results_file_name + '.csv').replace('"', '')
       new_file = (results_file_name + '.csv').replace("'", '')
       json_data[file_name]['file'] = new_file
+      count += len(race['results'])
       np.savetxt(os.path.join(directory, new_file), race['results'], delimiter=", ", fmt="%s")
     except:
       pass
@@ -331,11 +353,16 @@ def write_results(m):
   with open(directory+'/raceSummary.json', 'w') as f:
     json.dump(json_data, f)
 
+  return count
 
-allRaces = getTFRRSLinks(10, 2018)
-
+allRaces = getTFRRSLinks(meet_name='NCAA Division I')
+count = 0
 for race in allRaces:
-  getTFRRSResults('http:'+race)
+  
+  a = getTFRRSResults('http:'+race)
+  if a != None:
+    count += a
+    print(f"Count = {count}")
 
 
 
