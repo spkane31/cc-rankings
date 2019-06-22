@@ -45,7 +45,7 @@ def getNIRCALinks(URL):
 
 def getTFRRSLinks(month, year):
   headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
-  data = {'sport': 'xc', 'state': '', 'month': str(month), 'year': str(year)}
+  data = {'meet_name': 'Roy Griak', 'sport': 'xc', 'state': ''}#, 'month': str(month), 'year': str(year)}
   s = requests.session()
   
   r = s.get(TFRRS_RACES, headers=headers, params=data)
@@ -68,9 +68,7 @@ def getTFRRSLinks(month, year):
 
     except:
       not_except = False
-
-
-
+  print(f"Found {len(links)} Links!")
   return links
 
 def getNIRCAResults(URL):
@@ -259,26 +257,46 @@ def write_results(m):
   if not len(m): return
   directory = 'RaceResults2/'
   json_data = {}
+
+  json_data['date'] = m[0]['date']
+  json_data['course'] = m[0]['course']
+  json_data['name'] = m[0]['name']
+
   try:
     os.mkdir(directory)
   except:
     pass
-  # print(m[0]  )
+    
   race = m[0]['name']
   race = race.replace(' ', '')
   race = race.replace('/', '')
   race = race.replace(',', '')
-  directory = os.path.join(directory, race)
+  race = race.replace(')', '')
+  race = race.replace('(', '')
+  race = race.replace('*', '')
+  race = race.replace("'", '')
+  race = race.replace('"', '')
+  race = race.replace('|', '')
+  race = race.replace('&', '')
 
+  race = race.upper()
+  year = json_data['date'].split()[-1]
+
+  directory = os.path.join(directory, race)
 
   try:
       os.mkdir(directory)
   except:
     pass
 
-  json_data['date'] = m[0]['date']
-  json_data['course'] = m[0]['course']
-  json_data['name'] = m[0]['name']
+
+  directory = os.path.join(directory, year)
+
+  try:
+      os.mkdir(directory)
+  except:
+    pass
+
 
   count = 0
   for race in m:
@@ -290,6 +308,16 @@ def write_results(m):
     json_data[file_name]['distance'] = race['distance']
 
     results_file_name = race['race_name'].replace(' ', '')
+    results_file_name = results_file_name.replace('/', '')
+    results_file_name = results_file_name.replace(',', '')
+    results_file_name = results_file_name.replace('(', '')
+    results_file_name = results_file_name.replace(')', '')
+    results_file_name = results_file_name.replace('*', '')
+    results_file_name = results_file_name.replace('"', '')
+    results_file_name = results_file_name.replace("'", '')
+    results_file_name = results_file_name.replace('&', '')
+    results_file_name = results_file_name.replace('|', '')
+    results_file_name = results_file_name.upper()
 
     file = os.path.join(directory, results_file_name+'.csv')
     try:
@@ -303,44 +331,11 @@ def write_results(m):
   with open(directory+'/raceSummary.json', 'w') as f:
     json.dump(json_data, f)
 
-  # with open(directory+'/raceSummary.json', 'r') as f:
-  #   data = f.read()
-  #   json_data = json.loads(data)
-  # pprint.pprint(json_data)
-
-
-
 
 allRaces = getTFRRSLinks(10, 2018)
-print(len(allRaces))
-# quit()
-# print(allRaces)
-# getTFRRSResults('https://www.tfrrs.org/results/xc/14671/Roy_Griak_Invitational')
-# quit()
-
 
 for race in allRaces:
   getTFRRSResults('http:'+race)
 
-# # print(allRaces)
-# # quit()
-# for a in allRaces:
-#     link = a[0][2:]
-#     # print(link)
-#     race = a[1]
-#     date = a[2]
-#     mens, womens = getNIRCAResults(link)
-#     # print(mens)
-#     print('\nSaving results from ' + str(race))
-#     saveRaceResults(race, mens, womens, date)
-#     # print(mens)
-#     # quit()
-    
 
-# quit()
-# getTFRRSLinks(TFRRS_RACES)
-# mens, womens = getNIRCAResults(NIRCA_TEST_RACE)
-# print(mens)
-# saveRaceResults('test', mens, womens, 'date')
-# mens2, womens2, race2, location2, date2 = getTFRRSResults(TFRRS_TEST_RACE)
 
