@@ -28,7 +28,6 @@ func CreateResult(db *sql.DB, details []string, distance, gender, course, date, 
 	
 	// This will create a new runner given their name, team, and year, and return the ID
 	if debug {fmt.Println("\nCreating a new Result")}
-	var id int
 	runner_id, err := FindRunner(db, details[1], details[0], details[3], gender, team_id)
 	if err == sql.ErrNoRows {
 		if debug {fmt.Println("No Runner found, creating a new one")}
@@ -65,7 +64,7 @@ func CreateResult(db *sql.DB, details []string, distance, gender, course, date, 
 		result_id = AddResult(db, details[4], distance, runner_id, instance_id)
 	}
 	if debug {fmt.Printf("Result ID: %d\n", result_id)}
-	return id
+	return result_id
 }
 
 func AddResult(db *sql.DB, time string, distance string, runner_id, instance_id int) int {

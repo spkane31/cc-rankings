@@ -1,10 +1,11 @@
-import pprint
+# import pprint
 from bs4 import BeautifulSoup
 import requests
 import csv
 import os
 import numpy as np
 import json
+import time
 
 
 NIRCA_RACES = 'https://clubrunning.org/races/?season=F-18'
@@ -319,10 +320,10 @@ def write_results(m):
     pass
 
 
-  count = 0
+  index = 0
   for race in m:
-    count += 1
-    file_name = 'file' + str(count)
+    index += 1
+    file_name = 'file' + str(index)
     json_data[file_name] = {}
     json_data[file_name]['race_name'] = race['race_name']
     json_data[file_name]['gender'] = race['gender']
@@ -355,6 +356,7 @@ def write_results(m):
 
   return count
 
+start = time.time()
 allRaces = getTFRRSLinks(meet_name='NCAA Division I')
 count = 0
 for race in allRaces:
@@ -362,7 +364,6 @@ for race in allRaces:
   a = getTFRRSResults('http:'+race)
   if a != None:
     count += a
-    print(f"Count = {count}")
+    print(f"Count = {count}\tTime = {time.time() - start}\tAverage = {count / (time.time() - start)}")
 
-
-
+print(f"Found {count} results in {time.time() - start} seconds! Average {count / (time.time() - start)} per second!")
