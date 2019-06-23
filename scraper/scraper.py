@@ -27,6 +27,18 @@ def removeSpecialCharacters(s):
   s = s.replace('&', '')
   return s
 
+def removeSpecialCharactersNotSpaces(s):
+  s = s.replace('/', '')
+  s = s.replace(',', '')
+  s = s.replace(')', '')
+  s = s.replace('(', '')
+  s = s.replace('*', '')
+  s = s.replace("'", '')
+  s = s.replace('"', '')
+  s = s.replace('|', '')
+  s = s.replace('&', '')
+  return s
+
 
 def getNIRCALinks(URL):
     s = requests.session()
@@ -172,7 +184,7 @@ def getTFRRSResults(URL):
     if name != None:
     # try:
       details['date'] = date
-      loc = removeSpecialCharacters(loc)
+      loc = removeSpecialCharactersNotSpaces(loc)
       details['course'] = loc
       details['name'] = race_name
       info = name.get_text()
