@@ -4,14 +4,29 @@ import requests
 import csv
 import os
 import numpy as np
-import json
+import json, time, logging
 import time
 
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 NIRCA_RACES = 'https://clubrunning.org/races/?season=F-18'
 TFRRS_RACES = 'https://www.tfrrs.org/results_search.html'
 NIRCA_TEST_RACE = 'https://clubrunning.org/races/race_results.php?race=677'
 TFRRS_TEST_RACE = 'https://www.tfrrs.org/results/xc/15028/NCAA_Division_III_Cross_Country_Championships'
+
+def removeSpecialCharacters(s):
+  s = s.replace(' ', '')
+  s = s.replace('/', '')
+  s = s.replace(',', '')
+  s = s.replace(')', '')
+  s = s.replace('(', '')
+  s = s.replace('*', '')
+  s = s.replace("'", '')
+  s = s.replace('"', '')
+  s = s.replace('|', '')
+  s = s.replace('&', '')
+  return s
+
 
 def getNIRCALinks(URL):
     s = requests.session()
@@ -129,22 +144,18 @@ def getTFRRSResults(URL):
   s = requests.session()
   
   r = s.get(URL, headers=headers)
-  # print(r)
   soup = BeautifulSoup(r.content, 'html.parser')
-  # <div class="col-lg-12">
-  races = soup.find_all('div', class_='row')#, class_='col-lg-12')
+  races = soup.find_all('div', class_='row')
   
   date_loc = soup.find_all('div', class_='panel-heading-normal-text inline-block')
   if not len(date_loc):
     print('Date did not work')
-    print(date_loc)
     return
-  # print(len(date_loc))
+
   date = date_loc[0].get_text().replace("\n", " ")
   date = date.strip()
   loc = date_loc[1].get_text().replace("\n", " ")
   loc = loc.strip()
-  # print(date, loc)
 
   race_name = soup.find_all('a', class_='white-underline-hover')
   race_name = race_name[0].get_text().replace("\n", " ")
@@ -161,6 +172,7 @@ def getTFRRSResults(URL):
     if name != None:
     # try:
       details['date'] = date
+      loc = removeSpecialCharacters(loc)
       details['course'] = loc
       details['name'] = race_name
       info = name.get_text()
@@ -233,7 +245,6 @@ def getTFRRSResults(URL):
           elif not finished:
             new_race_name += i + " "
       results = race.find('tbody', class_='color-xc')
-      # if details['valid']: print(details, len(results), race_name)
 
       if details['valid']: 
         r = getResults(results)
@@ -243,12 +254,14 @@ def getTFRRSResults(URL):
         try:
           a = details['distance']
         except:
-          print("\t\tThis didn't work!!! No Distance")
+          logging.warning(f"No Distance found at: {race_name}, {date}")
+          # print("\t\tThis didn't work!!! No Distance")
           return
         try:
           a = details['gender']
         except:
-          print("\t\tThis didn't work!!! No gender")
+          logging.warning(f"No gender found at: {race_name}, {date}")
+          # print("\t\tThis didn't work!!! No gender")
           return
   return write_results(m)
   
@@ -259,14 +272,33 @@ def getResults(results):
   results = [r.get_text() for r in results]
   results = [str(r) for r in results]
   results = [r.split('\n') for r in results]
-  results = [[r[3], r[6], r[9], r[15]] for r in results]
-  results = [[r[0].replace(" ", ""), r[1].strip(','), r[2], r[3]] for r in results]
-  return results
+  # results = [[r[3], r[6], r[9], r[15]] for r in results]
+  ret = []
+  for result in results:
+    names = result[3].split(",")
+    year = result[6]
+    school = result[9]
+    time = result[15]
+    names[0] = names[0].strip()
+    names[1] = names[1].strip()
+
+    names[0] = names[0].replace("'", "")
+    names[1] = names[1].replace("'", "")
+    
+    names[0] = names[0].replace('"', "")
+    names[1] = names[1].replace('"', "")
+
+    names[0] = names[0].replace(",", "")
+    names[1] = names[1].replace(",", "")
+    names[0] = names[0].replace(" ", "")
+    names[1] = names[1].replace(" ", "")
+    ret.append([names[0], names[1], year, school, time])
+  return ret
   
 def write_results(m):
   if not len(m): return
   count = 0
-  directory = 'RaceResults2/'
+  directory = 'RaceResults/'
   json_data = {}
 
   json_data['date'] = m[0]['date']
@@ -279,30 +311,11 @@ def write_results(m):
     pass
     
   race = m[0]['name']
-  race = race.replace(' ', '')
-  race = race.replace('/', '')
-  race = race.replace(',', '')
-  race = race.replace(')', '')
-  race = race.replace('(', '')
-  race = race.replace('*', '')
-  race = race.replace("'", '')
-  race = race.replace('"', '')
-  race = race.replace('|', '')
-  race = race.replace('&', '')
-
+  race = removeSpecialCharacters(race)
   race = race.upper()
   
   year = json_data['date'].split()[-1]
-  year = year.replace(' ', '')
-  year = year.replace('/', '')
-  year = year.replace(',', '')
-  year = year.replace(')', '')
-  year = year.replace('(', '')
-  year = year.replace('*', '')
-  year = year.replace("'", '')
-  year = year.replace('"', '')
-  year = year.replace('|', '')
-  year = year.replace('&', '')
+  year = removeSpecialCharacters(year)
 
   directory = os.path.join(directory, race)
 
@@ -330,21 +343,13 @@ def write_results(m):
     json_data[file_name]['distance'] = race['distance']
 
     results_file_name = race['race_name'].replace(' ', '')
-    results_file_name = results_file_name.replace('/', '')
-    results_file_name = results_file_name.replace(',', '')
-    results_file_name = results_file_name.replace('(', '')
-    results_file_name = results_file_name.replace(')', '')
-    results_file_name = results_file_name.replace('*', '')
-    results_file_name = results_file_name.replace('"', '')
-    results_file_name = results_file_name.replace("'", '')
-    results_file_name = results_file_name.replace('&', '')
-    results_file_name = results_file_name.replace('|', '')
+    results_file_name = removeSpecialCharacters(results_file_name)
     results_file_name = results_file_name.upper()
 
     file = os.path.join(directory, results_file_name+'.csv')
     try:
-      new_file = (results_file_name + '.csv').replace('"', '')
-      new_file = (results_file_name + '.csv').replace("'", '')
+      new_file = (results_file_name + '.csv')
+      new_file = removeSpecialCharacters(new_file)
       json_data[file_name]['file'] = new_file
       count += len(race['results'])
       np.savetxt(os.path.join(directory, new_file), race['results'], delimiter=", ", fmt="%s")
@@ -364,6 +369,6 @@ for race in allRaces:
   a = getTFRRSResults('http:'+race)
   if a != None:
     count += a
-    print(f"Count = {count}\tTime = {time.time() - start}\tAverage = {count / (time.time() - start)}")
+    # print(f"Count = {count}\tTime = {time.time() - start}\tAverage = {count / (time.time() - start)}")
 
 print(f"Found {count} results in {time.time() - start} seconds! Average {count / (time.time() - start)} per second!")
