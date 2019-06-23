@@ -23,21 +23,6 @@ type Runner struct {
 	results []Result
 }
 
-type Race struct {
-	id int
-	name string
-	course string
-	distance int
-	gender string
-	correction float64
-}
-
-type Instance struct {
-	id int
-	date string
-	race_id int
-}
-
 func FindConnections(db *sql.DB) {
 	conns := 0
 	csvFile, err := os.Open("../scraper/RaceResults/NCAADICrossCountryChampionship/mens.csv")

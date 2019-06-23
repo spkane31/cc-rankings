@@ -86,8 +86,8 @@ func GetTime(time string) float64 {
 	var ret float64
 	t := strings.Split(time, ":")
 	mult := 1.0
-	for i := len(t)-1; i >= 0; mult *= 60 {
-		f, _ := strconv.ParseFloat(t[i], 16)
+	for i := len(t)-1; i >= 0; mult *= 60.0 {
+		f, _ := strconv.ParseFloat(strings.Replace((t[i]), " ", "", -1), 16)
 		ret += f * mult
 		i--
 	}
@@ -133,4 +133,33 @@ func PrintEdgeNames(db *sql.DB, i, j int) {
 	check(err)
 
 	fmt.Printf("\n%v -> %v\n", to[0:len(to)-1], from[0:len(from)-1])
+}
+
+func GetRaceResults(db *sql.DB, id int) *[]Result {
+	var ret []Result
+
+	queryStatement := `SELECT * FROM results WHERE race_id=$1;`
+	rows, err := db.Query(queryStatement, id)
+	check(err)
+	defer rows.Close()
+
+	for rows.Next() {
+		var result Result
+		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id)
+		ret = append(ret, result)
+	}
+
+	return &ret
+}
+
+func FilterDNFs(results *[]Result) []Result {
+	var ret []Result
+
+	for _, each := range *results {
+		if GetTime(each.time) != 0 {
+			ret = append(ret, each)
+		}
+	}
+
+	return ret
 }
