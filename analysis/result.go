@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var _, _ = fmt.Println, os.Exit
+var _, _, _ = fmt.Println, os.Exit, math.Round
 
 type Pair struct {
 	to, from int
@@ -44,59 +44,41 @@ func FindResult(db *sql.DB, id int) Result {
 
 func Analyze(db *sql.DB, runners []Runner) {
 	fmt.Println("Analyzing Results")
-	graph := make(map[Pair]Edge)
+	graph := make(map[Pair]*Edge)
 	for _, runner := range runners {
 		for i := 0; i < len(runner.results)-1; i++ {
 			for j := i+1; j < len(runner.results); j++ {
 
 				if runner.results[i].distance == runner.results[j].distance {
-					var e Edge
+					// var e *Edge
 					p := Pair{runner.results[i].race_instance_id, runner.results[j].race_instance_id}
 					e, has := graph[p]
 					if has == false {
-						// Try the opposite just in case, the graph is be acyclic. Is it?
-						p = Pair{runner.results[j].race_instance_id, runner.results[i].race_instance_id}
-						e1, has := graph[p]
-						if has == false {
-							fmt.Printf("New Edge: %v->%v\n", runner.results[j].race_instance_id, runner.results[i].race_instance_id)
-							fmt.Println(runner)
-							e = Edge{
-								runner.results[j].race_instance_id, 
-								runner.results[i].race_instance_id,
-								1,
-								GetTime(runner.results[i].time) - GetTime(runner.results[j].time),
-							}
-
-						} else {
-							p = Pair{runner.results[i].race_instance_id, runner.results[j].race_instance_id}
-							e = e1
-							e.count += 1
-							e.total_time += GetTime(runner.results[i].time) - GetTime(runner.results[j].time)
-						}
+						var e *Edge = new(Edge)
+						fmt.Println("NEW EDGE")
+						fmt.Printf("%v -> %v\n", runner.results[i].race_instance_id, runner.results[j].race_instance_id)
+						e.to = runner.results[i].race_instance_id
+						(*e).from = runner.results[j].race_instance_id
+						e.count = 1
+						e.total_time = 	GetTime(runner.results[i].time) - GetTime(runner.results[j].time)
+						graph[p] = e
 					} else {
 						// This connection already exists: Need to modify it
 						dif := GetTime(runner.results[i].time) - GetTime(runner.results[j].time)
 						e.count += 1
 						e.total_time += dif
 					}
-
-					graph[p] = e
+					// graph[p] = e
 				}
 
 			}
 		}
 	}
-	for i := 1; i < 10; i++ {
-		p := Pair{i, 10}
-		e, has := graph[p]
-		if has == false {
-			p = Pair{10, i}
-			e, has = graph[p]
-		}
-		if has == true {
-			PrintEdgeNames(db, i, 10)
-			fmt.Printf("Total Connections: %v\tTotal Time: %v\tWeight: %v\n", e.count, e.total_time, math.Round(e.total_time / float64(e.count)))
-		}
+	for p, e := range graph {
+		PrintEdgeNames(db, p.to, p.from)
+		w := fmt.Sprintf("%.2f", e.total_time / float64(e.count))
+		fmt.Printf("Total Connections: %v\tTotal Time Difference: %v\tWeight: %v\n", e.count, e.total_time, w)
+		UpdateRace(db, p.to, e.total_time / float64(e.count))
 	}
 }
 
@@ -115,7 +97,7 @@ func GetTime(time string) float64 {
 func FindResultsForRunner(db *sql.DB, id int) *[]Result {
 	var res []Result
 
-	queryStatement := `SELECT * FROM results WHERE runner_id=$1;`
+	queryStatement := `SELECT * FROM results WHERE runner_id=$1 ORDER BY race_instance_id;`
 
 	rows, err := db.Query(queryStatement, id)
 	check(err)

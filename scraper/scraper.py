@@ -1,16 +1,44 @@
-import pprint
+# import pprint
 from bs4 import BeautifulSoup
 import requests
 import csv
 import os
 import numpy as np
-import json
+import json, time, logging
+import time
 
+logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 
 NIRCA_RACES = 'https://clubrunning.org/races/?season=F-18'
 TFRRS_RACES = 'https://www.tfrrs.org/results_search.html'
 NIRCA_TEST_RACE = 'https://clubrunning.org/races/race_results.php?race=677'
 TFRRS_TEST_RACE = 'https://www.tfrrs.org/results/xc/15028/NCAA_Division_III_Cross_Country_Championships'
+
+def removeSpecialCharacters(s):
+  s = s.replace(' ', '')
+  s = s.replace('/', '')
+  s = s.replace(',', '')
+  s = s.replace(')', '')
+  s = s.replace('(', '')
+  s = s.replace('*', '')
+  s = s.replace("'", '')
+  s = s.replace('"', '')
+  s = s.replace('|', '')
+  s = s.replace('&', '')
+  return s
+
+def removeSpecialCharactersNotSpaces(s):
+  s = s.replace('/', '')
+  s = s.replace(',', '')
+  s = s.replace(')', '')
+  s = s.replace('(', '')
+  s = s.replace('*', '')
+  s = s.replace("'", '')
+  s = s.replace('"', '')
+  s = s.replace('|', '')
+  s = s.replace('&', '')
+  return s
+
 
 def getNIRCALinks(URL):
     s = requests.session()
@@ -43,9 +71,18 @@ def getNIRCALinks(URL):
     # allRaces = [link, date, location]
     return allRaces
 
-def getTFRRSLinks(month, year):
+def getTFRRSLinks(month=None, year=None, meet_name=None, state=None):
   headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
-  data = {'sport': 'xc', 'state': '', 'month': str(month), 'year': str(year)}
+  data = {'meet_name': '', 'sport': 'xc', 'state': '', 'month': '', 'year': ''}
+  if month != None:
+    data['month'] = str(month)
+  if year != None:
+    data['year'] = str(year)
+  if meet_name != None:
+    data['meet_name'] = meet_name
+  if state != None:
+    data['state'] = state
+
   s = requests.session()
   
   r = s.get(TFRRS_RACES, headers=headers, params=data)
@@ -68,9 +105,7 @@ def getTFRRSLinks(month, year):
 
     except:
       not_except = False
-
-
-
+  print(f"Found {len(links)} Links!")
   return links
 
 def getNIRCAResults(URL):
@@ -121,22 +156,18 @@ def getTFRRSResults(URL):
   s = requests.session()
   
   r = s.get(URL, headers=headers)
-  # print(r)
   soup = BeautifulSoup(r.content, 'html.parser')
-  # <div class="col-lg-12">
-  races = soup.find_all('div', class_='row')#, class_='col-lg-12')
+  races = soup.find_all('div', class_='row')
   
   date_loc = soup.find_all('div', class_='panel-heading-normal-text inline-block')
   if not len(date_loc):
     print('Date did not work')
-    print(date_loc)
     return
-  # print(len(date_loc))
+
   date = date_loc[0].get_text().replace("\n", " ")
   date = date.strip()
   loc = date_loc[1].get_text().replace("\n", " ")
   loc = loc.strip()
-  # print(date, loc)
 
   race_name = soup.find_all('a', class_='white-underline-hover')
   race_name = race_name[0].get_text().replace("\n", " ")
@@ -153,6 +184,7 @@ def getTFRRSResults(URL):
     if name != None:
     # try:
       details['date'] = date
+      loc = removeSpecialCharactersNotSpaces(loc)
       details['course'] = loc
       details['name'] = race_name
       info = name.get_text()
@@ -225,7 +257,6 @@ def getTFRRSResults(URL):
           elif not finished:
             new_race_name += i + " "
       results = race.find('tbody', class_='color-xc')
-      # if details['valid']: print(details, len(results), race_name)
 
       if details['valid']: 
         r = getResults(results)
@@ -235,14 +266,16 @@ def getTFRRSResults(URL):
         try:
           a = details['distance']
         except:
-          print("\t\tThis didn't work!!! No Distance")
+          logging.warning(f"No Distance found at: {race_name}, {date}")
+          # print("\t\tThis didn't work!!! No Distance")
           return
         try:
           a = details['gender']
         except:
-          print("\t\tThis didn't work!!! No gender")
+          logging.warning(f"No gender found at: {race_name}, {date}")
+          # print("\t\tThis didn't work!!! No gender")
           return
-  write_results(m)
+  return write_results(m)
   
   # quit()
 
@@ -251,51 +284,86 @@ def getResults(results):
   results = [r.get_text() for r in results]
   results = [str(r) for r in results]
   results = [r.split('\n') for r in results]
-  results = [[r[3], r[6], r[9], r[15]] for r in results]
-  results = [[r[0].replace(" ", ""), r[1].strip(','), r[2], r[3]] for r in results]
-  return results
+  # results = [[r[3], r[6], r[9], r[15]] for r in results]
+  ret = []
+  for result in results:
+    names = result[3].split(",")
+    year = result[6]
+    school = result[9]
+    time = result[15]
+    names[0] = names[0].strip()
+    names[1] = names[1].strip()
+
+    names[0] = names[0].replace("'", "")
+    names[1] = names[1].replace("'", "")
+    
+    names[0] = names[0].replace('"', "")
+    names[1] = names[1].replace('"', "")
+
+    names[0] = names[0].replace(",", "")
+    names[1] = names[1].replace(",", "")
+    names[0] = names[0].replace(" ", "")
+    names[1] = names[1].replace(" ", "")
+    ret.append([names[0], names[1], year, school, time])
+  return ret
   
 def write_results(m):
   if not len(m): return
-  directory = 'RaceResults2/'
+  count = 0
+  directory = 'RaceResults/'
   json_data = {}
+
+  json_data['date'] = m[0]['date']
+  json_data['course'] = m[0]['course']
+  json_data['name'] = m[0]['name']
+
   try:
     os.mkdir(directory)
   except:
     pass
-  # print(m[0]  )
+    
   race = m[0]['name']
-  race = race.replace(' ', '')
-  race = race.replace('/', '')
-  race = race.replace(',', '')
-  directory = os.path.join(directory, race)
+  race = removeSpecialCharacters(race)
+  race = race.upper()
+  
+  year = json_data['date'].split()[-1]
+  year = removeSpecialCharacters(year)
 
+  directory = os.path.join(directory, race)
 
   try:
       os.mkdir(directory)
   except:
     pass
 
-  json_data['date'] = m[0]['date']
-  json_data['course'] = m[0]['course']
-  json_data['name'] = m[0]['name']
 
-  count = 0
+  directory = os.path.join(directory, year)
+
+  try:
+      os.mkdir(directory)
+  except:
+    pass
+
+
+  index = 0
   for race in m:
-    count += 1
-    file_name = 'file' + str(count)
+    index += 1
+    file_name = 'file' + str(index)
     json_data[file_name] = {}
     json_data[file_name]['race_name'] = race['race_name']
     json_data[file_name]['gender'] = race['gender']
     json_data[file_name]['distance'] = race['distance']
 
     results_file_name = race['race_name'].replace(' ', '')
+    results_file_name = removeSpecialCharacters(results_file_name)
+    results_file_name = results_file_name.upper()
 
     file = os.path.join(directory, results_file_name+'.csv')
     try:
-      new_file = (results_file_name + '.csv').replace('"', '')
-      new_file = (results_file_name + '.csv').replace("'", '')
+      new_file = (results_file_name + '.csv')
+      new_file = removeSpecialCharacters(new_file)
       json_data[file_name]['file'] = new_file
+      count += len(race['results'])
       np.savetxt(os.path.join(directory, new_file), race['results'], delimiter=", ", fmt="%s")
     except:
       pass
@@ -303,44 +371,16 @@ def write_results(m):
   with open(directory+'/raceSummary.json', 'w') as f:
     json.dump(json_data, f)
 
-  # with open(directory+'/raceSummary.json', 'r') as f:
-  #   data = f.read()
-  #   json_data = json.loads(data)
-  # pprint.pprint(json_data)
+  return count
 
-
-
-
-allRaces = getTFRRSLinks(10, 2018)
-print(len(allRaces))
-# quit()
-# print(allRaces)
-# getTFRRSResults('https://www.tfrrs.org/results/xc/14671/Roy_Griak_Invitational')
-# quit()
-
-
+start = time.time()
+allRaces = getTFRRSLinks(meet_name='NCAA Division I')
+count = 0
 for race in allRaces:
-  getTFRRSResults('http:'+race)
+  
+  a = getTFRRSResults('http:'+race)
+  if a != None:
+    count += a
+    # print(f"Count = {count}\tTime = {time.time() - start}\tAverage = {count / (time.time() - start)}")
 
-# # print(allRaces)
-# # quit()
-# for a in allRaces:
-#     link = a[0][2:]
-#     # print(link)
-#     race = a[1]
-#     date = a[2]
-#     mens, womens = getNIRCAResults(link)
-#     # print(mens)
-#     print('\nSaving results from ' + str(race))
-#     saveRaceResults(race, mens, womens, date)
-#     # print(mens)
-#     # quit()
-    
-
-# quit()
-# getTFRRSLinks(TFRRS_RACES)
-# mens, womens = getNIRCAResults(NIRCA_TEST_RACE)
-# print(mens)
-# saveRaceResults('test', mens, womens, 'date')
-# mens2, womens2, race2, location2, date2 = getTFRRSResults(TFRRS_TEST_RACE)
-
+print(f"Found {count} results in {time.time() - start} seconds! Average {count / (time.time() - start)} per second!")

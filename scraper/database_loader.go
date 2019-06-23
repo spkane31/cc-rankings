@@ -37,71 +37,113 @@ func main() {
 	debug = false
 	fmt.Println("Testing Connections for now!")
 	db := ConnectToPSQL()
-	directories := []string{
-		"NCAADivisionIWestRegionCrossCountryChampionships",
-		"NCAADivisionISouthRegionCrossCountryChampionships",
-		"NCAADivisionISoutheastRegionCrossCountryChampionships",
-		"NCAADivisionISouthCentralRegionCrossCountryChampionships",
-		"NCAADivisionINortheastRegionCrossCountryChampionships",
-		"NCAADivisionIMountainRegionCrossCountryChampionships",
-		"NCAADivisionIMidwestRegionCrossCountryChampionships",
-		"NCAADivisionIMid-AtlanticRegionCrossCountryChampionships",
-		"NCAADivisionIGreatLakesRegionCrossCountryChampionships",
-		"NCAADICrossCountryChampionships",
-		// "BigSkyConferenceChampionship",
-		// "2018SunBeltConferenceCrossCountryChampionship",
-		// "AmericanAthleticConferenceChampionship",
-		// "Big12CrossCountryChampionship",
-		// "Big8ConferenceChampionshi",
-		// "BIGEASTCrossCountryChampionship",
+	// directories := []string{
+	// 	// "NCAADivisionIWestRegionCrossCountryChampionships",
+	// 	// "NCAADivisionISouthRegionCrossCountryChampionships",
+	// 	// "NCAADivisionISoutheastRegionCrossCountryChampionships",
+	// 	// "NCAADivisionISouthCentralRegionCrossCountryChampionships",
+	// 	// "NCAADivisionINortheastRegionCrossCountryChampionships",
+	// 	// "NCAADivisionIMountainRegionCrossCountryChampionships",
+	// 	// "NCAADivisionIMidwestRegionCrossCountryChampionships",
+	// 	// "NCAADivisionIMid-AtlanticRegionCrossCountryChampionships",
+	// 	// "NCAADivisionIGreatLakesRegionCrossCountryChampionships",
+	// 	"NCAADIVISIONICROSSCOUNTRYCHAMPIONSHIPS",
+	// }
+	directories, err := ioutil.ReadDir("RaceResults/")
+	check(err)
 
-	}
-
-	// dir := "RaceResults/NCAADivisionIWestRegionCrossCountryChampionships/"
+	// For analysis of speed. Interested in how many values can be loaded/second
 	count := 0
 	start := time.Now()
+
+	// Iterate through each directory and then see how many years are in each directory
 	for _, dir := range directories {
-		fmt.Println(dir)
-		for i := 1; ; i++ {
 	
-			plan, _ := ioutil.ReadFile("RaceResults2/" + dir + "/raceSummary.json")
-			var data map[string]interface{}
-			err := json.Unmarshal(plan, &data)
-			// fmt.Println(data)
-
-			f_name := fmt.Sprintf("file%v", i)
-
-			if !KeyExists(data, f_name) {break}
-
-			var m map[string]interface{}
-			m = data[f_name].(map[string]interface{})
-
-			file_name := fmt.Sprintf("%v",m["file"])
-			csvFile, err := os.Open("RaceResults2/" + dir + fmt.Sprintf("/%v", file_name))
+		// for i := 1; ; i++ {
+			files, err := ioutil.ReadDir("RaceResults/" + dir.Name() + "/")
 			check(err)
-			reader := csv.NewReader(bufio.NewReader(csvFile))
-			distance := fmt.Sprintf("%v", m["distance"])
-			gender := fmt.Sprintf("%v", m["gender"])
-			// if gender == "WOMENS" {break}
-			course := fmt.Sprintf("%v", data["course"])
-			date := fmt.Sprintf("%v", data["date"])
-			race_name := fmt.Sprintf("%v", data["name"])
-			for {
-				line, err := reader.Read()
-				if err == io.EOF {
-					break
-				} else {
+			for _, f := range files {
+				var index int = 1
+				for {
+					plan, _ := ioutil.ReadFile("RaceResults/" + dir.Name() + "/" + f.Name() + "/raceSummary.json")
+					var data map[string]interface{}
+					err = json.Unmarshal(plan, &data)
+					f_name := fmt.Sprintf("file%v", index)
+					index++
+					
+					// The files are simply labeled as "file1", "file2", etc. Once we can't find one, we break 
+					// and go to a new directory.
+					if !KeyExists(data, f_name) {break}
+
+					var m map[string]interface{}
+					m = data[f_name].(map[string]interface{})
+
+					file_name := fmt.Sprintf("%v", m["file"])
+					csvFile, err := os.Open("RaceResults/" + dir.Name() + "/" + f.Name() + fmt.Sprintf("/%v", file_name))
+					fmt.Printf("Working on %v...\n", "RaceResults/" + dir.Name() + "/" + f.Name() + fmt.Sprintf("/%v", file_name))
 					check(err)
-					// fmt.Println(line)
-					// fmt.Println(line)
-					// break
-					CreateResult(db, line, distance, gender, course, date, race_name)
-					count++
-					// os.Exit(1)
+
+					reader := csv.NewReader(bufio.NewReader(csvFile))
+					distance := fmt.Sprintf("%v", m["distance"])
+					gender := fmt.Sprintf("%v", m["gender"])
+					course := fmt.Sprintf("%v", data["course"])
+					date := fmt.Sprintf("%v", data["date"])
+					race_name := fmt.Sprintf("%v", data["name"])
+					for {
+						line, err := reader.Read()
+						if err == io.EOF {
+							break
+						} else {
+							check(err)
+							if len(line) <= 4 {
+								fmt.Println(line)
+								os.Exit(1)
+							}
+							_ = CreateResult(db, line, distance, gender, course, date, race_name)
+							count++
+						}
+					}
 				}
 			}
+	
+			// plan, _ := ioutil.ReadFile("RaceResults/" + dir + "/raceSummary.json")
+			// var data map[string]interface{}
+			// err = json.Unmarshal(plan, &data)
+			// // fmt.Println(data)
+
+			// f_name := fmt.Sprintf("file%v", i)
+
+			// if !KeyExists(data, f_name) {break}
+
+			// var m map[string]interface{}
+			// m = data[f_name].(map[string]interface{})
+
+			// file_name := fmt.Sprintf("%v",m["file"])
+			// csvFile, err := os.Open("RaceResults/" + dir + fmt.Sprintf("/%v", file_name))
+			// check(err)
+			// reader := csv.NewReader(bufio.NewReader(csvFile))
+			// distance := fmt.Sprintf("%v", m["distance"])
+			// gender := fmt.Sprintf("%v", m["gender"])
+			// // if gender == "WOMENS" {break}
+			// course := fmt.Sprintf("%v", data["course"])
+			// date := fmt.Sprintf("%v", data["date"])
+			// race_name := fmt.Sprintf("%v", data["name"])
+			// for {
+			// 	line, err := reader.Read()
+			// 	if err == io.EOF {
+			// 		break
+			// 	} else {
+			// 		check(err)
+			// 		// fmt.Println(line)
+			// 		// fmt.Println(line)
+			// 		// break
+			// 		CreateResult(db, line, distance, gender, course, date, race_name)
+			// 		count++
+			// 		// os.Exit(1)
+			// 	}
+			// }
 			// os.Exit(1)
-		}
+		// }
 
 	}
 	elapsed := time.Since(start)
