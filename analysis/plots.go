@@ -13,6 +13,7 @@ import (
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
+	// "gonum.org/v1/gonum/stat"
 )
 
 var _, _ = fmt.Println, os.Exit
@@ -37,6 +38,8 @@ func PlotAllRaces(db *sql.DB) {
 			if GetTime(each.time) == 0 {fmt.Println(each)}
 		}
 
+		lin_reg := CreateLinearRegression(&results)
+
 		data := CreateXYData(&results)
 		os.Mkdir("plots", os.ModePerm)
 
@@ -45,11 +48,37 @@ func PlotAllRaces(db *sql.DB) {
 
 		f_name := "plots/" + safe_name
 		fmt.Printf("Creating %v plot\n", (*races)[i].name)
-		Plot(data, (*races)[i].name, f_name)
+		Plot(data, lin_reg, (*races)[i].name, f_name)
 	}
 }
 
-func Plot(data plotter.XYs, title, saveFile string) {
+func CreateLinearRegression(results *[]Result) plotter.XYs {
+	size := len(*results)
+	sum_x, sum_y, sum_xx, sum_xy := 0.0, 0.0, 0.0, 0.0
+
+	for i := range *results {	
+		sum_x += float64(i+1)
+		sum_xx += float64((i+1) * (i+1))
+
+		sum_y += GetTime((*results)[i].time)
+		sum_xy += (float64(i+1) * GetTime((*results)[i].time))
+	}
+
+	m := (float64(size) * sum_xy - sum_x*sum_y) / (float64(size) * sum_xx - sum_x * sum_x)
+	b := (sum_y / float64(size)) - (m * sum_x / float64(size))
+
+	fmt.Println(m, b)
+
+	pts := make(plotter.XYs, size)
+
+	for i := range *results {	
+		pts[i].X = float64(i)
+		pts[i].Y = m*float64(i) + b
+	}
+	return pts
+}
+
+func Plot(data, lin_reg plotter.XYs, title, saveFile string) {
 	p, err := plot.New()
 	check(err)
 
@@ -58,17 +87,14 @@ func Plot(data plotter.XYs, title, saveFile string) {
 	p.Y.Label.Text = "Time (seconds)"
 	err = plotutil.AddLinePoints(p,
 		title, data,
+		"Best Fit", lin_reg,
 	)
-	check(err)
 	check(err)
 
 	err = p.Save(8*vg.Inch, 8*vg.Inch, saveFile+".png")
 	check(err)
 
 }
-
-
-
 
 func PlotRace(db *sql.DB) {
 	name := "NCAA Division I Cross Country Championships"
@@ -121,4 +147,19 @@ func randomPoints(n int) plotter.XYs {
 		pts[i].Y = pts[i].Y + 10 * rand.Float64()
 	}
 	return pts
+}
+
+type xy struct {
+	x []float64
+	y []float64
+}
+
+func (d xy) Len() int {
+	return len(d.x)
+}
+
+func (d xy) XY(i int) (x, y float64) {
+	x = d.x[i]
+	y = d.y[i]
+	return
 }

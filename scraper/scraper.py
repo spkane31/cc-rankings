@@ -304,6 +304,8 @@ def getResults(results):
     names[1] = names[1].replace(",", "")
     names[0] = names[0].replace(" ", "")
     names[1] = names[1].replace(" ", "")
+
+    time = time.strip()
     ret.append([names[0], names[1], year, school, time])
   return ret
   
