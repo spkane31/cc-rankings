@@ -20,12 +20,15 @@ type Race struct {
 	distance int
 	gender string
 	correction float64
+	is_base bool
 }
 
 type Instance struct {
 	id int
 	date string
 	race_id int 
+	average float64
+	std_dev float64
 }
 
 func UpdateRace(db *sql.DB, id int, correction float64) {
@@ -62,7 +65,7 @@ func FindAllInstances(db *sql.DB, id int) *[]Instance {
 
 	for rows.Next() {
 		var inst Instance
-		err = rows.Scan(&inst.id, &inst.date, &inst.race_id)
+		err = rows.Scan(&inst.id, &inst.date, &inst.race_id, &inst.average, &inst.std_dev)
 		ret = append(ret, inst)
 	}
 

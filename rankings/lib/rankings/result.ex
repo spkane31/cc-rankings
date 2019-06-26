@@ -7,6 +7,7 @@ defmodule Rankings.Result do
     field :unit, :string
     field :rating, :float
     field :time, :string
+    field :scaled_time, :float
     belongs_to :runner, Rankings.Runner
     belongs_to :race_instance, Rankings.RaceInstance
   end

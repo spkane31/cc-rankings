@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"sort"
+	"math"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -56,18 +57,26 @@ func CreateLinearRegression(results *[]Result) plotter.XYs {
 	size := len(*results)
 	sum_x, sum_y, sum_xx, sum_xy := 0.0, 0.0, 0.0, 0.0
 
+	mean := 0.0
+	S := 0.0
+
 	for i := range *results {	
 		sum_x += float64(i+1)
 		sum_xx += float64((i+1) * (i+1))
 
-		sum_y += GetTime((*results)[i].time)
-		sum_xy += (float64(i+1) * GetTime((*results)[i].time))
+		t := GetTime((*results)[i].time)
+
+		sum_y += t
+		sum_xy += (float64(i+1) * t)
+		prev_mean := mean
+		mean = mean + (t - mean) / float64(i+1)
+		S = S + (t - mean) * (t - prev_mean)
 	}
 
 	m := (float64(size) * sum_xy - sum_x*sum_y) / (float64(size) * sum_xx - sum_x * sum_x)
 	b := (sum_y / float64(size)) - (m * sum_x / float64(size))
 
-	fmt.Println(m, b)
+	fmt.Printf("m = %v, b = %v, mean = %v, st_dev = %v\n", m, b, mean, math.Sqrt(S / float64(size)))
 
 	pts := make(plotter.XYs, size)
 

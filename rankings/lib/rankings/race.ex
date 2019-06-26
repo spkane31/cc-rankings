@@ -10,6 +10,7 @@ defmodule Rankings.Race do
     field :distance, :integer
     field :gender, :string
     field :correction, :float
+    fiedl :is_base, :boolean
     has_many :instances, Rankings.RaceInstance
   end
 

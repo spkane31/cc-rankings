@@ -6,6 +6,8 @@ defmodule Rankings.RaceInstance do
 
   schema "race_instances" do
     field :date, :string, null: false
+    field :average, :float, default: 0
+    field :std_dev, :float, default: 0
     belongs_to :race, Rankings.Race
     has_many :instance_results, Rankings.Result
   end
