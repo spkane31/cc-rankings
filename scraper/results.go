@@ -2,7 +2,9 @@ package main
 
 import (
 	"database/sql"
-  "fmt"
+	"fmt"
+	"strings"
+	"strconv"
 
 	_ "github.com/lib/pq"
 )
@@ -61,18 +63,30 @@ func CreateResult(db *sql.DB, details []string, distance, gender, course, date, 
 	result_id, err := FindResult(db, details[4], distance, runner_id, instance_id)
 	if err == sql.ErrNoRows {
 		if debug {fmt.Println("Adding Result")}
-		result_id = AddResult(db, details[4], distance, runner_id, instance_id)
+		result_id = AddResult(db, details[4], distance, runner_id, instance_id, gender)
 	}
 	if debug {fmt.Printf("Result ID: %d\n", result_id)}
 	return result_id
 }
 
-func AddResult(db *sql.DB, time string, distance string, runner_id, instance_id int) int {
+func AddResult(db *sql.DB, time string, distance string, runner_id, instance_id int, gender string) int {
 	var id int
-	sqlStatement := `INSERT INTO results (distance, time, runner_id, unit, race_instance_id) VALUES ($1, $2, $3, $4, $5);`
+	var scaled float64
+	if distance == "10000" {
+		scaled = GetTime(time) / 1.268
+	} else if distance == "8000" {
+		scaled = GetTime(time)
+	} else if distance == "5000" && gender == "WOMENS" {
+		scaled = GetTime(time)
+	} else if distance == "6000" && gender == "WOMENS" {
+		scaled = GetTime(time) / 1.213
+	} else {
+		scaled = 0.0
+	}
+	sqlStatement := `INSERT INTO results (distance, time, runner_id, unit, race_instance_id, scaled_time) VALUES ($1, $2, $3, $4, $5, $6);`
 	var unit string
 	d := GetDistance(distance)
-	_, err := db.Exec(sqlStatement, d, time, runner_id, unit, instance_id)
+	_, err := db.Exec(sqlStatement, d, time, runner_id, unit, instance_id, scaled)
 	
 	check(err)
 	id, err = FindResult(db, time, distance, runner_id, instance_id)
@@ -87,4 +101,16 @@ func FindResult(db *sql.DB, time string, distance string, runner_id, instance_id
 	row := db.QueryRow(queryStatement, time, d, runner_id, instance_id)
 	err := row.Scan(&id)
 	return id, err
+}
+
+func GetTime(time string) float64 {
+	var ret float64
+	t := strings.Split(time, ":")
+	mult := 1.0
+	for i := len(t)-1; i >= 0; mult *= 60.0 {
+		f, _ := strconv.ParseFloat(strings.Replace((t[i]), " ", "", -1), 16)
+		ret += f * mult
+		i--
+	}
+	return ret
 }
