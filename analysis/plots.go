@@ -30,6 +30,7 @@ func PlotAllRaces(db *sql.DB) {
 				results = append(results, each)
 			}
 		}
+		fmt.Println(len(results))
 
 		sort.SliceStable(results, func(i, j int) bool { return GetTime(results[i].time) < GetTime(results[j].time) })
 

@@ -31,6 +31,17 @@ type Instance struct {
 	std_dev float64
 }
 
+func UpdateAverage(db *sql.DB, id int, average float64) {
+	update := `UPDATE races SET average=$2 WHERE id=$1;`
+	_, err := db.Exec(update, id, average)
+	check(err)
+}
+func UpdateStdDev(db *sql.DB, id int, std_dev float64) {
+	update := `UPDATE races SET std_dev=$2 WHERE id=$1;`
+	_, err := db.Exec(update, id, std_dev)
+	check(err)
+}
+
 func UpdateRace(db *sql.DB, id int, correction float64) {
 	update := `UPDATE races SET correction=$2 WHERE id=$1;`
 	_, err := db.Exec(update, id, correction)
@@ -83,7 +94,9 @@ func GetInstanceResults(db *sql.DB, id int) *[]Result {
 
 	for rows.Next() {
 		var result Result
-		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id)
+		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id, &result.scaled_time, &result.time_float)
+		fmt.Println(err)
+		os.Exit(1)
 		ret = append(ret, result)
 	}
 
