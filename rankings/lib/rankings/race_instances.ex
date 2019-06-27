@@ -1,6 +1,5 @@
 defmodule Rankings.RaceInstance do
   use Ecto.Schema
-  import Ecto.Changeset
 
   alias Rankings
 
