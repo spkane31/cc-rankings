@@ -16,6 +16,8 @@ type Result struct {
 	rating float64
 	time string
 	runner_id int
+	scaled_time float64
+	time_float float64
 }
 
 func CreateResult(db *sql.DB, details []string, distance, gender, course, date, race_name string) int {
@@ -72,21 +74,22 @@ func CreateResult(db *sql.DB, details []string, distance, gender, course, date, 
 func AddResult(db *sql.DB, time string, distance string, runner_id, instance_id int, gender string) int {
 	var id int
 	var scaled float64
+	time_float := GetTime(time)
 	if distance == "10000" {
-		scaled = GetTime(time) / 1.268
+		scaled = time_float / 1.268
 	} else if distance == "8000" {
-		scaled = GetTime(time)
+		scaled = time_float
 	} else if distance == "5000" && gender == "WOMENS" {
-		scaled = GetTime(time)
+		scaled = time_float
 	} else if distance == "6000" && gender == "WOMENS" {
-		scaled = GetTime(time) / 1.213
+		scaled = time_float / 1.213
 	} else {
 		scaled = 0.0
 	}
-	sqlStatement := `INSERT INTO results (distance, time, runner_id, unit, race_instance_id, scaled_time) VALUES ($1, $2, $3, $4, $5, $6);`
+	sqlStatement := `INSERT INTO results (distance, time, runner_id, unit, race_instance_id, scaled_time, time_float) VALUES ($1, $2, $3, $4, $5, $6, &7);`
 	var unit string
 	d := GetDistance(distance)
-	_, err := db.Exec(sqlStatement, d, time, runner_id, unit, instance_id, scaled)
+	_, err := db.Exec(sqlStatement, d, time, runner_id, unit, instance_id, scaled, time_float)
 	
 	check(err)
 	id, err = FindResult(db, time, distance, runner_id, instance_id)

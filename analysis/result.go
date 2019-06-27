@@ -31,6 +31,7 @@ type Result struct {
 	race_instance_id int
 	runner_id int
 	scaled_time float64
+	time_float float64
 }
 
 func FindResult(db *sql.DB, id int) Result {
@@ -38,7 +39,7 @@ func FindResult(db *sql.DB, id int) Result {
 
 	row := db.QueryRow(queryStatement, id)
 	var r Result
-	err := row.Scan(&r.id, &r.distance, &r.unit, &r.rating, &r.time, &r.race_instance_id, &r.runner_id, &r.scaled_time)
+	err := row.Scan(&r.id, &r.distance, &r.unit, &r.rating, &r.time, &r.race_instance_id, &r.runner_id, &r.scaled_time, &r.time_float)
 	check(err)
 	return r
 }
@@ -106,7 +107,7 @@ func FindResultsForRunner(db *sql.DB, id int) *[]Result {
 
 	for rows.Next() {
 		var result Result
-		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id, &r.scaled_time)
+		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id, &result.scaled_time, &result.time_float)
 		res = append(res, result)
 	}
 
@@ -146,7 +147,7 @@ func GetRaceResults(db *sql.DB, id int) *[]Result {
 
 	for rows.Next() {
 		var result Result
-		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id, &r.scaled_time)
+		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id, &result.scaled_time, &result.time_float)
 		ret = append(ret, result)
 	}
 

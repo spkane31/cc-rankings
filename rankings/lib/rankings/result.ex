@@ -1,6 +1,6 @@
 defmodule Rankings.Result do
   use Ecto.Schema
-  # import Ecto.Query
+  import Ecto.Query
 
   schema "results" do
     field :distance, :integer
@@ -8,6 +8,7 @@ defmodule Rankings.Result do
     field :rating, :float
     field :time, :string
     field :scaled_time, :float
+    field :time_float, :float
     belongs_to :runner, Rankings.Runner
     belongs_to :race_instance, Rankings.RaceInstance
   end
@@ -24,5 +25,10 @@ defmodule Rankings.Result do
 
   def list_results do
     Repo.all(Rankings.Result) |> Repo.preload(:runner)
+  end
+
+  def last_n_results(n) do
+    q = from(r in Rankings.Result, limit: ^n)
+    Repo.all(q)
   end
 end

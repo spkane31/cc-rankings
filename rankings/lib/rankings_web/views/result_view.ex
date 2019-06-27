@@ -11,8 +11,12 @@ defmodule RankingsWeb.ResultView do
     time
   end
 
-  def get_rating(%Result{rating: rating}) do
-    rating
+  def get_rating(%Result{time_float: t, distance: d}) do
+    if t != nil do
+      (1900 - t) / (d / 1.609)
+    else
+      0
+    end
   end
 
 end

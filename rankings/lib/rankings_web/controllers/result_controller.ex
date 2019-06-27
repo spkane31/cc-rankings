@@ -5,7 +5,7 @@ defmodule RankingsWeb.ResultController do
   alias Rankings.Repo
 
   def index(conn, _params) do
-    results = Result.list_results() |> Repo.preload([{:runner, :team}])
+    results = Result.last_n_results(25) |> Repo.preload([{:runner, :team}])
     render(conn, "index.html", results: results)
   end
 

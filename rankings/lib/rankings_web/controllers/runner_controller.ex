@@ -12,9 +12,8 @@ defmodule RankingsWeb.RunnerController do
 
   def show(conn, %{"id" => id}) do
     runner = Runner.get_runner(id) |> Repo.preload(:team)
-    # runner = Repo.preload(runner, [:team, :results])
     team = Runner.get_team_name(id)
-    results = Runner.get_athlete_results(id)#Repo.get(Runner, id) |> Repo.preload([{:results, :runner}]) #Runner.get_results(id) |> Repo.preload({:race_instance, :runner})
+    results = Runner.get_athlete_results(id)
     render(conn, "show.html", runner: runner, team: team, results: results)
   end
 end
