@@ -1,8 +1,10 @@
 defmodule Rankings.Team do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Rankings
+  alias Rankings.Repo
 
   schema "teams" do
     field :name, :string, null: false
@@ -26,6 +28,12 @@ defmodule Rankings.Team do
 
   def get_team!(id) do
     Repo.get!(Rankings.Team, id)
+  end
+
+  def get_last_n(n) do
+    q = from(r in Rankings.Team, limit: ^n)
+    Repo.all(q)
+
   end
 
   def list_teams do

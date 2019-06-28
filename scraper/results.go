@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"strings"
 	"strconv"
+	"os"
 
 	_ "github.com/lib/pq"
 )
+
+var _ = os.Exit
 
 type Result struct {
 	id int
@@ -21,22 +24,25 @@ type Result struct {
 }
 
 func CreateResult(db *sql.DB, details []string, distance, gender, course, date, race_name string) int {
+	// detailts = [last, first, year, school, time]
+
 	// First create the team w we have the runner_id, check for the team
 	debug = false
-	team_id, err := FindTeam(db, details[2])
+	// fmt.Println(details)
+	team_id, err := FindTeam(db, details[3])
 	if err == sql.ErrNoRows {
 		if debug {fmt.Println("No team found, creating a new one")}
-		team_id = AddTeam(db, details[2])
+		team_id = AddTeam(db, details[3])
 	}
 	if debug {fmt.Printf("Team ID: %d\n", team_id)}
 	
 	// This will create a new runner given their name, team, and year, and return the ID
 	if debug {fmt.Println("\nCreating a new Result")}
-	runner_id, err := FindRunner(db, details[1], details[0], details[3], gender, team_id)
+	runner_id, err := FindRunner(db, details[1], details[0], details[2], gender, team_id)
 	if err == sql.ErrNoRows {
 		if debug {fmt.Println("No Runner found, creating a new one")}
 		// Order is last name, first name
-		runner_id = AddRunner(db, details[1], details[0], details[3], gender, team_id)
+		runner_id = AddRunner(db, details[1], details[0], details[2], gender, team_id)
 	}
 
 	if debug {fmt.Printf("Runner ID: %d\n", runner_id)}
@@ -68,6 +74,7 @@ func CreateResult(db *sql.DB, details []string, distance, gender, course, date, 
 		result_id = AddResult(db, details[4], distance, runner_id, instance_id, gender)
 	}
 	if debug {fmt.Printf("Result ID: %d\n", result_id)}
+	
 	return result_id
 }
 
@@ -86,7 +93,7 @@ func AddResult(db *sql.DB, time string, distance string, runner_id, instance_id 
 	} else {
 		scaled = 0.0
 	}
-	sqlStatement := `INSERT INTO results (distance, time, runner_id, unit, race_instance_id, scaled_time, time_float) VALUES ($1, $2, $3, $4, $5, $6, &7);`
+	sqlStatement := `INSERT INTO results (distance, time, runner_id, unit, race_instance_id, scaled_time, time_float) VALUES ($1, $2, $3, $4, $5, $6, $7);`
 	var unit string
 	d := GetDistance(distance)
 	_, err := db.Exec(sqlStatement, d, time, runner_id, unit, instance_id, scaled, time_float)

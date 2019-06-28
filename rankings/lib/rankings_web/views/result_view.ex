@@ -13,7 +13,12 @@ defmodule RankingsWeb.ResultView do
 
   def get_rating(%Result{time_float: t, distance: d}) do
     if t != nil do
-      (1900 - t) / (d / 1.609)
+      if d == 6000 do
+        (1300 - (t/1.21)) / (d / 1609)
+      else if d == 5000 do
+        (1300 - t) / (d / 1609)
+      end
+      end
     else
       0
     end

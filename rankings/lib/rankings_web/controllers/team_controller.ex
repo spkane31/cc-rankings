@@ -5,7 +5,7 @@ defmodule RankingsWeb.TeamController do
   alias Rankings.Repo
 
   def index(conn, _params) do
-    teams = Team.list_teams()
+    teams = Team.get_last_n(25)
     render(conn, "index.html", teams: teams)
   end
 

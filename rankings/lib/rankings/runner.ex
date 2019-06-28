@@ -4,6 +4,8 @@ defmodule Rankings.Runner do
 
   alias Rankings
   alias Rankings.Result
+  alias Rankings.Repo
+  import Ecto.Query
 
   schema "runners" do
     field :first_name, :string
@@ -33,6 +35,11 @@ defmodule Rankings.Runner do
 
   def list_runners do
     Repo.all(Rankings.Runner)
+  end
+
+  def last_n_runners(n) do
+    q = from(r in Rankings.Runner, limit: ^n)
+    Repo.all(q)
   end
 
   def get_team_name(id) do
