@@ -20,10 +20,10 @@
       <%= if result.race_instance == nil do %>
       <td>N/A</td>
       <td>N/A</td>
-      <%= else %>
+      <% else %>
       <td><%= result.race_instance.date %></td>
       <td><%= link result.race_instance.race.name, to: Routes.race_path(@conn, :show, result.race_instance.race.id) %></td>
-      <%= end %>
+      <% end %>
       <td><%= result.distance %>
       <td><%= result.time %>
       <td><%= result.rating %>

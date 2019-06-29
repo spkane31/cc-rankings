@@ -1,6 +1,7 @@
 defmodule Rankings.Race do
   use Ecto.Schema
   import Ecto.Changeset
+  import Ecto.Query
 
   alias Rankings
 
@@ -33,5 +34,10 @@ defmodule Rankings.Race do
 
   def list_races do
     Repo.all(Rankings.Race)
+  end
+
+  def get_n_races(n) do
+    q = from(r in Rankings.Team, limit: ^n)
+    Repo.all(q)
   end
 end

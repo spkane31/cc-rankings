@@ -5,7 +5,7 @@ defmodule RankingsWeb.RaceController do
   alias Rankings.Repo
 
   def index(conn, _params) do
-    races = Repo.all(Race)
+    races = Race.get_n_races(25) #Repo.all(Race)
     render(conn, "index.html", races: races)
   end
 
