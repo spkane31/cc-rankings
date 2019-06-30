@@ -67,4 +67,24 @@ defmodule Rankings.Runner do
       r.results
     end
   end
+
+  alias Rankings.Runner
+
+  def list_runners(params) do
+    first = get_in(params, ["first"])
+    last = get_in(params, ["last"])
+    if first == nil and last == nil do
+      nil
+    else
+      Runner |> Runner.search(first, last) |> Repo.all() |> Repo.preload(:team)
+    end
+  end
+
+  def search(query, first, last) do
+    wildcard_first = "%#{first}"
+    wildcard_last = "%#{last}"
+
+    from r in query,
+    where: ilike(r.first_name, ^wildcard_first) and ilike(r.last_name, ^wildcard_last)
+  end
 end

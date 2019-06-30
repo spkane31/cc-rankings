@@ -40,4 +40,17 @@ defmodule Rankings.Race do
     q = from(r in Rankings.Team, limit: ^n)
     Repo.all(q)
   end
+
+  alias Rankings.Race
+  def list_races(params) do
+    race = get_in(params, ["race"])
+    Race
+    |> Race.search(race) |> Repo.all()
+  end
+
+  def search(query, name) do
+    wildcard = "%#{name}%"
+    from r in query,
+    where: ilike(r.name, ^wildcard)
+  end
 end

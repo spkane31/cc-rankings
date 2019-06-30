@@ -39,4 +39,17 @@ defmodule Rankings.Team do
   def list_teams do
     Repo.all(Rankings.Team)
   end
+
+  alias Rankings.Team
+  def list_teams(params) do
+    team = get_in(params, ["team"])
+    Team
+    |> Team.search(team) |> Repo.all() |> Repo.preload(:runners)
+  end
+
+  def search(query, name) do
+    wildcard = "%#{name}"
+    from r in query,
+    where: ilike(r.name, ^wildcard)
+  end
 end
