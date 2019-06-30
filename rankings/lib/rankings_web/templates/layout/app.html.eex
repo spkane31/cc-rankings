@@ -4,20 +4,29 @@
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Rankings · Phoenix Framework</title>
+    <title>Cross Country Rankings</title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
   </head>
   <body>
     <header>
       <section class="container">
-        <nav role="navigation">
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
+        <div class="topnav">
+          <a class="active" href="/">Home</a>
+          <a href="/search">Search</a>
+          <a href="/compare">Compare</a>
+          <a href="/about">About</a>
+          <a href="/virtual">Virtual Race</a>
+        </div>
+        <%# <nav role="navigation">
+          <a href="/">CC Rankings</a>
+          <button type="button", data-toggle="collapse">
+					<ul>
+						<li><a href="/search">Search</a></li>
           </ul>
-        </nav>
-        <a href="http://phoenixframework.org/" class="phx-logo">
-          <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
-        </a>
+					<ul>
+						<li><a>About - broken link</a></li>
+					</ul>
+        </nav> %>
       </section>
     </header>
     <main role="main" class="container">
@@ -29,10 +38,13 @@
   </body>
 
   <footer>
-    <div>Created and Maintained by Sean Kane 2019</div>
-    <div><a href="https://github.com/spkane31/cc-rankings/issues">Issues</a></div>
+    <div>Created and Maintained by Sean Kane</div>
+    <div>
+      <a href="https://github.com/spkane31/cc-rankings/issues">Issues</a>
+       . 
+      <a href="https://github.com/spkane31/cc-rankings/blob/master/License.txt">License</a>
+    </div>
     <div><a href="https://github.com/spkane31/cc-rankings">Project Home</a></div>
-    <div><a href="https://github.com/spkane31/cc-rankings/blob/master/License.txt">License</a></div>
     <div>
   </footer>
 
