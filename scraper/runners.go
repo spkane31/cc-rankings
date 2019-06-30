@@ -70,7 +70,7 @@ func AddYearToRunner(db *sql.DB, id int, year string) int {
 }
 
 func ConnectRunnerTeam(db *sql.DB, runner, team int) int { 
-	updateStatement := `UPDATE runners SET team_id=$1 WHERE id=$2`
+	updateStatement := `UPDATE runners SET team_id=$1 WHERE id=$2;`
 	res, err := db.Exec(updateStatement, team, runner)
 	check(err)
 	count, err := res.RowsAffected()
@@ -79,4 +79,25 @@ func ConnectRunnerTeam(db *sql.DB, runner, team int) int {
 	} else {
 		return 0
 	}
+}
+
+type Year int
+const (
+	FR Year = 1 + iota
+	SO
+	JR
+	SR
+	NA
+)
+
+var years = [...]string{
+	"FR",
+	"SO",
+	"JR",
+	"SR",
+	"N/A",
+}
+
+func (y Year) String() string {
+	return years[y-1]
 }

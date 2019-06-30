@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sort"
 	"math"
+	"time"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -20,6 +21,7 @@ import (
 var _, _ = fmt.Println, os.Exit
 
 func PlotAllRaces(db *sql.DB) {
+	fmt.Printf("%v: Creating Plots\n", time.Now().Format("01-02-2006, 15:04:05"))
 	races := GetAllRacesByGender(db, "MENS")
 	for i := range *races {
 		insts := FindAllInstances(db, (*races)[i].id)

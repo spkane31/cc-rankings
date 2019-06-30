@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"encoding/csv"
-	"bufio"
-	"io"
 
 	_ "github.com/lib/pq"
 )
@@ -23,53 +21,6 @@ type Runner struct {
 	results []Result
 }
 
-func FindConnections(db *sql.DB) {
-	conns := 0
-	csvFile, err := os.Open("../scraper/RaceResults/NCAADICrossCountryChampionship/mens.csv")
-	check(err)
-	query := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND gender='MALE');`
-	
-	reader := csv.NewReader(bufio.NewReader(csvFile))
-	var id int
-	for {
-		line, err := reader.Read() 
-		if err == io.EOF {
-			break
-		} else {
-			row := db.QueryRow(query, line[1], line[0])
-			err := row.Scan(&id)
-			check(err)
-
-			if CheckMultipleConnections(db, id) {
-				conns++
-			} else {
-				fmt.Println(line)
-			}
-
-		}
-	}
-
-	fmt.Println(conns)
-
-	// query := `SELECT COUNT(*) FROM runners;`
-	rows, err := db.Query(query)
-	var count int
-	check(err)
-	for rows.Next() {
-		err = rows.Scan(&count)
-		check(err)
-	}
-	fmt.Println(count)
-	for i := 1; i <= count; i++ {
-		if CheckMultipleConnections(db, i) {
-			conns++
-		}
-	}
-	fmt.Println(conns)
-	os.Exit(1)
-
-}
-
 func CheckMultipleConnections(db *sql.DB, id int) bool {
 	var results []Result
 	query := `SELECT * FROM results WHERE runner_id=$1;`
@@ -84,26 +35,30 @@ func CheckMultipleConnections(db *sql.DB, id int) bool {
 	return len(results) > 1
 }
 
-func FindAllConnections(db *sql.DB) {
+func FindAllConnections(db *sql.DB, g *map[Pair]*Edge) {
 	queryStatement := `SELECT runner_id FROM results GROUP BY runner_id HAVING COUNT(runner_id) > 1;`
 	rows, err := db.Query(queryStatement)
 	var allResults []Result
 	check(err)
 	var id int
-	var count int
 	defer rows.Close()
 	for rows.Next() {
 		err = rows.Scan(&id)
-		count++
 		results := FindResultsForRunner(db, id)
+		AddToGraph(results, g)
 		for _, result := range (*results) {
 			allResults = append(allResults, result)
 		}	
+		if len(*g) > 100 {
+			PrintGraph(db, g)
+			os.Exit(1)
+		}
 	}
-	fmt.Printf("%v Connections!\n", count)
+	fmt.Printf("%v Connections!\n", len(allResults))
 
 	mens, womens := BuildRunnerConnections(db, &allResults)
-	// os.Exit(1)
+	print(len(*mens), len(*womens))
+	os.Exit(1)
 	Analyze(db, *mens)
 	Analyze(db, *womens)
 }

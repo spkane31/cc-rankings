@@ -7,20 +7,12 @@ import (
 	"strings"
 	"strconv"
 	"math"
+	// "time"
 	_ "github.com/lib/pq"
 )
 
 var _, _, _ = fmt.Println, os.Exit, math.Round
 
-type Pair struct {
-	to, from int
-}
-
-type Edge struct {
-	to, from int
-	count int
-	total_time float64
-}
 
 type Result struct {
 	id int
@@ -45,14 +37,13 @@ func FindResult(db *sql.DB, id int) Result {
 }
 
 func Analyze(db *sql.DB, runners []Runner) {
-	fmt.Println("Analyzing Results")
+	// fmt.Printf("%v: Analyzing Results\n", time.Now().Format("01-02-2006, 15:04:05"))
 	graph := make(map[Pair]*Edge)
 	for _, runner := range runners {
 		for i := 0; i < len(runner.results)-1; i++ {
 			for j := i+1; j < len(runner.results); j++ {
 
 				if runner.results[i].distance == runner.results[j].distance {
-					// var e *Edge
 					p := Pair{runner.results[i].race_instance_id, runner.results[j].race_instance_id}
 					e, has := graph[p]
 					if has == false {
@@ -65,12 +56,10 @@ func Analyze(db *sql.DB, runners []Runner) {
 						e.total_time = 	GetTime(runner.results[i].time) - GetTime(runner.results[j].time)
 						graph[p] = e
 					} else {
-						// This connection already exists: Need to modify it
 						dif := GetTime(runner.results[i].time) - GetTime(runner.results[j].time)
 						e.count += 1
 						e.total_time += dif
 					}
-					// graph[p] = e
 				}
 
 			}
@@ -112,29 +101,6 @@ func FindResultsForRunner(db *sql.DB, id int) *[]Result {
 	}
 
 	return &res
-}
-
-func PrintEdgeNames(db *sql.DB, i, j int) {
-	instanceStatement := `SELECT race_id FROM race_instances WHERE id=$1;`
-	row := db.QueryRow(instanceStatement, i)
-	var race_id int
-	var to string
-	var from string
-	err := row.Scan(&race_id)
-	check(err)
-	raceStatement := `SELECt name FROM races WHERE id=$1;`
-	row = db.QueryRow(raceStatement, race_id)
-	err = row.Scan(&to)
-	check(err)
-
-	row = db.QueryRow(instanceStatement, j)
-	err = row.Scan(&race_id)
-	check(err)
-	row = db.QueryRow(raceStatement, race_id)
-	err = row.Scan(&from)
-	check(err)
-
-	fmt.Printf("\n%v -> %v\n", to[0:len(to)-1], from[0:len(from)-1])
 }
 
 func GetRaceResults(db *sql.DB, id int) *[]Result {

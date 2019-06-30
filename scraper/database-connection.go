@@ -42,8 +42,6 @@ func InsertRunner(db *sql.DB, first, last, team, year string) {
 	fmt.Println(result)
 }
 
-func UpdateRunner(db *sql.DB, first, last, team, year string) {
-} 
 
 func QueryRunnerFromID(db *sql.DB, id int) Runner {
 	var runner Runner

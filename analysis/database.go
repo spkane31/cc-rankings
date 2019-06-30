@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -31,6 +32,6 @@ func ConnectToPSQL() *sql.DB {
 	// Let's ping the database to check that the connection worked
 	err = db.Ping()
 	check(err)
-	fmt.Println("Successfully connected!")
+	fmt.Printf("%v: Succesfully Connected!\n", time.Now().Format("01-02-2006, 15:04:05"))
 	return db
 }
