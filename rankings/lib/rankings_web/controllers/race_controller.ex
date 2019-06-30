@@ -10,7 +10,7 @@ defmodule RankingsWeb.RaceController do
   end
 
   def show(conn, %{"id" => id}) do
-    race = Race.get_race(id) |> Repo.preload(:instances)
+    race = Race.get_race(id) |> Repo.preload([{:instances, :instance_results}])
     race_instances = race.instances
     render(conn, "show.html", race: race, race_instances: race_instances)
   end

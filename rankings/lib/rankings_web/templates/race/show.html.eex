@@ -3,7 +3,7 @@
 <h3>Course: <%= @race.course %></h3>
 <h3>Distance: <%= @race.distance %>
 <h3>Gender: <%= @race.gender %>
-<h3>Correction Factor: <%= @race.correction %>
+<h3>Correction Factor: <%= @race.correction_avg %>
 
 <h2>Race History</h2>
 <table>
@@ -17,9 +17,10 @@
   <%= for instance <- @race_instances do %>
   <tr>
     <td><%= link instance.date, to: Routes.race_instance_path(@conn, :show, instance.id) %></td>
-    <td></td>
+    <td><%= length(instance.instance_results) %></td>
     <td></td>
     <td></td>
   </tr>
 
   <% end %>
+</table>

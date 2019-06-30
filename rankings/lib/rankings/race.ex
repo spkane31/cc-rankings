@@ -10,8 +10,11 @@ defmodule Rankings.Race do
     field :course, :string
     field :distance, :integer
     field :gender, :string
-    field :correction, :float
     field :is_base, :boolean
+    field :average, :float
+    field :std_dev, :float
+    field :correction_avg, :float
+    field :correction_graph, :float
     has_many :instances, Rankings.RaceInstance
   end
 
@@ -52,5 +55,14 @@ defmodule Rankings.Race do
     wildcard = "%#{name}%"
     from r in query,
     where: ilike(r.name, ^wildcard)
+  end
+
+  def get_runner_count(id) do
+    r = get_race(id) |> Repo.preload([{:instances, :instance_results}])
+    count = 0
+    for instance <- @r do
+      count = count + length(instance.results)
+    end
+    count
   end
 end

@@ -28,7 +28,7 @@ defmodule Rankings.Result do
   end
 
   def last_n_results(n) do
-    q = from(r in Rankings.Result, limit: ^n)
+    q = from(r in Rankings.Result, limit: ^n, order_by: :time_float)
     Repo.all(q)
   end
 end

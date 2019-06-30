@@ -17,16 +17,6 @@
           <a href="/about">About</a>
           <a href="/virtual">Virtual Race</a>
         </div>
-        <%# <nav role="navigation">
-          <a href="/">CC Rankings</a>
-          <button type="button", data-toggle="collapse">
-					<ul>
-						<li><a href="/search">Search</a></li>
-          </ul>
-					<ul>
-						<li><a>About - broken link</a></li>
-					</ul>
-        </nav> %>
       </section>
     </header>
     <main role="main" class="container">
@@ -36,6 +26,8 @@
     </main>
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
+
+
 
   <footer>
     <div>Created and Maintained by Sean Kane</div>

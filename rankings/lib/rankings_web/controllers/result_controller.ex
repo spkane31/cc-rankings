@@ -10,7 +10,7 @@ defmodule RankingsWeb.ResultController do
   end
 
   def show(conn, %{"id" => id}) do
-    result = Result.get_result(id) |> Repo.preload([{:runner, :team}])
+    result = Result.get_result(id) |> Repo.preload([{:runner, :team}, {:race_instance, :race}])
     render(conn, "show.html", result: result)
   end
 end

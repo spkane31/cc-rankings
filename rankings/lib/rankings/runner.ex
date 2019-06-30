@@ -11,6 +11,7 @@ defmodule Rankings.Runner do
     field :first_name, :string
     field :last_name, :string
     field :year, :string
+    field :gender, :string
     belongs_to :team, Rankings.Team
     has_many :instances, Rankings.Result
   end

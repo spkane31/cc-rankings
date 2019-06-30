@@ -14,6 +14,7 @@
     <td>Distance</td>
     <td>Time</td>
     <td>Rating</td>
+    <td>Correction</td>
   </tr>
   <%= for result <- @results do %>
     <tr>
@@ -26,7 +27,8 @@
       <% end %>
       <td><%= result.distance %>
       <td><%= result.time %>
-      <td><%= result.rating %>
+      <td><%= get_rating(result, @runner) %>
+      <td><%= Float.round(result.race_instance.race.correction_avg, 3) %>
     </tr>
   <% end %>
 <table>
