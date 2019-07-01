@@ -3,6 +3,7 @@ package rankings
 import (
 	"fmt"
 	"database/sql"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -21,7 +22,7 @@ type Runner struct {
 func GetRunnerID(db *sql.DB, first, last, year, gender string, team_id int) (int, error) {
 	var id int
 
-	query := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2, AND year=$3, AND team_id=$4, AND gender=$5);`
+	query := `SELECT id FROM runners WHERE (first_name=$1 AND last_name=$2 AND year=$3 AND team_id=$4 AND gender=$5);`
 	row := db.QueryRow(query, first, last, year, team_id, gender)
 	err := row.Scan(&id)
 	return id, err
@@ -32,8 +33,8 @@ func AddRunner(db *sql.DB, first, last, year, gender string, team_id int) int {
 	
 	id, err := GetRunnerID(db, first, last, year, gender, team_id)
 	if err == sql.ErrNoRows {
-		 insert := `INSERT INTO runners (first_name, last_name, year, team_id, gender) VALUES ($1, $2, $3, $4, $5);`
-		 _, err := db.Exec(insert, first, last, year, team_id, gender)
+		 insert := `INSERT INTO runners (first_name, last_name, year, team_id, gender, inserted_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7);`
+		 _, err := db.Exec(insert, first, last, year, team_id, gender, time.Now(), time.Now())
 		 check(err)
 
 		 id, err = GetRunnerID(db, first, last, year, gender, team_id)

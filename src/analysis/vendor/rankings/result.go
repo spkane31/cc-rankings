@@ -2,14 +2,17 @@ package rankings
 
 import (
 	"database/sql"
-	// "fmt"
+	"fmt"
+	"time"
 	// "os"
 	"strings"
 	"strconv"
 	// "math"
-	// "time"
+
 	_ "github.com/lib/pq"
 )
+
+var _, _ = fmt.Println, time.Now
 
 type Result struct {
 	id int
@@ -23,6 +26,70 @@ type Result struct {
 	time_float float64
 }
 
+func CreateResult(db *sql.DB, details []string, distance, gender, course, date, race_name string, place int) int {
+	// details = [last, first, year, school, time]
+	debug := true
+
+	team_id, err := FindTeam(db, details[3])
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("No team found, creating a new one")}
+		team_id = AddTeam(db, details[3])
+	} else {
+		check(err)
+	}
+	if debug {fmt.Printf("Team ID: %d\n", team_id)}
+
+	runner_id, err := GetRunnerID(db, details[1], details[0], details[2], gender, team_id)
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("No Runner found, creating a new one")}
+		runner_id = AddRunner(db, details[1], details[0], details[2], gender, team_id)
+	} else {
+		check(err)
+	}
+	if debug {fmt.Printf("Runner ID: %d\n", runner_id)}
+
+	ConnectRunnerTeam(db, runner_id, team_id)
+
+	race_id, err := GetRaceByCourse(db, race_name, course, gender, distance)
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("This Race does not exist, creating a new RACE")}
+		race_id = AddRace(db, race_name, course, gender, distance)
+	} else {
+		check(err)
+	}
+	if debug {fmt.Printf("Race ID: %d\n", race_id)}
+
+	instance_id, err := GetInstance(db, date, race_id)
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("New Race Instance")}
+		instance_id = AddInstance(db, date, race_id, gender, distance)
+	} else {
+		check(err)
+	}
+	if debug {fmt.Printf("Instance ID: %d\n", instance_id)}
+
+	// Now we create the result and link it to the runner and the race instance
+	result_id, err := FindResult(db, details[4], distance, runner_id, instance_id)
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("Adding Result")}
+		result_id = AddResult(db, details[4], distance, runner_id, instance_id, gender, place, date)
+	} else {
+		check(err)
+	}
+	if debug {fmt.Printf("Result ID: %d\n", result_id)}
+	
+	return result_id
+}
+
+func FindResult(db *sql.DB, time string, distance string, runner_id, instance_id int) (int, error) {
+	var id int
+	d := GetDistance(distance)
+	queryStatement := `SELECT id FROM results WHERE (time=$1 AND distance=$2 AND runner_id=$3 AND race_instance_id=$4);`
+	row := db.QueryRow(queryStatement, time, d, runner_id, instance_id)
+	err := row.Scan(&id)
+	return id, err
+}
+
 func FindResultByID(db *sql.DB, id int) Result {
 	query := `SELECT * FROM results WHERE (id=$1);`
 
@@ -31,6 +98,34 @@ func FindResultByID(db *sql.DB, id int) Result {
 	err := row.Scan(&ret.id, &ret.distance, &ret.unit, &ret.rating, &ret.time, &ret.race_instance_id, &ret.runner_id, &ret.scaled_time, &ret.time_float)
 	check(err)
 	return ret
+}
+
+func AddResult(db *sql.DB, t string, distance string, runner_id, instance_id int, gender string, place int, date string) int {
+	var id int
+	var scaled float64
+	time_float := GetTime(t)
+	if distance == "10000" && gender == "MALE" {
+		scaled = time_float / 1.268
+	} else if distance == "8000" && gender == "MALE" {
+		scaled = time_float
+	} else if distance == "5000" && gender == "FEMALE" {
+		scaled = time_float
+	} else if distance == "6000" && gender == "FEMALE" {
+		scaled = time_float / 1.213
+	} else {
+		scaled = 0.0
+	}
+	sqlStatement := `INSERT INTO results 
+										(distance, time, runner_id, unit, race_instance_id, scaled_time, time_float, date, gender, place, inserted_at, updated_at) 
+										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`
+	var unit string
+	d := GetDistance(distance)
+	_, err := db.Exec(sqlStatement, d, t, runner_id, unit, instance_id, scaled, time_float, date, gender, place, time.Now(), time.Now())
+	
+	check(err)
+	id, err = FindResult(db, t, distance, runner_id, instance_id)
+
+	return id
 }
 
 func GetTime(time string) float64 {
@@ -93,4 +188,14 @@ func FilterDNFs(results *[]Result) *[]Result {
 
 	return &ret
 
+}
+
+func ScaleTime(time float64, distance string) float64 {
+	if distance == "6000" {
+		return time / 1.213
+	} else if distance == "10000" {
+		return time / 1.268
+	} else {
+		return -1
+	}
 }

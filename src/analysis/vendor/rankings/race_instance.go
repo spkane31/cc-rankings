@@ -2,7 +2,8 @@ package rankings
 
 import (
 	"database/sql"
-	// "fmt"
+	"time"
+	"fmt"
 	// "strconv"
 
 	_ "github.com/lib/pq"
@@ -24,12 +25,23 @@ func GetInstance(db *sql.DB, date string, race_id int) (int, error) {
 	return id, err
 }
 
-func AddInstance(db *sql.DB, date string, race_id int) int {
+func AddInstance(db *sql.DB, date string, race_id int, gender, distance string) int {
 	var id int
+	valid := false
+	if gender == "MALE" {
+		if (distance == "8000" || distance == "10000") {valid = true}
+	} else if gender == "FEMALE" {
+		if (distance == "6000" || distance == "5000") {valid = true}
+	} else {
+		fmt.Println("NO GENDER")
+		return -1
+	}
 	id, err := GetInstance(db, date, race_id)
 	if err == sql.ErrNoRows {
-		sqlStatement := `INSERT INTO race_instances (date, race_id) VALUES ($1, $2);`
-		_, err = db.Exec(sqlStatement, date, race_id)
+		sqlStatement := `INSERT INTO race_instances 
+											(date, race_id, inserted_at, updated_at, valid) 
+											VALUES ($1, $2, $3, $4, $5);`
+		_, err = db.Exec(sqlStatement, date, race_id, time.Now(), time.Now(), valid)
 
 		id, err = GetInstance(db, date, race_id)
 	}

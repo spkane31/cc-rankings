@@ -21,6 +21,7 @@ defmodule Rankings.Repo.Migrations.CreateGraph do
       add :added_to_graph, :boolean, default: false
       add :date, :date
       add :gender, :string
+      add :place, :int
     end
 
     alter table(:runners) do

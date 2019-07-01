@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log"
 	"encoding/json"
-	// "encoding/csv"
+	"encoding/csv"
 	"os"
-	// "bufio"
-	// "io"
+	"bufio"
+	"io"
 	"io/ioutil"
 	"time"
 )
@@ -60,18 +60,36 @@ func main() {
 				added := m["added_to_db"].(bool)
 				if !added {
 					file_name := fmt.Sprintf("%v", m["file"])
-					_, err := os.Open(results_dir + dir.Name() + "/" + f.Name() + fmt.Sprintf("/%v", file_name))
+					csvFile, err := os.Open(results_dir + dir.Name() + "/" + f.Name() + fmt.Sprintf("/%v", file_name))
 					check(err)
 
-					// reader := csv.NewReader(bufio.NewReader(csvFile))
-					// distance := fmt.Sprintf("%v", m["distance"])
-					// gender := fmt.Sprintf("%v", m["gender"])
-					// course := fmt.Sprintf("%v", data["course"])
-					// date := fmt.Sprintf("%v", data["date"])
-					// race_name := fmt.Sprintf("%v", data["name"])
+					reader := csv.NewReader(bufio.NewReader(csvFile))
+					distance := fmt.Sprintf("%v", m["distance"])
+					gender := fmt.Sprintf("%v", m["gender"])
+					course := fmt.Sprintf("%v", data["course"])
+					date := fmt.Sprintf("%v", data["date"])
+					race_name := fmt.Sprintf("%v", data["name"])
+					place := 1
+					for {
+						line, err := reader.Read()
+						if err == io.EOF {
+							break
+						} else {
+							check(err)
+							if len(line) <= 4 {
+								fmt.Println("ERROR: Not correct line length: ", line)
+							} else {
+								// line is of the format: last, first, year, team, time
+								fmt.Println("Creating Result")
+								rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
+								place++
+								os.Exit(1)
+							} 
+						}
+					}
 
-					fmt.Println(data)
-					fmt.Println(m)
+					// fmt.Println(data)
+					// fmt.Println(m)
 
 				}
 

@@ -6,7 +6,7 @@ import (
 	"os"
 	"math"
 	// "math/rand"
-	// "time"
+	"time"
 	// "encoding/csv"
 	// "bufio"
 	// "io"
@@ -20,6 +20,8 @@ type Race struct {
 	course string
 	distance int
 	gender string
+	// inserted_at
+	// updated_at 
 	is_base bool
 	average float64
 	std_dev float64
@@ -31,8 +33,8 @@ func AddRace(db *sql.DB, name, course, gender, d string) (int) {
 	id, err := GetRaceByCourse(db, name, course, gender, d)
 	if err == sql.ErrNoRows {
 		distance := GetDistance(d)
-		sqlStatement := `INSERT INTO races (name, course, distance, gender) VALUES ($1, $2, $3, $4);`
-		_, err := db.Exec(sqlStatement, name, course, distance, gender)
+		sqlStatement := `INSERT INTO races (name, course, distance, gender, inserted_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6);`
+		_, err := db.Exec(sqlStatement, name, course, distance, gender, time.Now(), time.Now())
 		check(err)
 
 		id, err = GetRaceByCourse(db, name, course, gender, d)
@@ -103,10 +105,10 @@ func GetAllRacesByGender(db *sql.DB, gender string) *[]Race {
 }
 
 func GetDistance(d string) int {
-	if d == "10K" {return 10000}
-	if d == "8K" {return 8000}
-	if d == "6K" {return 6000}
-	if d == "5K" {return 5000}
+	if d == "10000" {return 10000}
+	if d == "8000" {return 8000}
+	if d == "6000" {return 6000}
+	if d == "5000" {return 5000}
 
 	return -1
 }
