@@ -7,6 +7,8 @@ defmodule Rankings.Repo.Migrations.CreateResults do
       add :unit, :string, null: false
       add :rating, :float, default: 0
       add :time, :string
+
+      timestamps()
     end
   end
 end

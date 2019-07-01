@@ -8,6 +8,8 @@ defmodule Rankings.Repo.Migrations.CreateRaces do
       add :distance, :integer
       add :gender, :string
       add :correction, :float
+
+      timestamps()
     end
   end
 end

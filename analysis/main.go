@@ -1,6 +1,8 @@
 package main
 
 import (
+	"rankings" 
+	
 	"fmt"
 	"log"
 	"os"

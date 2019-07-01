@@ -12,13 +12,13 @@ A web scraping tool built with Go. It currently scrapes TFRRS.com for cross coun
 ### TODO
 
 * Database Changes
-  * [I] Add average and std_dev to races table
   * [I] Add date, gender to results
   * [I] Create a graph database
   * [I] Add a ```counted``` column to results for results already taken care of in graph database
   * [I] 
 
 * Web Scraper Changes
+  * [I] create sub-folder for years, instead of grouping races together
 
 
 * Database Insertion Changes
@@ -29,5 +29,9 @@ A web scraping tool built with Go. It currently scrapes TFRRS.com for cross coun
 
 ## Analysis
 A tool built with Go to perform the heavy analysis of all data. 
+
 ### TODO
-* well, alot
+* [I] Data Analysis
+* [W] Scraper
+* [W] Web Client
+* [I] CI/CD

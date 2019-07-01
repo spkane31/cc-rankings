@@ -41,35 +41,35 @@ def removeSpecialCharactersNotSpaces(s):
 
 
 def getNIRCALinks(URL):
-    s = requests.session()
-    BASE = 'https://clubrunning.org/races/'
-    r = s.get(URL)
-    soup = BeautifulSoup(r.content, 'html.parser')
+  s = requests.session()
+  BASE = 'https://clubrunning.org/races/'
+  r = s.get(URL)
+  soup = BeautifulSoup(r.content, 'html.parser')
 
-    races = soup.find_all('tr', class_='racerow')
-    allRaces = []
-    for r in races:
-        temp = []
-        details = r.find_all('td', class_='column1a row')
-        details = [d.get_text() for d in details]
-        
-        date = details[0].split('2018')
-        date = date[0] + '2018'
-        
-        location = details[0].split('Hosted')
-        location = location[0].split('2018')[1]
+  races = soup.find_all('tr', class_='racerow')
+  allRaces = []
+  for r in races:
+    temp = []
+    details = r.find_all('td', class_='column1a row')
+    details = [d.get_text() for d in details]
+    
+    date = details[0].split('2018')
+    date = date[0] + '2018'
+    
+    location = details[0].split('Hosted')
+    location = location[0].split('2018')[1]
 
-        link = r.find_all('a', href=True)
-        race = link[0].get_text()
-                
-        link = BASE + link[0]['href']
-        link = link.replace('info', 'results')
+    link = r.find_all('a', href=True)
+    race = link[0].get_text()
+            
+    link = BASE + link[0]['href']
+    link = link.replace('info', 'results')
 
-        temp = [link, race, date, location]
-        allRaces.append(temp)
+    temp = [link, race, date, location]
+    allRaces.append(temp)
 
-    # allRaces = [link, date, location]
-    return allRaces
+  # allRaces = [link, date, location]
+  return allRaces
 
 def getTFRRSLinks(month=None, year=None, meet_name=None, state=None):
   headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.76 Safari/537.36'} # This is chrome, you can set whatever browser you like
@@ -87,18 +87,19 @@ def getTFRRSLinks(month=None, year=None, meet_name=None, state=None):
   
   r = s.get(TFRRS_RACES, headers=headers, params=data)
   soup = BeautifulSoup(r.content, 'html.parser')
-  races = soup.find_all('tbody', id='results_page1')#, href=True)
+  races = soup.find_all('tbody', id='results_page1')
+  if not len(races): return
   races = races[0].find_all('a')
-  links = [r['href'][:-1] for r in races]     # need the [:-2] to get rid of the '\n' characters
+  links = [r['href'][:-1] for r in races]     
   
   not_except = True
   count = 2
   while not_except:
     try:
       string = 'results_page' + str(count)
-      races = soup.find_all('tbody', id=string)#, href=True)
+      races = soup.find_all('tbody', id=string)
       races = races[0].find_all('a')
-      l = [r['href'][:-1] for r in races]     # need the [:-2] to get rid of the '\n' characters
+      l = [r['href'][:-1] for r in races]
       if len(l) == 0: not_except = False
       links += l
       count += 1
@@ -196,66 +197,63 @@ def getTFRRSResults(URL):
         finished = False
         for i in info:
           if str.upper(i) in ['MEN', 'M', 'MENS', '(M)', "MEN'S"]:
-            details['gender'] = 'MENS'
-          if str.upper(i) in ['WOMEN', 'W', 'WOMENS', '(W)', "WOMEN'S"]:
-            details['gender'] = 'WOMENS'
+            details['gender'] = 'MALE'
+          elif str.upper(i) in ['WOMEN', 'W', 'WOMENS', '(W)', "WOMEN'S"]:
+            details['gender'] = 'FEMALE'
+          
           if str.upper(i) in ['INDIVIDUAL']:
             details['valid'] = True
           elif str.upper(i) in ['TEAM']:
             details['valid'] = False
-          if str.upper(i) in ['8K', '6K', '4K', '3K', '5K', '5', '10K', '10000', '6000', '4000', '8000', '5000', '3200' '3.73', '3', '4.97', '4.96' '3.1', '4', '8.4', '2.95', '7900', '7K', '8369']:
-            if str.upper(i) == '10000':
-              details['distance'] = '10K'
-            elif str.upper(i) == '6000':
-              details['distance'] = '6K'
-            elif str.upper(i) == '4000':
-              details['distance'] = '4K'
-            elif str.upper(i) == '4K':
-              details['distance'] = '4K'
-            elif str.upper(i) == '8000':
-              details['distance'] = '8K'
-            elif str.upper(i) == '5000':
-              details['distance'] = '5K'
-            elif str.upper(i) == '5':
-              if 'MILE' in info:
-                details['distance'] = '5 MILE'
-              elif 'K' in info:
-                details['distance'] = '5K'
-            elif str.upper(i) == '3K':
-              details['distance'] = '3K'
-            elif str.upper(i) == '4.97':
-              details['distance'] = '8K'
-            elif str.upper(i) == '4.96':
-              details['distance'] = '8K'
-            elif str.upper(i) == '2.95':
-              details['distance'] = '2.95'
-            elif str.upper(i) == '3.73':
-              details['distance'] = '6K'
-            elif str.upper(i) == '3.1':
-              details['distance'] = '5K'
-            elif str.upper(i) == '3200':
-              details['distance'] = '3.2K'
-            elif str.upper(i) == '8.4':
-              details['distance'] = '8.4K'
-            elif str.upper(i) == '8369':
-              details['distance'] = '8.369K'
-            elif str.upper(i) == '3':
-              if 'MILE' in info:
-                details['distance'] = '3 MILE'
-            elif str.upper(i) == '4':
-              if 'MILE' in info:
-                details['distance'] = '4 MILE'
-            elif str.upper(i) == '7900':
-              details['distance'] = '7.9K'
-            elif str.upper(i) == '7K':
-              details['distance'] = '7K'
-            else:
-              details['distance'] = str.upper(i)
+
+          # if str.upper(i) in ['4000', '3200' '3.73', '3', '3.1', '4', '8.4', '2.95', '7900', '7K', '8369']:
+          if str.upper(i) in ['10000', '10K']:
+            details['distance'] = '10000'
+          elif str.upper(i) in ['6000', '6K', '3.73']:
+            details['distance'] = '6000'
+          elif str.upper(i) in ['4000', '4K']:
+            details['distance'] = '4000'
+          elif str.upper(i) in ['8000', '8K', '4.97', '4.95']:
+            details['distance'] = '8000'
+          elif str.upper(i) in ['5000' , '5K', '3.1']:
+            details['distance'] = '5000'
+          elif str.upper(i) == '5':
+            if 'MILE' in info:
+              details['distance'] = '5 MILE'
+            elif 'K' in info:
+              details['distance'] = '5K'              
+          elif str.upper(i) == '3K':
+            details['distance'] = '3K'
+            
+          elif str.upper(i) == '2.95':
+            details['distance'] = '2.95'
+          elif str.upper(i) == '3200':
+            details['distance'] = '3.2K'
+          elif str.upper(i) == '8.4':
+            details['distance'] = '8.4K'
+          elif str.upper(i) == '8369':
+            details['distance'] = '8.369K'
+          elif str.upper(i) == '2':
+            if 'MILE' in info:
+              details['distance'] = '2 MILE'
+          elif str.upper(i) == '3':
+            if 'MILE' in info:
+              details['distance'] = '3 MILE'
+          elif str.upper(i) == '4':
+            if 'MILE' in info:
+              details['distance'] = '4 MILE'
+          elif str.upper(i) == '7900':
+            details['distance'] = '7.9K'
+          elif str.upper(i) == '7K':
+            details['distance'] = '7K'
+          elif str.upper(i) == '4100':
+            details['distance'] = '4100'
 
           if str.upper(i) in ["RESULTS", "RESULT", "INDIVIDUAL"]:
             finished = True
           elif not finished:
             new_race_name += i + " "
+
       results = race.find('tbody', class_='color-xc')
 
       if details['valid']: 
@@ -266,18 +264,15 @@ def getTFRRSResults(URL):
         try:
           a = details['distance']
         except:
-          logging.warning(f"No Distance found at: {race_name}, {date}")
-          # print("\t\tThis didn't work!!! No Distance")
-          return
+          # logging.warning(f"No Distance found at: {race_name}, {date}")
+          details['distance'] = 'N/A'
         try:
           a = details['gender']
         except:
-          logging.warning(f"No gender found at: {race_name}, {date}")
-          # print("\t\tThis didn't work!!! No gender")
-          return
+          # logging.warning(f"No gender found at: {race_name}, {date}")
+          details['gender'] = 'N/A'
   return write_results(m)
-  
-  # quit()
+
 
 def getResults(results):
   results = results.find_all('tr')
@@ -338,7 +333,6 @@ def write_results(m):
   except:
     pass
 
-
   directory = os.path.join(directory, year)
 
   try:
@@ -355,12 +349,12 @@ def write_results(m):
     json_data[file_name]['race_name'] = race['race_name']
     json_data[file_name]['gender'] = race['gender']
     json_data[file_name]['distance'] = race['distance']
+    json_data[file_name]['added_to_db'] = False
 
     results_file_name = race['race_name'].replace(' ', '')
     results_file_name = removeSpecialCharacters(results_file_name)
     results_file_name = results_file_name.upper()
-
-    file = os.path.join(directory, results_file_name+'.csv')
+    
     try:
       new_file = (results_file_name + '.csv')
       new_file = removeSpecialCharacters(new_file)
@@ -371,18 +365,20 @@ def write_results(m):
       pass
 
   with open(directory+'/raceSummary.json', 'w') as f:
-    json.dump(json_data, f)
+    json.dump(json_data, f, indent=4)
 
   return count
 
 start = time.time()
-allRaces = getTFRRSLinks(meet_name='NCAA Division I')
+
+months = [8, 9, 10, 11, 12]
 count = 0
-for race in allRaces:
-  
-  a = getTFRRSResults('http:'+race)
-  if a != None:
-    count += a
-    # print(f"Count = {count}\tTime = {time.time() - start}\tAverage = {count / (time.time() - start)}")
+for month in months:
+  allRaces = getTFRRSLinks(month=month, year=2018) #meet_name='NCAA Division I')
+  for race in allRaces:
+    
+    a = getTFRRSResults('http:'+race)
+    if a != None:
+      count += a
 
 print(f"Found {count} results in {time.time() - start} seconds! Average {count / (time.time() - start)} per second!")

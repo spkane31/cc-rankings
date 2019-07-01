@@ -1,82 +1,59 @@
 # Database Design
 
-## Race
+## Races
 * id
-* race name
-* race location / course
+* name
+* course
 * distance
 * gender
-  * There will be a different instance for the male and female races
-* average time
-* count on finishers
+  * Note: There will be a different instance for the male and female races
+* is_base
+* average 
+* std_dev
+* correction_avg
+* correction_graph
 * one-to-many with Race Instance
 
-## Race Instance
+## Race Instances
+* id
+* date
+* race_id
+* average
+* std_dev
 * many-to-one with Race
-* average time for the year
-* number of participants
-* valid
+* valid - Need to add
   * a boolean of whether this instance counts towards the aggregate (weather,
   course change, timing error, etc.)
 
-## Runner
-* id - primary key
+## Runners
+* id
 * first name - string
 * last name - string
 * team - string
 * year - string
+* team_id
+* gender
+* one-to-many w/ Results
 
-## Team
-* Name
-* Region (not sure how to do this one yet)
-* Conference (also not sure)
-* runners: one-to-one relation
+## Teams
+* name
+* region (not sure how to do this one yet)
+* conference (also not sure)
+* runners: one-to-many relation
 
+## Results
+* id
+* distance
+* unit
+* rating
+* time
+* scaled_time
+* time_float
+* many-to-one w/ Runners
+* many-to-one w/ Race Instances
 
-### SQL Statement to Create the table
-```
-CREATE TABLE runners (
-id SERIAL PRIMARY KEY,
-first_name VARCHAR(255) NOT NULL,
-last_name VARCHAR(255) NOT NULL,
-team_id INT,
-year VARCHAR(255) 
-);
-
-CREATE TABLE teams (
-id SERIAL PRIMARY KEY,
-name VARCHAR(255) NOT NULL,
-region VARCHAR(255),
-conference VARCHAR(255),
-CONSTRAINT fk_runner_id FOREIGN KEY (id) REFERENCES runners (id)
-
-CREATE TABLE races (
-id SERIAL PRIMARY KEY,
-name VARCHAR(255) NOT NULL,
-course VARCHAR(255) NOT NULL,
-distance INT NOT NULL,
-gender VARCHAR(255) NOT NULL,
-correction REAL);
-
-CREATE TABLE race_instances (
-id SERIAL PRIMARY KEY,
-date VARCHAR(255) NOT NULL,
-race_id INT NOT NULL,
-FOREIGN KEY (race_id) REFERENCES races(id) ON DELETE CASCADE
-);
-
-CREATE TABLE results (
-id SERIAL PRIMARY KEY,
-distance int not null,
-rating real not null,
-time VARCHAR(255),
-race_instance_id INT NOT NULL,
-FOREIGN KEY (race_instance_id) REFERENCES race_instances(id) ON DELETE CASCADE,
-runner_id INT NOT NULL,
-FOREIGN KEY (runner_id) REFERENCES runners(id) ON DELETE CASCADE
-);
-
-```
+## Graph
+TODO
 
 ## Logging into the Databse from the CL
 ```
