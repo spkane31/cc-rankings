@@ -3,7 +3,7 @@ package rankings
 import (
 	"database/sql"
 	"fmt"
-	"os"
+	// "os"
 	"math"
 	// "math/rand"
 	"time"
@@ -109,6 +109,12 @@ func GetDistance(d string) int {
 	if d == "8000" {return 8000}
 	if d == "6000" {return 6000}
 	if d == "5000" {return 5000}
+	if d == "2 MILE" {return 3218}
+	if d == "3K" {return 3000}
+	if d == "4 MILE" {return 6436}
+	if d == "4000" {return 4000}
+	if d == "7k" {return 7000}
+	fmt.Printf("%v\t races.go GetDistance()\n", d)
 
 	return -1
 }
@@ -119,8 +125,8 @@ func GetRaceByCourse(db *sql.DB, name, course, gender, d string) (int, error) {
 	
 	distance := GetDistance(d)
 	if distance == -1 {
-		fmt.Printf("Distance not recognized")
-		os.Exit(1)
+		fmt.Println("Distance not recognized. Race - GetRaceByCourse()")
+		// os.Exit(1)
 		// TODO - Error handling this
 	}
 	row := db.QueryRow(query, name, course, gender, distance)
@@ -138,19 +144,19 @@ func GetRaceByID(db *sql.DB, id int) *Race {
 }
 
 func UpdateAverage(db *sql.DB, id int, average float64) {
-	update := `UPDATE races SET average=$2 WHERE id=$1;`
-	_, err := db.Exec(update, id, average)
+	update := `UPDATE races SET average=$2, updated_at=$3 WHERE id=$1;`
+	_, err := db.Exec(update, id, average, time.Now())
 	check(err)
 }
 
 func UpdateRace(db *sql.DB, id int, correction float64) {
-	update := `UPDATE races SET correction=$2 WHERE id=$1;`
-	_, err := db.Exec(update, id, correction)
+	update := `UPDATE races SET correction=$2, updated_at=$3 WHERE id=$1;`
+	_, err := db.Exec(update, id, correction, time.Now())
 	check(err)
 }
 
 func UpdateStdDev(db *sql.DB, id int, std_dev float64) {
-	update := `UPDATE races SET std_dev=$2 WHERE id=$1;`
-	_, err := db.Exec(update, id, std_dev)
+	update := `UPDATE races SET std_dev=$2, updated_at=$3 WHERE id=$1;`
+	_, err := db.Exec(update, id, std_dev, time.Now())
 	check(err)
 }

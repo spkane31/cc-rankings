@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-	// "os"
+	"os"
 	"strings"
 	"strconv"
 	// "math"
@@ -12,7 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var _, _ = fmt.Println, time.Now
+var _, _, _ = fmt.Println, time.Now, os.Exit
 
 type Result struct {
 	id int
@@ -26,9 +26,9 @@ type Result struct {
 	time_float float64
 }
 
-func CreateResult(db *sql.DB, details []string, distance, gender, course, date, race_name string, place int) int {
+func CreateResult(db *sql.DB, details []string, distance, gender, course, date, race_name string, place int) (int, int, int) {
 	// details = [last, first, year, school, time]
-	debug := true
+	debug := false
 
 	team_id, err := FindTeam(db, details[3])
 	if err == sql.ErrNoRows {
@@ -78,7 +78,7 @@ func CreateResult(db *sql.DB, details []string, distance, gender, course, date, 
 	}
 	if debug {fmt.Printf("Result ID: %d\n", result_id)}
 	
-	return result_id
+	return runner_id, result_id, race_id
 }
 
 func FindResult(db *sql.DB, time string, distance string, runner_id, instance_id int) (int, error) {
@@ -142,22 +142,21 @@ func GetTime(time string) float64 {
 	return ret
 }
 
-func FindResultsForRunner(db * sql.DB, id int) *[]Result {
-	var results []Result
+func FindResultsForRunner(db * sql.DB, id int) *[]int {
+	var result_ids []int
 
-	query := `SELECT * FROM results WHERE runner_id=$1 ORDER BY race_instance_id;`
-
+	query := `SELECT id FROM results WHERE runner_id=$1 ORDER BY race_instance_id;`
 	rows, err := db.Query(query, id)
 	check(err)
 	defer rows.Close()
 
 	for rows.Next() {
-		var result Result
-		err = rows.Scan(&result.id, &result.distance, &result.unit, &result.rating, &result.time, &result.race_instance_id, &result.runner_id, &result.scaled_time, &result.time_float)
-		results = append(results, result)
+		var id int
+		err = rows.Scan(&id)
+		result_ids = append(result_ids, id)
 	}
-
-	return &results
+	
+	return &result_ids
 }
 
 func GetRaceResults(db *sql.DB, id int) *[]Result {
@@ -198,4 +197,72 @@ func ScaleTime(time float64, distance string) float64 {
 	} else {
 		return -1
 	}
+}
+
+func CheckResultsYears(db *sql.DB, a, b int) bool {
+
+	query := `SELECT date FROM results WHERE id=$1;`
+
+	row := db.QueryRow(query, a)
+	date_a := time.Now()
+	err := row.Scan(&date_a)
+	check(err)
+
+	row = db.QueryRow(query, b)
+	date_b := time.Now()
+	err = row.Scan(&date_b)
+	check(err)
+
+	return date_b.Year() == date_a.Year()
+}
+
+func GetRaceIDFromResult(db *sql.DB, id int) int {
+	query := `SELECT race_instance_id FROM results WHERE id=$1;`
+	var inst_id int
+	row := db.QueryRow(query, id)
+	err := row.Scan(&inst_id)
+	check(err)
+
+	query = `SELECT race_id FROM race_instances WHERE id=$1;`
+	var race_id int
+	row = db.QueryRow(query, inst_id)
+	err = row.Scan(&race_id)
+	check(err)
+
+	return race_id
+}
+
+func GetEdgeInformation(db *sql.DB, result_a, result_b int) (int, int, float64) {
+
+	result_query := `SELECT race_instance_id, time FROM results WHERE id=$1;`
+	var inst_id_a int
+	var time_a string
+	row := db.QueryRow(result_query, result_a)
+	err := row.Scan(&inst_id_a, &time_a)
+	check(err)
+
+	race_query := `SELECT race_id FROM race_instances WHERE id=$1;`
+	var race_id_a int
+	row = db.QueryRow(race_query, inst_id_a)
+	err = row.Scan(&race_id_a)
+	check(err)
+
+	var time_b string
+	var inst_id_b int
+	var race_id_b int
+
+	row = db.QueryRow(result_query, result_b)
+	err = row.Scan(&inst_id_b, &time_b)
+	check(err)
+
+	row = db.QueryRow(race_query, inst_id_b)
+	err = row.Scan(&race_id_b)
+
+	return race_id_a, race_id_b, GetTime(time_a) - GetTime(time_b)
+}
+
+func MarkResultAsAdded(db *sql.DB, result int) {
+	update := `UPDATE results SET added_to_graph=true WHERE id=$1;`
+	_, err := db.Exec(update, result)
+	check(err)
 }

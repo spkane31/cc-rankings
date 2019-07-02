@@ -12,9 +12,10 @@ import (
 	"io"
 	"io/ioutil"
 	"time"
+	"math"
 )
 
-var _ = os.Exit
+var _, _ = os.Exit, math.Sqrt
 
 func check(e error) {
 	if e != nil {
@@ -37,8 +38,8 @@ func main() {
 	directories, err := ioutil.ReadDir(results_dir)
 	check(err)
 
-	// count := 0
-	// start := time.Now()
+	count := 0
+	start := time.Now()
 
 	for _, dir := range directories {
 		files, err := ioutil.ReadDir(results_dir + dir.Name() + "/")
@@ -70,45 +71,77 @@ func main() {
 					date := fmt.Sprintf("%v", data["date"])
 					race_name := fmt.Sprintf("%v", data["name"])
 					place := 1
+					// _, _, _, _, _, _, _ = db, distance, gender, course, date, race_name, place
+					n, mean, variance := 0, 0.0, 0.0
+					
+					if distance == "N/A" {
+						fmt.Println("Skipping Race. Distance = %v. Race: %v", distance, race_name)
+						break
+					}
+
 					for {
 						line, err := reader.Read()
 						if err == io.EOF {
 							break
+							os.Exit(1)
 						} else {
 							check(err)
 							if len(line) <= 4 {
 								fmt.Println("ERROR: Not correct line length: ", line)
 							} else {
+								n, mean, variance = UpdateStats(n, mean, variance, rankings.GetTime(line[4]))
+																								
 								// line is of the format: last, first, year, team, time
-								fmt.Println("Creating Result")
-								rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
+								runner, result, race_id := rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
+								all_results := rankings.FindResultsForRunner(db, runner)
+								
+								rankings.UpdateAverage(db, race_id, mean)
+								rankings.UpdateStdDev(db, race_id, variance)
+								if len(*all_results) >= 1 {
+									// This runner has multiple results, go through these and add to the graph
+									rankings.AddToGraph(db, all_results, result)
+								}
 								place++
-								os.Exit(1)
+								count++
 							} 
 						}
 					}
+
+					fmt.Printf("%v results in %s seconds.\n", count, time.Now().Sub(start))
+					// if count > 1000 {break}
 
 					// fmt.Println(data)
 					// fmt.Println(m)
 
 				}
 
-				os.Exit(1)
+				// os.Exit(1)
 			}
 		}
 	}
 
-	os.Exit(1)
+	// os.Exit(1)
 
-	ComputeAverages(db)
-	UpdateCorrectionAvg(db)
-	os.Exit(1)
+	// ComputeAverages(db)
+	// UpdateCorrectionAvg(db)
+	// os.Exit(1)
 
-	g := make(map[Pair]*Edge)
+	// g := make(map[Pair]*Edge)
 
-	FindAllConnections(db, &g)
+	// FindAllConnections(db, &g)
 
-	PlotAllRaces(db)
+	// PlotAllRaces(db)
 
 	fmt.Printf("%v: Finished!\n", time.Now().Format("01-02-2006, 15:04:05"))
+}
+
+func UpdateStats(n int, mean, S, new float64) (int, float64, float64) {
+	// fmt.Println(new)
+
+	prev_mean := mean
+	mean = mean + (new - mean) / (float64(n+1))
+	S = S + (new - mean) * (new - prev_mean)
+
+	return n+1, mean, S
+
 }

@@ -2,7 +2,7 @@ package rankings
 
 import (
 	"database/sql"
-	"fmt"
+	// "fmt"
 	"time"
 	_ "github.com/lib/pq"
 )
@@ -29,7 +29,6 @@ func AddTeam(db *sql.DB, name string) int {
 	if err == sql.ErrNoRows {
 		insert := `INSERT INTO teams (name, inserted_at, updated_at) VALUES ($1, $2, $3);`
 		_, err = db.Exec(insert, name, time.Now(), time.Now())
-		fmt.Println(err)
 		check(err)
 
 		id, err = FindTeam(db, name)
