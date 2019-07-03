@@ -189,11 +189,13 @@ func FilterDNFs(results *[]Result) *[]Result {
 
 }
 
-func ScaleTime(time float64, distance string) float64 {
-	if distance == "6000" {
+func ScaleTime(time float64, distance int) float64 {
+	if distance == 6000 {
 		return time / 1.213
-	} else if distance == "10000" {
+	} else if distance == 10000 {
 		return time / 1.268
+	} else if distance == 5000 || distance == 8000 {
+		return time
 	} else {
 		return -1
 	}
@@ -234,12 +236,15 @@ func GetRaceIDFromResult(db *sql.DB, id int) int {
 
 func GetEdgeInformation(db *sql.DB, result_a, result_b int) (int, int, float64) {
 
-	result_query := `SELECT race_instance_id, time FROM results WHERE id=$1;`
+	result_query := `SELECT race_instance_id, time, distance FROM results WHERE id=$1;`
 	var inst_id_a int
 	var time_a string
+	var dist_a int
+
 	row := db.QueryRow(result_query, result_a)
-	err := row.Scan(&inst_id_a, &time_a)
+	err := row.Scan(&inst_id_a, &time_a, &dist_a)
 	check(err)
+	scaled_a := ScaleTime(GetTime(time_a), dist_a)
 
 	race_query := `SELECT race_id FROM race_instances WHERE id=$1;`
 	var race_id_a int
@@ -250,15 +255,17 @@ func GetEdgeInformation(db *sql.DB, result_a, result_b int) (int, int, float64) 
 	var time_b string
 	var inst_id_b int
 	var race_id_b int
+	var dist_b int
 
 	row = db.QueryRow(result_query, result_b)
-	err = row.Scan(&inst_id_b, &time_b)
+	err = row.Scan(&inst_id_b, &time_b, &dist_b)
 	check(err)
+	scaled_b := ScaleTime(GetTime(time_b), dist_b)
 
 	row = db.QueryRow(race_query, inst_id_b)
 	err = row.Scan(&race_id_b)
 
-	return race_id_a, race_id_b, GetTime(time_a) - GetTime(time_b)
+	return race_id_a, race_id_b, scaled_b - scaled_a
 }
 
 func MarkResultAsAdded(db *sql.DB, result int) {

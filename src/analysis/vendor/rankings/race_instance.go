@@ -33,6 +33,7 @@ func AddInstance(db *sql.DB, date string, race_id int, gender, distance string) 
 	} else if gender == "FEMALE" {
 		if (distance == "6000" || distance == "5000") {valid = true}
 	} else {
+		fmt.Println(gender)
 		fmt.Println("NO GENDER")
 		return -1
 	}

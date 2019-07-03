@@ -29,22 +29,25 @@ func KeyExists(decoded map[string]interface{}, key string) bool {
 }
 
 func main() {
+
 	fmt.Printf("%v: Establishing DB connection...\n", time.Now().Format("01-02-2006, 15:04:05"))
 	db, err := rankings.ConnectToPSQL()
 	check(err)
 
 	results_dir := "/home/sean/github/cc-rankings/scraper/RaceResults/"
+	completed_dir := "/home/sean/github/cc-rankings/scraper/Completed/"
 	race_sum := "raceSummary.json"
 	directories, err := ioutil.ReadDir(results_dir)
 	check(err)
 
 	count := 0
 	start := time.Now()
+	var no_hiccups bool
 
 	for _, dir := range directories {
 		files, err := ioutil.ReadDir(results_dir + dir.Name() + "/")
 		check(err)
-
+		no_hiccups = true
 		for _, f := range files {
 			var index int = 1
 			for {
@@ -74,8 +77,9 @@ func main() {
 					// _, _, _, _, _, _, _ = db, distance, gender, course, date, race_name, place
 					n, mean, variance := 0, 0.0, 0.0
 					
-					if distance == "N/A" {
-						fmt.Println("Skipping Race. Distance = %v. Race: %v", distance, race_name)
+					if distance == "N/A" || gender == "N/A" {
+						fmt.Printf("Skipping Race. Distance = %v. Race: %v", distance, race_name)
+						no_hiccups = false
 						break
 					}
 
@@ -88,6 +92,8 @@ func main() {
 							check(err)
 							if len(line) <= 4 {
 								fmt.Println("ERROR: Not correct line length: ", line)
+								no_hiccups = false
+								break
 							} else {
 								n, mean, variance = UpdateStats(n, mean, variance, rankings.GetTime(line[4]))
 																								
@@ -97,7 +103,7 @@ func main() {
 								
 								rankings.UpdateAverage(db, race_id, mean)
 								rankings.UpdateStdDev(db, race_id, variance)
-								if len(*all_results) >= 1 {
+								if len(*all_results) > 1 {
 									// This runner has multiple results, go through these and add to the graph
 									rankings.AddToGraph(db, all_results, result)
 								}
@@ -107,17 +113,20 @@ func main() {
 						}
 					}
 
-					fmt.Printf("%v results in %s seconds.\n", count, time.Now().Sub(start))
-					// if count > 1000 {break}
-
-					// fmt.Println(data)
-					// fmt.Println(m)
+					fmt.Printf("%v results in %s seconds.\t", count, time.Now().Sub(start))
+					fmt.Printf("%v results per second.\n", math.Round(float64(count) / time.Now().Sub(start).Seconds()))
 
 				}
-
-				// os.Exit(1)
 			}
 		}
+
+		fmt.Printf("Finished %v\n", dir.Name())
+		if no_hiccups {
+			oldDir := results_dir + dir.Name() + "/"
+			err = os.Rename(oldDir, completed_dir + dir.Name() + "/")
+			check(err)
+		}
+
 	}
 
 	// os.Exit(1)

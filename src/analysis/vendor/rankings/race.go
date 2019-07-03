@@ -107,13 +107,21 @@ func GetAllRacesByGender(db *sql.DB, gender string) *[]Race {
 func GetDistance(d string) int {
 	if d == "10000" {return 10000}
 	if d == "8000" {return 8000}
+	if d == "7600" {return 7600}
 	if d == "6000" {return 6000}
+	if d == "5200" {return 5200}
+	if d == "5500" {return 5500}
 	if d == "5000" {return 5000}
-	if d == "2 MILE" {return 3218}
-	if d == "3K" {return 3000}
-	if d == "4 MILE" {return 6436}
 	if d == "4000" {return 4000}
-	if d == "7k" {return 7000}
+	if d == "7K" {return 7000}
+	if d == "7.9K" {return 7900}
+	if d == "3K" {return 3000}
+	if d == "5 MILE" {return 8045}
+	if d == "4.2 MILE" {return 6758}
+	if d == "4.1 MILE" {return 6597}
+	if d == "4 MILE" {return 6436}
+	if d == "3 MILE" {return 4827}
+	if d == "2 MILE" {return 3218}
 	fmt.Printf("%v\t races.go GetDistance()\n", d)
 
 	return -1

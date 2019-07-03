@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-	// "os"
+	"os"
 	// "strings"
 	// "strconv"
 	// "math"
@@ -12,24 +12,26 @@ import (
 	_ "github.com/lib/pq"
 )
 
+var _ = os.Exit
+
 func AddToGraph(db *sql.DB, all_results *[]int, result int) {
 
 	debug := false
 	for i := range *all_results {
-		if (*all_results)[i] == result {
-
-		} else 
-		if CheckResultsYears(db, (*all_results)[i], result) {
+		if CheckEdgeCondition(db, (*all_results)[i], result) {
 			race_a, race_b, time_dif := GetEdgeInformation(db, (*all_results)[i], result)
 
 			edge := UpdateEdge(db, race_a, race_b, time_dif)
 			if debug {fmt.Println(edge)}
 
+			if len(*all_results) == 2 {
+				MarkResultAsAdded(db, (*all_results)[0])
+			}
+
 		}
 	}
-
+	
 	MarkResultAsAdded(db, result)
-
 }
 
 func UpdateEdge(db *sql.DB, race_a, race_b int, time_dif float64) int {
@@ -38,7 +40,6 @@ func UpdateEdge(db *sql.DB, race_a, race_b int, time_dif float64) int {
 	} else if race_a > race_b {
 		race_a, race_b = race_b, race_a
 	}
-
 	var ret int
 	
 	// The from_race_id will always be the smaller one	
@@ -63,4 +64,52 @@ func UpdateEdge(db *sql.DB, race_a, race_b int, time_dif float64) int {
 	}
 
 	return ret
+}
+
+func CheckEdgeCondition(db *sql.DB, result_a, result_b int) bool {
+	if result_a == result_b {
+		return false
+	}
+
+	if !CheckResultsYears(db, result_a, result_b) {
+		return false
+	}
+
+	query := `SELECT gender, distance FROM results WHERE id=$1;`
+
+	var gender_a string
+	var dist_a int
+	err := db.QueryRow(query, result_a).Scan(&gender_a, &dist_a)
+	check(err)
+
+	var gender_b string
+	var dist_b int
+	err = db.QueryRow(query, result_b).Scan(&gender_b, &dist_b)
+	check(err)
+	
+	if gender_a != gender_b {
+		return false
+	} else if gender_a == "MALE" {
+		if dist_a == 8000 || dist_a == 10000 {
+			if dist_b == 8000 || dist_b == 10000 {
+				return true
+			} else {
+				return false
+			}
+		} else {
+			return false
+		}
+	} else if gender_b == "FEMALE" {
+		if dist_a == 5000 || dist_a == 6000 {
+			if dist_b == 5000 || dist_b == 6000 {
+				return true
+			} else {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+
+	return false
 }
