@@ -109,13 +109,16 @@ func GetDistance(d string) int {
 	if d == "8000" {return 8000}
 	if d == "7600" {return 7600}
 	if d == "6000" {return 6000}
+	if d == "6400" {return 6400}
 	if d == "5200" {return 5200}
 	if d == "5500" {return 5500}
 	if d == "5000" {return 5000}
+	if d == "4800" {return 4800}
 	if d == "4000" {return 4000}
 	if d == "7K" {return 7000}
 	if d == "7.9K" {return 7900}
 	if d == "3K" {return 3000}
+	if d == "3.2K" {return 3200}
 	if d == "5 MILE" {return 8045}
 	if d == "4.2 MILE" {return 6758}
 	if d == "4.1 MILE" {return 6597}
