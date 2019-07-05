@@ -14,3 +14,4 @@ scraper/scraper
 src/analysis/analysis
 analysis/plots/*
 venv/
+*.log

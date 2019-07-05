@@ -35,7 +35,7 @@ func main() {
 	check(err)
 
 	results_dir := "/home/sean/github/cc-rankings/scraper/RaceResults/"
-	completed_dir := "/home/sean/github/cc-rankings/scraper/Completed/"
+	// completed_dir := "/home/sean/github/cc-rankings/scraper/Completed/"
 	race_sum := "raceSummary.json"
 	directories, err := ioutil.ReadDir(results_dir)
 	check(err)
@@ -43,20 +43,29 @@ func main() {
 	count := 0
 	start := time.Now()
 	var no_hiccups bool
-	var entire_dir_added bool
+	// var entire_dir_added bool
+
+	f, err := os.OpenFile("app.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	check(err)
+
+	log.SetOutput(f)
+	log.Println("This is a test log entry")
 
 	for _, dir := range directories {
 		files, err := ioutil.ReadDir(results_dir + dir.Name() + "/")
 		check(err)
 		no_hiccups = true
-		entire_dir_added = true
+		// entire_dir_added = true
 		for _, f := range files {
 			var index int = 1
+			json_file := results_dir + dir.Name() + "/" + f.Name() + "/" + race_sum
+			plan, _ := ioutil.ReadFile(json_file)
+
+			var data map[string]interface{}
+			err = json.Unmarshal(plan, &data)
+			check(err)
+			
 			for {
-				plan, _ := ioutil.ReadFile(results_dir + dir.Name() + "/" + f.Name() + "/" + race_sum)
-				var data map[string]interface{}
-				err = json.Unmarshal(plan, &data)
-				check(err)
 				f_name := fmt.Sprintf("file%v", index)
 				index++
 
@@ -81,9 +90,9 @@ func main() {
 					n, mean, variance := 0, 0.0, 0.0
 					
 					if distance == "N/A" || gender == "N/A" {
-						fmt.Printf("Skipping Race. Distance = %v. Race: %v. Gender = %v\n", distance, race_name, gender)
+						log.Printf("Skipping Race. Distance = %v. Race: %v. Gender = %v\n", distance, race_name, gender)
 						no_hiccups = false
-						entire_dir_added = false
+						// entire_dir_added = false
 						break
 					} 
 
@@ -120,34 +129,27 @@ func main() {
 					fmt.Printf("%v results per second.\n", math.Round(float64(count) / time.Now().Sub(start).Seconds()))
 
 					if no_hiccups {
-						os.MkdirAll(completed_dir + dir.Name() + "/" + f.Name() + "/", os.ModePerm)
-						oldFile := results_dir + dir.Name() + "/" + f.Name() + "/" + file_name
-						newFile := completed_dir + dir.Name() + "/" + f.Name() + "/" + file_name
-						os.Create(newFile)
-						err = os.Rename(oldFile, newFile)
-						check(err)
+						// os.MkdirAll(completed_dir + dir.Name() + "/" + f.Name() + "/", os.ModePerm)
+						// oldFile := results_dir + dir.Name() + "/" + f.Name() + "/" + file_name
+						// newFile := completed_dir + dir.Name() + "/" + f.Name() + "/" + file_name
+						// os.Create(newFile)
+						// err = os.Rename(oldFile, newFile)
+						// check(err)
+						m["added_to_db"] = true
+						data[f_name] = m
 					}
 					
 				}
 			}
+
+			output, err := json.MarshalIndent(&data, "", "\t")
+			check(err)
+
+			err = ioutil.WriteFile(json_file, output, 0644)
+			check(err)
 		}
 
 		fmt.Printf("Finished %v\n", dir.Name())
-		if entire_dir_added {
-			oldFile := results_dir + dir.Name() + "/2018/raceSummary.json"
-			newFile := completed_dir + dir.Name() + "/2018/raceSummary.json"
-			os.Create(newFile)
-			err = os.Rename(oldFile, newFile)
-			check(err)
-
-			f, err := os.Open(results_dir + dir.Name() + "/2018/")
-			check(err)
-			_, err = f.Readdir(1)
-			if err == io.EOF {
-				os.RemoveAll(results_dir + dir.Name() + "/2018/")
-			}
-		}
-
 
 	}
 
