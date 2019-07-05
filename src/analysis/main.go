@@ -56,6 +56,7 @@ func main() {
 				plan, _ := ioutil.ReadFile(results_dir + dir.Name() + "/" + f.Name() + "/" + race_sum)
 				var data map[string]interface{}
 				err = json.Unmarshal(plan, &data)
+				check(err)
 				f_name := fmt.Sprintf("file%v", index)
 				index++
 
