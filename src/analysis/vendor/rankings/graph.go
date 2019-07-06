@@ -120,6 +120,16 @@ func CheckEdgeCondition(db *sql.DB, result_a, result_b int) bool {
 	return false
 }
 
+// type vertex struct {
+// 	id int
+// }
+
+// type edge struct {
+// 	from int
+// 	to int
+// 	weight float64
+// }
+
 func BuildGraph(db *sql.DB) *Graph {
 	queryCenter := `SELECT id, course, distance, average, correction_avg FROM races WHERE is_base=$1 AND gender=$2;`
 
@@ -145,29 +155,24 @@ func BuildGraph(db *sql.DB) *Graph {
 		edges, err := db.Query(edqeQuery, from_race_id)
 		check(err)
 
-		from_vertex, err := g.GetVertex(from_race_id)
-		check(err)
-
 		for edges.Next() {
 			var to_race_id int
 			var total_time float64
-			var weight float64
+			var count float64
 
-			err = rows.Scan(&to_race_id, &total_time, &weight)
+			err = edges.Scan(&to_race_id, &total_time, &count)
 			check(err)
 
-			to_vertex, err := g.GetVertex(to_race_id)
-			if err != nil {
-				to_vertex = g.AddVertex(from_race_id)
-			}
-
-
-			err = g.AddEdge(from_race_id, to_race_id, )
-
+			err = g.AddEdge(from_race_id, to_race_id, total_time/count)
+			check(err)
+		
 		}
 
 	}
 	
-
 	return g
+}
+
+func FindCorrections(g *Graph) {
+	
 }

@@ -148,9 +148,12 @@ func main() {
 
 	}
 
-	g := rankings.BuildGraph()
+	g := rankings.BuildGraph(db)
+	// g.Print()
+	fmt.Println(g.Length())
 
-	// os.Exit(1)
+	rankings.FindCorrections(g)
+	os.Exit(1)
 
 	// ComputeAverages(db)
 	// UpdateCorrectionAvg(db)
