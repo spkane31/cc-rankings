@@ -74,6 +74,7 @@ func main() {
 				var m map[string]interface{}
 				m = data[f_name].(map[string]interface{})
 				added := m["added_to_db"].(bool)
+				// if added {added = false}
 				if !added {
 					file_name := fmt.Sprintf("%v", m["file"])
 					csvFile, err := os.Open(results_dir + dir.Name() + "/" + f.Name() + fmt.Sprintf("/%v", file_name))
@@ -129,12 +130,6 @@ func main() {
 					fmt.Printf("%v results per second.\n", math.Round(float64(count) / time.Now().Sub(start).Seconds()))
 
 					if no_hiccups {
-						// os.MkdirAll(completed_dir + dir.Name() + "/" + f.Name() + "/", os.ModePerm)
-						// oldFile := results_dir + dir.Name() + "/" + f.Name() + "/" + file_name
-						// newFile := completed_dir + dir.Name() + "/" + f.Name() + "/" + file_name
-						// os.Create(newFile)
-						// err = os.Rename(oldFile, newFile)
-						// check(err)
 						m["added_to_db"] = true
 						data[f_name] = m
 					}
@@ -152,6 +147,8 @@ func main() {
 		fmt.Printf("Finished %v\n", dir.Name())
 
 	}
+
+	g := rankings.BuildGraph()
 
 	// os.Exit(1)
 

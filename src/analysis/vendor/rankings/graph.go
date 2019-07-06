@@ -75,17 +75,23 @@ func CheckEdgeCondition(db *sql.DB, result_a, result_b int) bool {
 		return false
 	}
 
-	query := `SELECT gender, distance FROM results WHERE id=$1;`
+	query := `SELECT gender, distance, time_float FROM results WHERE id=$1;`
 
 	var gender_a string
 	var dist_a int
-	err := db.QueryRow(query, result_a).Scan(&gender_a, &dist_a)
+	var time_a float64
+	err := db.QueryRow(query, result_a).Scan(&gender_a, &dist_a, &time_a)
 	check(err)
 
 	var gender_b string
 	var dist_b int
-	err = db.QueryRow(query, result_b).Scan(&gender_b, &dist_b)
+	var time_b float64
+	err = db.QueryRow(query, result_b).Scan(&gender_b, &dist_b, &time_b)
 	check(err)
+
+	if time_b == 0 || time_a == 0 {
+		return false
+	}
 	
 	if gender_a != gender_b {
 		return false
@@ -112,4 +118,56 @@ func CheckEdgeCondition(db *sql.DB, result_a, result_b int) bool {
 	}
 
 	return false
+}
+
+func BuildGraph(db *sql.DB) *Graph {
+	queryCenter := `SELECT id, course, distance, average, correction_avg FROM races WHERE is_base=$1 AND gender=$2;`
+
+	var center Race
+	err := db.QueryRow(queryCenter, true, "MALE").Scan(&center.id, &center.course, &center.distance, &center.average, &center.correction_avg)
+	check(err)
+
+	// Once we have the center, we can build the interconnections out
+	g := NewGraph()
+
+	query := `SELECT id FROM races WHERE gender=$1 AND (distance=$2 OR distance=$3);`
+	rows, err := db.Query(query, "MALE", 8000, 10000)
+	check(err)
+	defer rows.Close()
+
+	edqeQuery := `SELECT to_race_id, total_time, count FROM edges WHERE from_race_id=$1;`
+
+	for rows.Next() {
+		var from_race_id int
+		err = rows.Scan(&from_race_id)
+		check(err)
+
+		edges, err := db.Query(edqeQuery, from_race_id)
+		check(err)
+
+		from_vertex, err := g.GetVertex(from_race_id)
+		check(err)
+
+		for edges.Next() {
+			var to_race_id int
+			var total_time float64
+			var weight float64
+
+			err = rows.Scan(&to_race_id, &total_time, &weight)
+			check(err)
+
+			to_vertex, err := g.GetVertex(to_race_id)
+			if err != nil {
+				to_vertex = g.AddVertex(from_race_id)
+			}
+
+
+			err = g.AddEdge(from_race_id, to_race_id, )
+
+		}
+
+	}
+	
+
+	return g
 }

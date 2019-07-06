@@ -126,7 +126,7 @@ func GetDistance(d string) int {
 	if d == "4 MILE" {return 6436}
 	if d == "3 MILE" {return 4827}
 	if d == "2 MILE" {return 3218}
-	fmt.Printf("%v\t races.go GetDistance()\n", d)
+	// fmt.Printf("%v\t races.go GetDistance()\n", d)
 
 	return -1
 }
