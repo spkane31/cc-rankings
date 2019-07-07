@@ -149,8 +149,7 @@ func main() {
 	}
 
 	g := rankings.BuildGraph(db)
-	// g.Print()
-	fmt.Println(g.Length())
+	// fmt.Println(g.Length())
 
 	rankings.FindCorrections(g)
 	os.Exit(1)

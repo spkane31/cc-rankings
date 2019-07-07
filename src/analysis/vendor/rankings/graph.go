@@ -181,8 +181,8 @@ func BuildGraph(db *sql.DB) *Graph {
 }
 
 func FindCorrections(g *Graph) {
-	v := g.GetIthVertex(0)
-	fmt.Println(v)
+	// v := g.GetIthVertex(0)
+	// fmt.Println(v)
 
 	base_id := 1010
 	fmt.Printf("Base is Vertex %v\n", base_id)

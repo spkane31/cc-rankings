@@ -332,6 +332,15 @@ func (g Graph) Print() {
 	}
 }
 
+func (g *Graph) PrintVertex(id int) {
+	fmt.Printf("ID: %v Connects to: ", id)
+
+	for to, e := range g.egress[id] {
+		fmt.Printf("%v (%0.2f)\t", to, e.weight)
+	}
+	fmt.Printf("\n")
+}
+
 func (g *Graph) GetIthVertex(i int) *vertex {
 	return g.vertices[i]
 }
@@ -392,7 +401,7 @@ func (g *Graph) ShortestPaths(base int) {
 	for id := range g.vertices {
 		if id != base {
 			fmt.Println(id, base)
-			fmt.Println(g.vertices[id])
+			g.PrintVertex(id)
 			g.Dijkstra(id, base)
 			os.Exit(1)
 		}
