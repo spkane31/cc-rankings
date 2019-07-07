@@ -3,9 +3,10 @@ package rankings
 import (
 	"fmt"
 	"math"
+	"os"
 )
 
-// type ID interface{}
+var _ = os.Exit
 
 type Vertex interface {
 
@@ -330,6 +331,74 @@ func (g Graph) Print() {
 		fmt.Printf("\n")
 	}
 }
+
+func (g *Graph) GetIthVertex(i int) *vertex {
+	return g.vertices[i]
+}
+
+func (g *Graph) minDistance(dist map[int]float64, sptSet map[int]bool) int {
+	min := math.Inf(1)
+	min_index := -1
+
+	for v := 0; v < g.Length(); v++ {
+		if sptSet[v] == false && math.Abs(dist[v]) <= min {
+			min = dist[v]
+			min_index = v
+		}
+	}
+
+	return min_index
+}
+
+
+// Finds the shortest distances between two points 
+// Since edges are seen as both positive and negative, the minimum between
+// two edges is the values closest to zero (absolute value)
+func (g *Graph) Dijkstra(start, target int) (cost float64) {
+	
+	dist := make(map[int]float64)
+	// dist := make([]float64, g.Length())
+
+	sptSet := make(map[int]bool)
+	// sptSet := make([]bool, g.Length())
+
+	for i := range dist {
+		dist[i] = math.Inf(1)
+		sptSet[i] = false
+	}
+
+	dist[start] = 0
+
+	for count := 0; count < g.Length() - 1; count++ {
+		u := g.minDistance(dist, sptSet)
+
+		sptSet[u] = true
+		
+		for v := 0; v < g.Length(); v++ {
+			_, has := g.egress[u][v]
+			if !sptSet[v] && has && dist[u] != math.Inf(1) && dist[u] + g.egress[u][v].weight < dist[v] {
+				dist[v] = dist[u] + g.egress[u][v].weight
+			}
+		}
+
+		fmt.Println(dist[u])
+		return
+	}
+
+	return
+}
+
+func (g *Graph) ShortestPaths(base int) {
+	for id := range g.vertices {
+		if id != base {
+			fmt.Println(id, base)
+			fmt.Println(g.vertices[id])
+			g.Dijkstra(id, base)
+			os.Exit(1)
+		}
+	}
+}
+
 
 // func (g *Graph) DisableEdge(from, to int) {
 // 	g.egress[from][to].enable = false

@@ -145,8 +145,8 @@ func BuildGraph(db *sql.DB) *Graph {
 	check(err)
 	defer rows.Close()
 
-	edqeQuery := `SELECT to_race_id, total_time, count FROM edges WHERE from_race_id=$1;`
-
+	edqeQuery := `SELECT to_race_id, total_time, count FROM edges WHERE from_race_id=$1 and count > 7;`
+	question_count := 0
 	for rows.Next() {
 		var from_race_id int
 		err = rows.Scan(&from_race_id)
@@ -163,16 +163,30 @@ func BuildGraph(db *sql.DB) *Graph {
 			err = edges.Scan(&to_race_id, &total_time, &count)
 			check(err)
 
+			if total_time / count > 200 || total_time / count < -200 {
+				question_count++
+				fmt.Println(from_race_id, to_race_id, total_time, count, total_time/count)
+			}
+
 			err = g.AddEdge(from_race_id, to_race_id, total_time/count)
 			check(err)
 		
 		}
 
 	}
+
+	fmt.Printf("Questionable edges: %0.6f percent\n", 100.0 * float64(question_count) / float64(g.Length()))
 	
 	return g
 }
 
 func FindCorrections(g *Graph) {
-	
+	v := g.GetIthVertex(0)
+	fmt.Println(v)
+
+	base_id := 1010
+	fmt.Printf("Base is Vertex %v\n", base_id)
+
+	g.ShortestPaths(1010)
+
 }
