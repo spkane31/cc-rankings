@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"time"
 	"os"
-	// "strings"
-	// "strconv"
-	// "math"
+	"math"
 
 	_ "github.com/lib/pq"
 )
@@ -119,29 +117,22 @@ func CheckEdgeCondition(db *sql.DB, result_a, result_b int) bool {
 
 	return false
 }
-
-// type vertex struct {
-// 	id int
-// }
-
-// type edge struct {
-// 	from int
-// 	to int
-// 	weight float64
-// }
-
-func BuildGraph(db *sql.DB) *Graph {
+func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 	queryCenter := `SELECT id, course, distance, average, correction_avg FROM races WHERE is_base=$1 AND gender=$2;`
 
+	var questionable_border float64 
+	if gender == "MALE" {questionable_border = 180}
+	if gender == "FEMALE" {questionable_border = 112.5}
+
 	var center Race
-	err := db.QueryRow(queryCenter, true, "MALE").Scan(&center.id, &center.course, &center.distance, &center.average, &center.correction_avg)
+	err := db.QueryRow(queryCenter, true, gender).Scan(&center.id, &center.course, &center.distance, &center.average, &center.correction_avg)
 	check(err)
 
 	// Once we have the center, we can build the interconnections out
 	g := NewGraph()
 
 	query := `SELECT id FROM races WHERE gender=$1 AND (distance=$2 OR distance=$3);`
-	rows, err := db.Query(query, "MALE", 8000, 10000)
+	rows, err := db.Query(query, gender, reg_dist, extra_dist)
 	check(err)
 	defer rows.Close()
 
@@ -163,30 +154,31 @@ func BuildGraph(db *sql.DB) *Graph {
 			err = edges.Scan(&to_race_id, &total_time, &count)
 			check(err)
 
-			if total_time / count > 200 || total_time / count < -200 {
+			if math.Abs(total_time / count) > questionable_border {
 				question_count++
-				fmt.Println(from_race_id, to_race_id, total_time, count, total_time/count)
+				// fmt.Println("erejklfd;asj")
 			}
 
-			err = g.AddEdge(from_race_id, to_race_id, total_time/count)
-			check(err)
+			if math.Abs(total_time / count) < 400 {
+				err = g.AddEdge(from_race_id, to_race_id, total_time/count)
+				check(err)
+			}
 		
 		}
 
 	}
 
 	fmt.Printf("Questionable edges: %0.6f percent\n", 100.0 * float64(question_count) / float64(g.Length()))
-	
 	return g
 }
 
-func FindCorrections(g *Graph) {
+func FindCorrections(g *Graph, base_id int) {
 	// v := g.GetIthVertex(0)
 	// fmt.Println(v)
 
-	base_id := 1010
-	fmt.Printf("Base is Vertex %v\n", base_id)
+	// base_id := 1010
+	// fmt.Printf("Base is Vertex %v\n", base_id)
 
-	g.ShortestPaths(1010)
+	g.ShortestPaths(base_id)
 
 }

@@ -349,10 +349,12 @@ func (g *Graph) minDistance(dist map[int]float64, sptSet map[int]bool) int {
 	min := math.Inf(1)
 	min_index := -1
 
-	for v := 0; v < g.Length(); v++ {
-		if sptSet[v] == false && math.Abs(dist[v]) <= min {
-			min = dist[v]
-			min_index = v
+	for key, val := range dist {
+	// for v := 0; v < g.Length(); v++ {
+		if sptSet[key] == false && math.Abs(val) <= min {
+			min = dist[key]
+			min_index = key
+			// fmt.Println(key, val, min, min_index, sptSet[key])
 		}
 	}
 
@@ -363,49 +365,60 @@ func (g *Graph) minDistance(dist map[int]float64, sptSet map[int]bool) int {
 // Finds the shortest distances between two points 
 // Since edges are seen as both positive and negative, the minimum between
 // two edges is the values closest to zero (absolute value)
-func (g *Graph) Dijkstra(start, target int) (cost float64) {
-	
-	dist := make(map[int]float64)
-	// dist := make([]float64, g.Length())
-
-	sptSet := make(map[int]bool)
-	// sptSet := make([]bool, g.Length())
-
-	for i := range dist {
-		dist[i] = math.Inf(1)
-		sptSet[i] = false
+func (g *Graph) Dijkstra(source int) (dist map[int]float64, prev map[int]int, err error) {
+	if _, exists := g.vertices[source]; !exists {
+		return nil, nil, fmt.Errorf("Vertex %v does not exist.", source)
 	}
 
-	dist[start] = 0
+	dist = make(map[int]float64)
+	prev = make(map[int]int)
+	heap := NewFibHeap()
 
-	for count := 0; count < g.Length() - 1; count++ {
-		u := g.minDistance(dist, sptSet)
+	for id := range g.vertices {
+		prev[id] = -1
+		if id != source {
+			dist[id] = math.Inf(1)
+			heap.Insert(id, math.Inf(1))
+		} else {
+			dist[id] = 0
+			heap.Insert(id, 0)
+		}
+	}
 
-		sptSet[u] = true
-		
-		for v := 0; v < g.Length(); v++ {
-			_, has := g.egress[u][v]
-			if !sptSet[v] && has && dist[u] != math.Inf(1) && dist[u] + g.egress[u][v].weight < dist[v] {
-				dist[v] = dist[u] + g.egress[u][v].weight
+	for heap.Num() != 0 {
+		min, _ := heap.ExtractMin()
+		for to, edge := range g.egress[min.(int)] {
+			if dist[min.(int)] + edge.weight < dist[to] {
+				heap.DecreaseKey(to, dist[min.(int)]+edge.weight)
+				prev[to] = min.(int)
+				dist[to] = dist[min.(int)] + edge.weight
 			}
 		}
-
-		fmt.Println(dist[u])
-		return
 	}
 
 	return
 }
 
 func (g *Graph) ShortestPaths(base int) {
+	inf_count := 0
+	max_correction := 0.0
 	for id := range g.vertices {
 		if id != base {
-			fmt.Println(id, base)
-			g.PrintVertex(id)
-			g.Dijkstra(id, base)
-			os.Exit(1)
+			// fmt.Println(id)
+			// g.PrintVertex(id)
+			dist, _, err := g.Dijkstra(id)
+			check(err)
+			if dist[base] == math.Inf(1) {
+				inf_count++
+			} else {
+				if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
+				// fmt.Printf("ID: %v\tCorrection: %v\n", id, dist[base])
+			}
+			// os.Exit(1)
 		}
 	}
+	fmt.Printf("Valid Vertices: %0.4f %%\n", 100 * float64(inf_count)/float64(g.Length()))
+	fmt.Printf("Max Correction: %0.4f\n", max_correction)
 }
 
 
@@ -431,8 +444,4 @@ func (g *Graph) ShortestPaths(base int) {
 // 			edge.enable = true
 // 		}
 // 	}
-// }
-
-// func BuildGraph() Graph {
-
 // }
