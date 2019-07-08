@@ -4,6 +4,11 @@ import (
 	"fmt"
 	"math"
 	"os"
+
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/vg"
+	// "github.com/gonum/stat/distuv"
 )
 
 var _ = os.Exit
@@ -402,6 +407,10 @@ func (g *Graph) Dijkstra(source int) (dist map[int]float64, prev map[int]int, er
 func (g *Graph) ShortestPaths(base int) {
 	inf_count := 0
 	max_correction := 0.0
+
+	v := make(plotter.Values, len(g.vertices)-1)
+
+	i := 0
 	for id := range g.vertices {
 		if id != base {
 			// fmt.Println(id)
@@ -413,35 +422,25 @@ func (g *Graph) ShortestPaths(base int) {
 			} else {
 				if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
 				// fmt.Printf("ID: %v\tCorrection: %v\n", id, dist[base])
+				v[i] = dist[base]
+				i++
 			}
 			// os.Exit(1)
 		}
 	}
+
+	p, err := plot.New()
+	check(err)
+	p.Title.Text = "Histogram"
+
+	h, err := plotter.NewHist(v, 16)
+	check(err)
+
+	p.Add(h)
+	save_file := fmt.Sprintf("hist%v.png", base)
+	err = p.Save(8*vg.Inch, 8*vg.Inch, save_file)
+	check(err)
+
 	fmt.Printf("Valid Vertices: %0.4f %%\n", 100 * float64(inf_count)/float64(g.Length()))
 	fmt.Printf("Max Correction: %0.4f\n", max_correction)
 }
-
-
-// func (g *Graph) DisableEdge(from, to int) {
-// 	g.egress[from][to].enable = false
-// }
-
-// func (g *Graph) DisableVertex(vertex int) {
-// 	for _, edge := range g.egress[vertex] {
-// 		edge.enable = false
-// 	}
-// }
-
-// func (g *Graph) DisablePath(path []int) {
-// 	for _, vertex := range path {
-// 		g.DisableVertex(vertex)
-// 	}
-// }
-
-// func (g *Graph) Reset() {
-// 	for _, out := range g.egress {
-// 		for _, edge := range out {
-// 			edge.enable = true
-// 		}
-// 	}
-// }
