@@ -17,9 +17,12 @@ func AddToGraph(db *sql.DB, all_results *[]int, result, runner_id int, gender st
 	debug := false
 	for i := range *all_results {
 		if CheckEdgeCondition(db, (*all_results)[i], result) {
+			
 			race_a, race_b, time_dif := GetEdgeInformation(db, (*all_results)[i], result)
 
 			edge := CreateEdge(db, race_a, race_b, time_dif, runner_id, gender)
+
+			fmt.Printf("EDGES: %v\n", NumEdges(db))
 
 			if debug {fmt.Println(edge)}
 
@@ -176,4 +179,11 @@ func FindCorrections(g *Graph, base_id int) {
 
 	g.ShortestPaths(base_id)
 
+}
+
+func NumEdges(db *sql.DB) (ret int) {
+	query := `SELECT count(*) from edges;`
+	err := db.QueryRow(query).Scan(&ret)
+	check(err)
+	return
 }
