@@ -210,7 +210,7 @@ func CheckResultsYears(db *sql.DB, a, b int) bool {
 	date_a := time.Now()
 	err := row.Scan(&date_a)
 	check(err)
-
+	
 	row = db.QueryRow(query, b)
 	date_b := time.Now()
 	err = row.Scan(&date_b)

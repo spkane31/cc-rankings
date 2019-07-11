@@ -22,7 +22,7 @@ func AddToGraph(db *sql.DB, all_results *[]int, result, runner_id int, gender st
 
 			edge := CreateEdge(db, race_a, race_b, time_dif, runner_id, gender)
 
-			fmt.Printf("EDGES: %v\n", NumEdges(db))
+			// fmt.Printf("EDGES: %v\n", NumEdges(db))
 
 			if debug {fmt.Println(edge)}
 
@@ -154,7 +154,6 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 
 			if math.Abs(total_time / count) > questionable_border {
 				question_count++
-				// fmt.Println("erejklfd;asj")
 			}
 
 			if math.Abs(total_time / count) < 400 {

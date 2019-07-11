@@ -94,7 +94,7 @@ func main() {
 						race_name := fmt.Sprintf("%v", data["name"])
 						place := 1
 						// _, _, _, _, _, _, _ = db, distance, gender, course, date, race_name, place
-						n, mean, variance := 0, 0.0, 0.0
+						// n, mean, variance := 0, 0.0, 0.0	
 						
 						if distance == "N/A" || gender == "N/A" {
 							log.Printf("Skipping Race. Distance = %v. Race: %v. Gender = %v\n", distance, race_name, gender)
@@ -103,8 +103,8 @@ func main() {
 							break
 						} 
 						
-						var race_id int
-						var inst_id int
+						// var race_id int
+						// var inst_id int
 
 						for {
 							line, err := reader.Read()
@@ -120,15 +120,15 @@ func main() {
 									no_hiccups = false
 									break
 								} else if place == 1 {
-									runner_id, result_id, race_id, inst_id = rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
+									runner_id, result_id, _, _ = rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
 									place++
 									count++
 								} else {
-									n, mean, variance = UpdateStats(n, mean, variance, rankings.GetTime(line[4]))
+									// n, mean, variance = UpdateStats(n, mean, variance, rankings.GetTime(line[4]))
 
 									// line is of the format: last, first, year, team, time
-									// runner_id, result, race_id := rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
-									runner_id, result_id = rankings.AddResultToRace(db, line, race_id, inst_id, place, gender, distance, date)
+									runner_id, result_id, _, _ =	rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
+									// runner_id, result_id = rankings.AddResultToRace(db, line, race_id, inst_id, place, gender, distance, date)
 									
 									place++
 									count++
@@ -137,8 +137,8 @@ func main() {
 								
 								all_results := rankings.FindResultsForRunner(db, runner_id)
 
-								rankings.UpdateAverage(db, race_id, mean)
-								rankings.UpdateStdDev(db, race_id, variance)
+								// rankings.UpdateAverage(db, race_id, mean)
+								// rankings.UpdateStdDev(db, race_id, variance)
 								if len(*all_results) > 1 {
 									// This runner has multiple results, go through these and add to the graph
 									rankings.AddToGraph(db, all_results, result_id, runner_id, gender)
