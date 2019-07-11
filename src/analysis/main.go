@@ -1,7 +1,7 @@
 package main
 
 import (
-	"rankings" 
+	"rankings"
 	
 	"fmt"
 	"log"
@@ -37,9 +37,7 @@ func main() {
 
 	var insert_db bool
 
-
-
-	insert_db = false
+	insert_db = true
 	if insert_db {
 
 		results_dir := "/home/sean/github/cc-rankings/scraper/RaceResults/"
@@ -63,7 +61,7 @@ func main() {
 			files, err := ioutil.ReadDir(results_dir + dir.Name() + "/")
 			check(err)
 			no_hiccups = true
-			// entire_dir_added = true
+
 			for _, f := range files {
 				var index int = 1
 				json_file := results_dir + dir.Name() + "/" + f.Name() + "/" + race_sum
@@ -82,7 +80,7 @@ func main() {
 					var m map[string]interface{}
 					m = data[f_name].(map[string]interface{})
 					added := m["added_to_db"].(bool)
-					// if added {added = false}
+					if added {added = false}
 					if !added {
 						file_name := fmt.Sprintf("%v", m["file"])
 						csvFile, err := os.Open(results_dir + dir.Name() + "/" + f.Name() + fmt.Sprintf("/%v", file_name))
@@ -104,33 +102,48 @@ func main() {
 							// entire_dir_added = false
 							break
 						} 
+						
+						var race_id int
+						var inst_id int
 
 						for {
 							line, err := reader.Read()
+
 							if err == io.EOF {
 								break
 							} else {
 								check(err)
+								var runner_id int
+								var result_id int
 								if len(line) <= 4 {
 									fmt.Println("ERROR: Not correct line length: ", line)
 									no_hiccups = false
 									break
-								} else {
-									n, mean, variance = UpdateStats(n, mean, variance, rankings.GetTime(line[4]))
-																									
-									// line is of the format: last, first, year, team, time
-									runner, result, race_id := rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
-									all_results := rankings.FindResultsForRunner(db, runner)
-									
-									rankings.UpdateAverage(db, race_id, mean)
-									rankings.UpdateStdDev(db, race_id, variance)
-									if len(*all_results) > 1 {
-										// This runner has multiple results, go through these and add to the graph
-										rankings.AddToGraph(db, all_results, result)
-									}
+								} else if place == 1 {
+									runner_id, result_id, race_id, inst_id = rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
 									place++
 									count++
-								} 
+								} else {
+									n, mean, variance = UpdateStats(n, mean, variance, rankings.GetTime(line[4]))
+
+									// line is of the format: last, first, year, team, time
+									// runner_id, result, race_id := rankings.CreateResult(db, line, distance, gender, course, date, race_name, place)
+									runner_id, result_id = rankings.AddResultToRace(db, line, race_id, inst_id, place, gender, distance, date)
+									
+									place++
+									count++
+
+								}
+								
+								all_results := rankings.FindResultsForRunner(db, runner_id)
+
+								rankings.UpdateAverage(db, race_id, mean)
+								rankings.UpdateStdDev(db, race_id, variance)
+								if len(*all_results) > 1 {
+									// This runner has multiple results, go through these and add to the graph
+									rankings.AddToGraph(db, all_results, result_id, runner_id, gender)
+								}
+
 							}
 						}
 
@@ -169,7 +182,6 @@ func main() {
 
 	// ComputeAverages(db)
 	// UpdateCorrectionAvg(db)
-	// os.Exit(1)
 
 	// g := make(map[Pair]*Edge)
 

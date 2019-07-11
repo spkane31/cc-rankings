@@ -355,17 +355,14 @@ func (g *Graph) minDistance(dist map[int]float64, sptSet map[int]bool) int {
 	min_index := -1
 
 	for key, val := range dist {
-	// for v := 0; v < g.Length(); v++ {
 		if sptSet[key] == false && math.Abs(val) <= min {
 			min = dist[key]
 			min_index = key
-			// fmt.Println(key, val, min, min_index, sptSet[key])
 		}
 	}
 
 	return min_index
 }
-
 
 // Finds the shortest distances between two points 
 // Since edges are seen as both positive and negative, the minimum between
@@ -413,17 +410,20 @@ func (g *Graph) ShortestPaths(base int) {
 	i := 0
 	for id := range g.vertices {
 		if id != base {
-			// fmt.Println(id)
-			// g.PrintVertex(id)
 			dist, _, err := g.Dijkstra(id)
 			check(err)
 			if dist[base] == math.Inf(1) {
 				inf_count++
 			} else {
 				if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
-				// fmt.Printf("ID: %v\tCorrection: %v\n", id, dist[base])
+				
 				v[i] = dist[base]
 				i++
+
+				// Update the race in the database
+				// UpdateRace(id, dist[base])
+
+
 			}
 			// os.Exit(1)
 		}
@@ -431,9 +431,8 @@ func (g *Graph) ShortestPaths(base int) {
 
 	p, err := plot.New()
 	check(err)
-	p.Title.Text = "Histogram"
 
-	h, err := plotter.NewHist(v, 16)
+	h, err := plotter.NewHist(v, int(math.Sqrt(float64(len(g.vertices)-1))))
 	check(err)
 
 	p.Add(h)

@@ -18,3 +18,9 @@ Stop the PostgreSQL server
 ```
 sudo service postgresql stop
 ```
+
+## Go Modules
+Add the directory to your path:
+```
+export GOPATH=$HOME/go:$HOME/github/cc-rankings
+```

@@ -42,6 +42,36 @@ func AddRace(db *sql.DB, name, course, gender, d string) (int) {
 	return id
 }
 
+func AddResultToRace(db *sql.DB, details []string, race_id, instance_id, place int, gender, distance, date string) (result_id, runner_id int) {
+	debug := false
+
+	team_id, err := FindTeam(db, details[3])
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("No team found, creating a new one")}
+		team_id = AddTeam(db, details[3])
+	} else { check(err) }
+
+	runner_id, err = GetRunnerID(db, details[1], details[0], details[2], gender, team_id)
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("No Runner found, creating a new one")}
+		runner_id = AddRunner(db, details[1], details[0], details[2], gender, team_id)
+	} else {
+		check(err)
+	}
+	if debug {fmt.Printf("Runner ID: %d\n", runner_id)}
+	
+	result_id, err = FindResult(db, details[4], distance, runner_id, instance_id)
+	if err == sql.ErrNoRows {
+		if debug {fmt.Println("Adding Result")}
+		result_id = AddResult(db, details[4], distance, runner_id, instance_id, gender, place, date)
+	} else {
+		check(err)
+	}
+	if debug {fmt.Printf("Result ID: %d\n", result_id)}
+
+	return
+}
+
 func CalculateStatistics(results *[]Result) (float64, float64) {
 	size := len(*results)
 	sum_x, sum_y, sum_xx, sum_xy := 0.0, 0.0, 0.0, 0.0

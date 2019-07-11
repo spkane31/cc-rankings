@@ -14,6 +14,8 @@ const (
 	dbname = "rankings_dev"
 )
 
+var db *sql.DB
+
 func CreateConnectionString() string {
 	str := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	return str

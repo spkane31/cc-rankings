@@ -4,6 +4,7 @@ defmodule RankingsWeb.RunnerView do
 
   alias Rankings.Runner
   alias Rankings.Result
+  alias Date
 
   def get_name(%Runner{first_name: first, last_name: last}) do
     first <> " " <> last
@@ -30,6 +31,10 @@ defmodule RankingsWeb.RunnerView do
       end
 
     end
+  end
+
+  def stringify(date) do
+    Date.to_string(date)
   end
 
 end

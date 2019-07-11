@@ -12,27 +12,22 @@ import (
 
 var _ = os.Exit
 
-func AddToGraph(db *sql.DB, all_results *[]int, result int) {
+func AddToGraph(db *sql.DB, all_results *[]int, result, runner_id int, gender string) {
 
 	debug := false
 	for i := range *all_results {
 		if CheckEdgeCondition(db, (*all_results)[i], result) {
 			race_a, race_b, time_dif := GetEdgeInformation(db, (*all_results)[i], result)
 
-			edge := UpdateEdge(db, race_a, race_b, time_dif)
-			if debug {fmt.Println(edge)}
+			edge := CreateEdge(db, race_a, race_b, time_dif, runner_id, gender)
 
-			if len(*all_results) == 2 {
-				MarkResultAsAdded(db, (*all_results)[0])
-			}
+			if debug {fmt.Println(edge)}
 
 		}
 	}
-	
-	MarkResultAsAdded(db, result)
 }
 
-func UpdateEdge(db *sql.DB, race_a, race_b int, time_dif float64) int {
+func CreateEdge(db *sql.DB, race_a, race_b int, time_dif float64, runner_id int, gender string) int {
 	if race_a == race_b {
 		return -1
 	} else if race_a > race_b {
@@ -41,25 +36,17 @@ func UpdateEdge(db *sql.DB, race_a, race_b int, time_dif float64) int {
 	var ret int
 	
 	// The from_race_id will always be the smaller one	
-	query := `SELECT id, count, total_time FROM edges WHERE (from_race_id=$1 AND to_race_id=$2);`
-	id, count, total_time := 0, 0, 0.0
-	row := db.QueryRow(query, race_a, race_b)
-	err := row.Scan(&id, &count, &total_time)
-	if err == sql.ErrNoRows || id == 0 {
-		// This edge does not exist, need to create one
-		query := `INSERT INTO edges (from_race_id, to_race_id, total_time, count, inserted_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;`
-		err = db.QueryRow(query, race_a, race_b, time_dif, 1, time.Now(), time.Now()).Scan(&ret)
-		check(err)
-	} else {
-		// This edge does exist, update it
+	query := `SELECT id FROM edges WHERE (from_race_id=$1 AND to_race_id=$2 AND runner_id=$3);`
+
+	err := db.QueryRow(query, race_a, race_b, runner_id).Scan(&ret)
 	
-		update := `UPDATE edges SET count=$2, total_time=$3 WHERE id=$1 RETURNING id;`
-		count++
-		total_time += time_dif
-		err = db.QueryRow(update, id, count, total_time).Scan(&ret)
-		check(err)		
-	}
+	if err == sql.ErrNoRows {
+		// This edge does not exist, need to create one
+		query := `INSERT INTO edges (from_race_id, to_race_id, runner_id, difference, gender, inserted_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id;`
+		err = db.QueryRow(query, race_a, race_b, runner_id, time_dif, gender, time.Now(), time.Now()).Scan(&ret)
+		check(err)
+	} 
 
 	return ret
 }
@@ -117,7 +104,15 @@ func CheckEdgeCondition(db *sql.DB, result_a, result_b int) bool {
 
 	return false
 }
+
 func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
+
+	// First query for how many rows there are
+	queryCount := `SELECT count(*) from edges WHERE ;`
+	var num_rows int
+	err := db.QueryRow(queryCount).Scan(&num_rows)
+	check(err)
+
 	queryCenter := `SELECT id, course, distance, average, correction_avg FROM races WHERE is_base=$1 AND gender=$2;`
 
 	var questionable_border float64 
@@ -125,7 +120,7 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 	if gender == "FEMALE" {questionable_border = 112.5}
 
 	var center Race
-	err := db.QueryRow(queryCenter, true, gender).Scan(&center.id, &center.course, &center.distance, &center.average, &center.correction_avg)
+	err = db.QueryRow(queryCenter, true, gender).Scan(&center.id, &center.course, &center.distance, &center.average, &center.correction_avg)
 	check(err)
 
 	// Once we have the center, we can build the interconnections out

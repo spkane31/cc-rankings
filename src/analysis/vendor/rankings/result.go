@@ -26,7 +26,7 @@ type Result struct {
 	time_float float64
 }
 
-func CreateResult(db *sql.DB, details []string, distance, gender, course, date, race_name string, place int) (int, int, int) {
+func CreateResult(db *sql.DB, details []string, distance, gender, course, date, race_name string, place int) (int, int, int, int) {
 	// details = [last, first, year, school, time]
 	debug := false
 
@@ -78,7 +78,7 @@ func CreateResult(db *sql.DB, details []string, distance, gender, course, date, 
 	}
 	if debug {fmt.Printf("Result ID: %d\n", result_id)}
 	
-	return runner_id, result_id, race_id
+	return runner_id, result_id, race_id, instance_id
 }
 
 func FindResult(db *sql.DB, time string, distance string, runner_id, instance_id int) (int, error) {
@@ -120,9 +120,10 @@ func AddResult(db *sql.DB, t string, distance string, runner_id, instance_id int
 										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`
 	var unit string
 	d := GetDistance(distance)
-	_, err := db.Exec(sqlStatement, d, t, runner_id, unit, instance_id, scaled, time_float, date, gender, place, time.Now(), time.Now())
 	
+	_, err := db.Exec(sqlStatement, d, t, runner_id, unit, instance_id, scaled, time_float, date, gender, place, time.Now(), time.Now())
 	check(err)
+
 	id, err = FindResult(db, t, distance, runner_id, instance_id)
 
 	return id
@@ -266,10 +267,4 @@ func GetEdgeInformation(db *sql.DB, result_a, result_b int) (int, int, float64) 
 	err = row.Scan(&race_id_b)
 
 	return race_id_a, race_id_b, scaled_b - scaled_a
-}
-
-func MarkResultAsAdded(db *sql.DB, result int) {
-	update := `UPDATE results SET added_to_graph=true WHERE id=$1;`
-	_, err := db.Exec(update, result)
-	check(err)
 }

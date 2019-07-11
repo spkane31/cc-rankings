@@ -6,7 +6,7 @@ defmodule Rankings.RaceInstance do
   alias Rankings
 
   schema "race_instances" do
-    field :date, :string, null: false
+    field :date, :date, null: false
     field :average, :float, default: 0
     field :std_dev, :float, default: 0
     belongs_to :race, Rankings.Race

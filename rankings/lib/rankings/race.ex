@@ -40,7 +40,7 @@ defmodule Rankings.Race do
   end
 
   def get_n_races(n) do
-    q = from(r in Rankings.Team, limit: ^n)
+    q = from(r in Rankings.Race, limit: ^n)
     Repo.all(q)
   end
 
