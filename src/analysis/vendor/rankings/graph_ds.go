@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"database/sql"
+	"sort"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
@@ -48,11 +49,11 @@ func (v *vertex) Edges() (edges []edge) {
 	edges = make([]edge, len(v.outTo) + len(v.inFrom))
 	i := 0
 	for to, weight := range v.outTo {
-		edges[i] = edge{v.id, to, weight}
+		edges[i] = edge{v.id, to, weight, true}
 		i++
 	}
 	for from, weight := range v.inFrom {
-		edges[i] = edge{from, v.id, weight}
+		edges[i] = edge{from, v.id, weight, true}
 		i++
 	}
 
@@ -70,7 +71,7 @@ type edge struct {
 	from 		int
 	to 			int
 	weight 	float64
-	// enable bool
+	enable bool
 	// changed bool
 }
 
@@ -170,7 +171,7 @@ func (g *Graph) AddEdge(from, to int, weight float64) error {
 		return fmt.Errorf("Edge from %v to %v is duplicate", from, to)
 	}
 
-	g.egress[from][to] = &edge{from, to, weight}
+	g.egress[from][to] = &edge{from, to, weight, true}
 	g.ingress[to][from] = g.egress[from][to]
 
 	return nil
@@ -270,7 +271,7 @@ func (g *Graph) AddVertexWithEdges(v Vertex) error {
 			g.ingress[to] = make(map[int]*edge)
 		}
 
-		g.egress[from][to] = &edge{from, to, weight}
+		g.egress[from][to] = &edge{from, to, weight, true}
 		g.ingress[to][from] = g.egress[from][to]
 	}
 	
@@ -392,7 +393,10 @@ func (g *Graph) Dijkstra(source int) (dist map[int]float64, prev map[int]int, er
 	for heap.Num() != 0 {
 		min, _ := heap.ExtractMin()
 		for to, edge := range g.egress[min.(int)] {
-			if dist[min.(int)] + edge.weight < dist[to] {
+			if !edge.enable {
+				continue
+			}
+			if math.Abs(dist[min.(int)] + edge.weight) < dist[to] {
 				heap.DecreaseKey(to, dist[min.(int)]+edge.weight)
 				prev[to] = min.(int)
 				dist[to] = dist[min.(int)] + edge.weight
@@ -403,6 +407,171 @@ func (g *Graph) Dijkstra(source int) (dist map[int]float64, prev map[int]int, er
 	return
 }
 
+func getPath(prev map[int]int, lastNode int) (path []int) {
+	prevNode, has := prev[lastNode]
+	if has == false {
+		return nil
+	}
+
+	reversePath := []int{lastNode}
+	for ; has != false; prevNode, has = prev[prevNode] {
+		reversePath = append(reversePath, prevNode)
+	}
+
+	path = make([]int, len(reversePath))
+	for idx, n := range reversePath {
+		path[len(reversePath) - idx-1] = n
+	}
+
+	return
+}
+
+type potential struct {
+	dist float64
+	path []int
+}
+
+func (g *Graph) Yen(source, destination, K int) ([]float64, [][]int, error) {
+	var err error
+	var i, j, k int
+	var dijkstraDist map[int]float64
+	var dijkstraPrev map[int]int
+	var existed bool
+	var spurWeight float64
+	var spurPath []int
+	var potentials []potential
+	distTopK := make([]float64, K)
+	pathTopK := make([][]int, K)
+
+	for i := 0; i < K; i++ {
+		distTopK[i] = math.Inf(1)
+	}
+
+	dijkstraDist, dijkstraPrev, err = g.Dijkstra(source)
+	if err != nil {
+		return nil, nil, err
+	}
+	distTopK[0] = dijkstraDist[destination]
+	pathTopK[0] = getPath(dijkstraPrev, destination)
+
+	fmt.Println(distTopK, pathTopK)
+
+	for k = 1; k < K; {
+		for i = 0; i < len(pathTopK[k-1])-1; i++ {
+			for j = 0; j < k; j++ {
+				if isShareRootPath(pathTopK[j], pathTopK[k-1][:i+1]) {
+					g.DisableEdge(pathTopK[j][i], pathTopK[j][i+1])
+				}
+			}
+			g.DisablePath(pathTopK[k-1][:i])
+
+			dijkstraDist, dijkstraPrev, _ = g.Dijkstra(pathTopK[k-1][i])
+			if dijkstraDist[destination] != math.Inf(1) {
+				spurWeight = g.GetPathWeight(pathTopK[k-1][:i+1]) + dijkstraDist[destination]
+				spurPath = mergePath(pathTopK[k-1][:i], getPath(dijkstraPrev, destination))
+				existed = false
+
+				for _, each := range potentials {
+					if isSamePath(each.path, spurPath) {
+						existed = true
+						break
+					}
+				}
+
+				if !existed {
+					potentials = append(potentials, potential{spurWeight, spurPath})
+				}
+			}
+
+			g.Reset()
+		}
+
+		if len(potentials) == 0 {
+			break
+		}
+		sort.Slice(potentials, func(i, j int) bool {
+			return potentials[i].dist < potentials[j].dist
+		})
+
+		if len(potentials) >= K - k {
+			for l := 0; k < K; l++ {
+				distTopK[k] = potentials[l].dist
+				pathTopK[k] = potentials[l].path
+				k++
+			}
+			break
+		} else {
+			distTopK[k] = potentials[0].dist
+			pathTopK[k] = potentials[0].path
+			potentials = potentials[1:]
+			k++
+		}
+	}
+
+
+	return distTopK, pathTopK, nil
+}
+
+func isShareRootPath(path, rootPath []int) bool {
+	if len(path) < len(rootPath) { return false }
+
+	return isSamePath(path[:len(rootPath)], rootPath)
+}
+
+func isSamePath(path1, path2 []int) bool {
+	if len(path1) != len(path2) {
+		return false
+	}
+
+	for i := 0; i < len(path1); i++ {
+		if path1[i] != path2[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
+func mergePath(path1, path2 []int) []int {
+	newPath := []int{}
+	newPath = append(newPath, path1...)
+	newPath = append(newPath, path2...)
+
+	return newPath
+}
+
+func (g *Graph) DisableEdge(from, to int) {
+	if _, has := g.egress[from][to]; has {
+		g.egress[from][to].enable = false
+	}
+}
+
+func (g *Graph) DisableVertex(v int) {
+	for _, edge := range g.egress[v] {
+		edge.enable = false
+	}
+}
+
+func (g *Graph) DisablePath(path []int) {
+	for _, vertex := range path {
+		g.DisableVertex(vertex)
+	}
+}
+
+func (g *Graph) Reset() {
+	for _, out := range g.egress {
+		for _, edge := range out {
+			edge.enable = true
+		}
+	}
+}
+
+func (g *Graph) ResetVertices() {
+	for _, vertex := range g.vertices {
+		vertex.enable = true
+	}
+}
+
 func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 	inf_count := 0
 	max_correction := 0.0
@@ -410,13 +579,27 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 	v := make(plotter.Values, len(g.vertices)-1)
 
 	i := 0
+	fmt.Println(len(g.vertices))
 	for id := range g.vertices {
 		if id != base {
+
+			// weights, _, err := g.Yen(id, base, 5)
+			// check(err)
+
+
 			dist, _, err := g.Dijkstra(id)
-			if id == 1128 {
-				fmt.Println("HERE")
-				fmt.Println(dist[base])
-			}
+			// check(err)
+
+			// if weights[0] != math.Inf(1) || dist[base] != math.Inf(1) {
+			// 	fmt.Println(weights)
+			// 	fmt.Println(dist[base])
+			// 	os.Exit(1)
+			// }
+
+			
+
+
+
 			check(err)
 			if dist[base] == math.Inf(1) {
 				inf_count++
@@ -434,23 +617,62 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 				// Update the race in the database
 				UpdateRace(db, id, dist[base])
 
-
 			}
-			// os.Exit(1)
 		}
 	}
 
-	p, err := plot.New()
-	check(err)
+	plots_wanted := false 
+	if plots_wanted {
+		p, err := plot.New()
+		check(err)
 
-	h, err := plotter.NewHist(v, int(math.Sqrt(float64(len(g.vertices)-1))))
-	check(err)
+		h, err := plotter.NewHist(v, int(math.Sqrt(float64(len(g.vertices)-1))))
+		check(err)
 
-	p.Add(h)
-	save_file := fmt.Sprintf("hist%v.png", base)
-	err = p.Save(8*vg.Inch, 8*vg.Inch, save_file)
-	check(err)
+		p.Add(h)
+		save_file := fmt.Sprintf("hist%v.png", base)
+		err = p.Save(8*vg.Inch, 8*vg.Inch, save_file)
+		check(err)
+	}
 
 	fmt.Printf("Valid Vertices: %0.4f %%\n", 100 * float64(inf_count)/float64(g.Length()))
 	fmt.Printf("Max Correction: %0.4f\n", max_correction)
+}
+
+func (g *Graph) Completeness(id int) int {
+	// Computes what percentage of the graph a node can reach
+	var count int
+
+	conns := g.egress[id]
+	
+	for conn, vertex := range conns {
+		if vertex.enable {
+			count++
+			vertex.enable = false
+			count += g.RecursiveConnections(conn)
+		}
+	}
+
+	fmt.Printf("Base ID connects to %0.4f %% of the graph\n", 100.0 * float64(count) / float64(len(g.vertices)))
+
+
+	// os.Exit(1)
+
+	g.ResetVertices()
+	return count
+}
+
+func (g *Graph) RecursiveConnections(id int) int {
+	var count int
+	conns := g.egress[id]
+
+	for id, vertex := range conns {
+		if vertex.enable {
+			count++
+			vertex.enable = false
+			count += g.RecursiveConnections(id)
+		}
+	}
+
+	return count
 }

@@ -123,7 +123,7 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 	// Once we have the center, we can build the interconnections out
 	g := NewGraph()
 
-	query := `select from_race_id, to_race_id, count(*), sum(difference) from edges group by from_race_id, to_race_id, gender HAVING count(*) > 7 and gender=$1;`
+	query := `select from_race_id, to_race_id, count(*), sum(difference) from edges group by from_race_id, to_race_id, gender HAVING count(*) > 6 and gender=$1;`
 	rows, err := db.Query(query, gender)
 	check(err)
 	defer rows.Close()
@@ -162,13 +162,9 @@ func FindCorrections(g *Graph, base_id int, db *sql.DB) {
 	// base_id := 1010
 	// fmt.Printf("Base is Vertex %v\n", base_id)
 
+	g.Completeness(base_id)
+
 	g.ShortestPaths(base_id, db)
-
-	dist, _, err := g.Dijkstra(base_id)
-	check(err)
-	fmt.Println(dist[1128])
-
-
 }
 
 func NumEdges(db *sql.DB) (ret int) {
