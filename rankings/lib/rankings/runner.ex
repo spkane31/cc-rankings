@@ -4,11 +4,14 @@ defmodule Rankings.Runner do
 
   alias Rankings
   alias Rankings.Result
+  alias Rankings.Repo
+  import Ecto.Query
 
   schema "runners" do
     field :first_name, :string
     field :last_name, :string
     field :year, :string
+    field :gender, :string
     belongs_to :team, Rankings.Team
     has_many :instances, Rankings.Result
   end
@@ -35,6 +38,11 @@ defmodule Rankings.Runner do
     Repo.all(Rankings.Runner)
   end
 
+  def last_n_runners(n) do
+    q = from(r in Rankings.Runner, limit: ^n)
+    Repo.all(q)
+  end
+
   def get_team_name(id) do
     r = get_runner(id)
     r = Repo.preload(r, [:team])
@@ -59,5 +67,25 @@ defmodule Rankings.Runner do
     else
       r.results
     end
+  end
+
+  alias Rankings.Runner
+
+  def list_runners(params) do
+    first = get_in(params, ["first"])
+    last = get_in(params, ["last"])
+    if first == nil and last == nil do
+      nil
+    else
+      Runner |> Runner.search(first, last) |> Repo.all() |> Repo.preload(:team)
+    end
+  end
+
+  def search(query, first, last) do
+    wildcard_first = "%#{first}"
+    wildcard_last = "%#{last}"
+
+    from r in query,
+    where: ilike(r.first_name, ^wildcard_first) and ilike(r.last_name, ^wildcard_last)
   end
 end

@@ -1,0 +1,80 @@
+<h2>Search Runners</h2>
+<%= form_for @conn, Routes.search_path(@conn, :index), [method: :get], fn f-> %>
+  <div>
+    <%= search_input f, :first, placeholder: "First Name" %>
+  </div>
+  <div>
+    <%= search_input f, :last, placeholder: "Last Name" %>
+  </div>
+  <%= submit "Search" %>
+<% end %>
+
+<h2>Search Teams</h2>
+<%= form_for @conn, Routes.search_path(@conn, :index), [method: :get], fn f-> %>
+  <div>
+    <%= search_input f, :team, placeholder: "Team" %>
+  </div>
+  <%= submit "Search" %>
+<% end %>
+
+<h2>Search Races</h2>
+<%= form_for @conn, Routes.search_path(@conn, :index), [method: :get], fn f-> %>
+  <div>
+    <%= search_input f, :race, placeholder: "Race" %>
+  </div>
+  <%= submit "Search" %>
+<% end %>
+
+<h1>Search Results</h1>
+
+
+<%= if @runners == true do %>
+<table>
+  <tr>
+    <td>Name</td>
+    <td>Team</td>
+    <td>Year</td>
+  </tr>
+  <%= if @query != nil do %>
+    <%= for q <- @query do %>
+      <tr>
+        <td><%= link get_name(q), to: Routes.runner_path(@conn, :show, q.id) %></td>
+        <td><%= q.team.name %></td>
+        <td><%= q.year %></td>
+      </tr>
+    <% end %>
+  <% end %>
+</table>
+<% end %>
+
+<%= if @teams == true do %>
+<table>
+  <tr>
+    <td>Name</td>
+  </tr>
+  <%= if @query != nil do %>
+    <%= for q <- @query do %>
+      <tr>
+        <td><%= link get_name(q), to: Routes.team_path(@conn, :show, q.id) %></td>
+      </tr>
+    <% end %>
+  <% end %>
+</table>
+<% end %>
+
+<%= if @races == true do %>
+<table>
+  <tr>
+    <td>Name</td>
+    <td>Course</td>
+  </tr>
+  <%= if @query != nil do %>
+    <%= for q <- @query do %>
+      <tr>
+        <td><%= link get_name(q), to: Routes.race_path(@conn, :show, q.id) %></td>
+        <td><%= q.course %></td>
+      </tr>
+    <% end %>
+  <% end %>
+</table>
+<% end %>

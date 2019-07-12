@@ -9,7 +9,9 @@ erl_crash.dump
 /config/*.secret.exs
 
 scraper/RaceResults/*
-scraper/RaceResults2/*
+scraper/Completed/*
 scraper/scraper
-analysis/analysis
+src/analysis/analysis
+analysis/plots/*
 venv/
+*.log

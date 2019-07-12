@@ -30,7 +30,11 @@ defmodule RankingsWeb.Router do
     get "/raceinstances/:id", RaceInstanceController, :show
     get "/results", ResultController, :index
     get "/results/:id", ResultController, :show
-  end
+
+		get "/search", SearchController, :index
+		post "/search", SearchController, :index
+
+end
 
   # Other scopes may use custom stacks.
   # scope "/api", RankingsWeb do

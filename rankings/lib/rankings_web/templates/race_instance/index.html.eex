@@ -1,9 +1,17 @@
 <h1>Recent Races</h1>
 
 <table>
+  <tr>
+    <td>Race</td>
+    <td>Date</td>
+    <td>Gender</td>
+    <td>Link</td>
+  </tr>
   <%= for instance <- @instances do %>
     <tr>
-      <td><b><%= get_date(instance) %></b> (<%= instance.id %>)</td>
+      <td><%= instance.race.name %></td>
+      <td><%= get_date(instance) %></td>
+      <td><%= instance.race.gender %></td>
       <td><%= link "View", to: Routes.race_instance_path(@conn, :show, instance.id) %></td>
     </tr>
   <% end %>

@@ -19,6 +19,6 @@
       <td><%= get_time(result) %></td>
       <td><%= link get_rating(result), to: Routes.result_path(@conn, :show, result.id) %></td>
     </tr>
-    <%= end %>
+    <% end %>
   <% end %>
 </table>

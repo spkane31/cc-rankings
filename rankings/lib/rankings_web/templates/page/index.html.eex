@@ -4,11 +4,11 @@
 </section>
 
 <section>
-  <h3>Teams: <%= @teams %>
-  <h3>Runners: <%= @runners %>
-  <h3>Races: <%= @races %>
-  <h3>Results: <%= @results %>
-  <h3>Race Instances: <%= @instances %>
+  <h3><%=link "Teams:", to: Routes.team_path(@conn, :index) %> <%= @teams %>
+  <h3><%=link "Runners:", to: Routes.runner_path(@conn, :index) %> <%= @runners %>
+  <h3><%=link "Races:", to: Routes.race_path(@conn, :index) %> <%= @races %>
+  <h3><%=link "Results:", to: Routes.result_path(@conn, :index) %> <%= @results %>
+  <h3><%=link "Race Instances:", to: Routes.race_instance_path(@conn, :index) %> <%= @instances %>
 </section>
 
 

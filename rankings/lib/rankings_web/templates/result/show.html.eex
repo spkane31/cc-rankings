@@ -1,13 +1,13 @@
 <h1>Result Details</h1>
 
-<p>Runner: </p>
+<p>Runner: <%= @result.runner.first_name <> " " <> @result.runner.last_name %></p>
 
 <p>Distance: <%= get_distance(@result) %></p>
 
 <p>Time: <%= get_time(@result) %></p>
 
-<p>Course: </p>
+<p>Course: <%= @result.race_instance.race.course %></p>
 
-<p>Date: </p>
+<p>Date: <%= @result.race_instance.date %></p>
 
-<p>Correction Factor: </p>
+<p>Correction Factor: <%= @result.race_instance.race.correction_avg %>,  <%= @result.race_instance.race.correction_graph %>  </p>
