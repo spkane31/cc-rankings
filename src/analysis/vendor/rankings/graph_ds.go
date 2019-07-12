@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"database/sql"
 
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/vg"
 	// "github.com/gonum/stat/distuv"
+	_ "github.com/lib/pq"
 )
 
 var _ = os.Exit
@@ -401,7 +403,7 @@ func (g *Graph) Dijkstra(source int) (dist map[int]float64, prev map[int]int, er
 	return
 }
 
-func (g *Graph) ShortestPaths(base int) {
+func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 	inf_count := 0
 	max_correction := 0.0
 
@@ -421,7 +423,7 @@ func (g *Graph) ShortestPaths(base int) {
 				i++
 
 				// Update the race in the database
-				// UpdateRace(id, dist[base])
+				UpdateRace(db, id, dist[base])
 
 
 			}

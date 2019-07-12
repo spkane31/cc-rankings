@@ -3,7 +3,7 @@ package rankings
 import (
 	"database/sql"
 	"fmt"
-	// "os"
+	"os"
 	"math"
 	// "math/rand"
 	"time"
@@ -13,6 +13,8 @@ import (
 
 	_ "github.com/lib/pq"
 )
+
+var _ = os.Exit
 
 type Race struct {
 	id int
@@ -192,7 +194,7 @@ func UpdateAverage(db *sql.DB, id int, average float64) {
 }
 
 func UpdateRace(db *sql.DB, id int, correction float64) {
-	update := `UPDATE races SET correction=$2, updated_at=$3 WHERE id=$1;`
+	update := `UPDATE races SET correction_graph=$2, updated_at=$3 WHERE id=$1;`
 	_, err := db.Exec(update, id, correction, time.Now())
 	check(err)
 }

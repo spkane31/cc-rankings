@@ -37,7 +37,7 @@ func main() {
 
 	var insert_db bool
 
-	insert_db = true
+	insert_db = false
 	if insert_db {
 
 		results_dir := "/home/sean/github/cc-rankings/scraper/RaceResults/"
@@ -80,7 +80,7 @@ func main() {
 					var m map[string]interface{}
 					m = data[f_name].(map[string]interface{})
 					added := m["added_to_db"].(bool)
-					if added {added = false}
+					// if added {added = false}
 					if !added {
 						file_name := fmt.Sprintf("%v", m["file"])
 						csvFile, err := os.Open(results_dir + dir.Name() + "/" + f.Name() + fmt.Sprintf("/%v", file_name))
@@ -173,11 +173,11 @@ func main() {
 
 	fmt.Println("\nMen's Graph")
 	male_g := rankings.BuildGraph(db, "MALE", 8000, 10000)
-	rankings.FindCorrections(male_g, 1010)
+	rankings.FindCorrections(male_g, 1010, db)
 
 	fmt.Println("\nWomen's Graph")
 	female_g := rankings.BuildGraph(db, "FEMALE", 5000, 6000)
-	rankings.FindCorrections(female_g, 1009)
+	rankings.FindCorrections(female_g, 1009, db)
 	os.Exit(1)
 
 	// ComputeAverages(db)

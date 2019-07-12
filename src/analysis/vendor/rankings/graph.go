@@ -10,7 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var _ = os.Exit
+var _, _ = os.Exit, math.Round
 
 func AddToGraph(db *sql.DB, all_results *[]int, result, runner_id int, gender string) {
 
@@ -110,12 +110,6 @@ func CheckEdgeCondition(db *sql.DB, result_a, result_b int) bool {
 
 func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 
-	// First query for how many rows there are
-	queryCount := `SELECT count(*) from edges WHERE ;`
-	var num_rows int
-	err := db.QueryRow(queryCount).Scan(&num_rows)
-	check(err)
-
 	queryCenter := `SELECT id, course, distance, average, correction_avg FROM races WHERE is_base=$1 AND gender=$2;`
 
 	var questionable_border float64 
@@ -123,44 +117,36 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 	if gender == "FEMALE" {questionable_border = 112.5}
 
 	var center Race
-	err = db.QueryRow(queryCenter, true, gender).Scan(&center.id, &center.course, &center.distance, &center.average, &center.correction_avg)
+	err := db.QueryRow(queryCenter, true, gender).Scan(&center.id, &center.course, &center.distance, &center.average, &center.correction_avg)
 	check(err)
 
 	// Once we have the center, we can build the interconnections out
 	g := NewGraph()
 
-	query := `SELECT id FROM races WHERE gender=$1 AND (distance=$2 OR distance=$3);`
-	rows, err := db.Query(query, gender, reg_dist, extra_dist)
+	query := `select from_race_id, to_race_id, count(*), sum(difference) from edges group by from_race_id, to_race_id, gender HAVING count(*) > 7 and gender=$1;`
+	rows, err := db.Query(query, gender)
 	check(err)
 	defer rows.Close()
 
-	edqeQuery := `SELECT to_race_id, total_time, count FROM edges WHERE from_race_id=$1 and count > 7;`
 	question_count := 0
 	for rows.Next() {
 		var from_race_id int
-		err = rows.Scan(&from_race_id)
+		var to_race_id int
+		var count int
+		var diff float64
+
+		err = rows.Scan(&from_race_id, &to_race_id, &count, &diff)
 		check(err)
 
-		edges, err := db.Query(edqeQuery, from_race_id)
-		check(err)
+		e := diff / float64(count)
 
-		for edges.Next() {
-			var to_race_id int
-			var total_time float64
-			var count float64
+		if math.Abs(e) > questionable_border {
+			question_count++
+		}
 
-			err = edges.Scan(&to_race_id, &total_time, &count)
+		if math.Abs(e) < 400 {
+			err = g.AddEdge(from_race_id, to_race_id, e)
 			check(err)
-
-			if math.Abs(total_time / count) > questionable_border {
-				question_count++
-			}
-
-			if math.Abs(total_time / count) < 400 {
-				err = g.AddEdge(from_race_id, to_race_id, total_time/count)
-				check(err)
-			}
-		
 		}
 
 	}
@@ -169,14 +155,14 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 	return g
 }
 
-func FindCorrections(g *Graph, base_id int) {
+func FindCorrections(g *Graph, base_id int, db *sql.DB) {
 	// v := g.GetIthVertex(0)
 	// fmt.Println(v)
 
 	// base_id := 1010
 	// fmt.Printf("Base is Vertex %v\n", base_id)
 
-	g.ShortestPaths(base_id)
+	g.ShortestPaths(base_id, db)
 
 }
 
@@ -186,3 +172,13 @@ func NumEdges(db *sql.DB) (ret int) {
 	check(err)
 	return
 }
+
+// func (g *Graph) UpdateRace(db *sql.DB, id int, correction float64) (err error) {
+// 	update := `UPDATE races SET correction_graph=$2 WHERE id=$1;`
+// 	_, err = db.Exec(update, id, correction)
+// 	check(err)
+
+// 	fmt.Println(id, correction)
+// 	os.Exit(1)
+// 	return
+// } 
