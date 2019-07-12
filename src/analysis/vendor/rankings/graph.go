@@ -164,6 +164,11 @@ func FindCorrections(g *Graph, base_id int, db *sql.DB) {
 
 	g.ShortestPaths(base_id, db)
 
+	dist, _, err := g.Dijkstra(base_id)
+	check(err)
+	fmt.Println(dist[1128])
+
+
 }
 
 func NumEdges(db *sql.DB) (ret int) {

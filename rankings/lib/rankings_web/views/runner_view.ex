@@ -14,22 +14,17 @@ defmodule RankingsWeb.RunnerView do
     team
   end
 
-  def get_rating(%Result{time_float: t, distance: d, race_instance: r}, %Runner{gender: g}) do
-    if g == "MENS" do
-      if d == 10000 do
-        rating = (1900 - (t / 1.268) - r.race.correction_avg) / (d / 1609)
+  def get_rating(%Result{scaled_time: t, distance: d, race_instance: r}, %Runner{gender: g}) do
+    if g == "MALE" do
+      if d == 10000 or d == 8000 do
+        rating = (1900 - t - r.race.correction_graph) / (8000.0 / 1609.0)
         Float.round(rating, 3)
-      else
-        (1900 - t - r.race.correction_avg) / (d / 1609)
       end
     else
-      if d == 5000 do
-        rating = (1300 - t - r.race.correction_avg) / (d / 1609)
-      else
-        rating = (1300 - (t/1.213) - r.race.correction_avg) / (d / 1609)
+      if d == 5000 or d == 6000 do
+        rating = (1300 - t - r.race.correction_graph) / (5000 / 1609)
         Float.round(rating, 3)
       end
-
     end
   end
 

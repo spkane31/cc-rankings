@@ -413,6 +413,10 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 	for id := range g.vertices {
 		if id != base {
 			dist, _, err := g.Dijkstra(id)
+			if id == 1128 {
+				fmt.Println("HERE")
+				fmt.Println(dist[base])
+			}
 			check(err)
 			if dist[base] == math.Inf(1) {
 				inf_count++
@@ -421,6 +425,11 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 				
 				v[i] = dist[base]
 				i++
+
+				if id == 1128 {
+					fmt.Println(dist[base])
+					os.Exit(1)
+				}
 
 				// Update the race in the database
 				UpdateRace(db, id, dist[base])

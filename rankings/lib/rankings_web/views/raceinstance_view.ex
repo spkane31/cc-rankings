@@ -5,6 +5,8 @@ defmodule RankingsWeb.RaceInstanceView do
   alias Rankings.Runner
   alias Rankings.Team
 
+  import Float
+
   def get_date(%RaceInstance{date: date}) do
     date
   end
@@ -32,6 +34,20 @@ defmodule RankingsWeb.RaceInstanceView do
   alias Rankings.Result
   def get_runner_id(%Result{runner_id: id}) do
     id
+  end
+
+  def get_rating(%Result{scaled_time: t, gender: g, race_instance: r, distance: d}) do
+    if g == "MALE" do
+      if d == 10000 or d == 8000 do
+        rating = (1900 - t - r.race.correction_graph) / (8000.0 / 1609.0)
+        Float.round(rating, 3)
+      end
+    else
+      if d == 5000 or d == 6000 do
+        rating = (1300 - t - r.race.correction_graph) / (5000.0 / 1609.0)
+        Float.round(rating, 3)
+      end
+    end
   end
 
 end
