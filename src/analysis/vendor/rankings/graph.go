@@ -123,7 +123,7 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 	// Once we have the center, we can build the interconnections out
 	g := NewGraph()
 
-	query := `select from_race_id, to_race_id, count(*), sum(difference) from edges group by from_race_id, to_race_id, gender HAVING count(*) > 7 and gender=$1;`
+	query := `select from_race_id, to_race_id, count(*), sum(difference) from edges group by from_race_id, to_race_id, gender HAVING count(*) > 6 and gender=$1;`
 	rows, err := db.Query(query, gender)
 	check(err)
 	defer rows.Close()
@@ -147,6 +147,8 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 		if math.Abs(e) < 400 {
 			err = g.AddEdge(from_race_id, to_race_id, e)
 			check(err)
+			err = g.AddEdge(to_race_id, from_race_id, e)
+			check(err)
 		}
 
 	}
@@ -156,11 +158,7 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 }
 
 func FindCorrections(g *Graph, base_id int, db *sql.DB) {
-	// v := g.GetIthVertex(0)
-	// fmt.Println(v)
-
-	// base_id := 1010
-	// fmt.Printf("Base is Vertex %v\n", base_id)
+	g.Completeness(base_id)
 
 	g.ShortestPaths(base_id, db)
 
@@ -172,13 +170,3 @@ func NumEdges(db *sql.DB) (ret int) {
 	check(err)
 	return
 }
-
-// func (g *Graph) UpdateRace(db *sql.DB, id int, correction float64) (err error) {
-// 	update := `UPDATE races SET correction_graph=$2 WHERE id=$1;`
-// 	_, err = db.Exec(update, id, correction)
-// 	check(err)
-
-// 	fmt.Println(id, correction)
-// 	os.Exit(1)
-// 	return
-// } 
