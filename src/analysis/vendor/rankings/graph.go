@@ -147,7 +147,7 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 		if math.Abs(e) < 400 {
 			err = g.AddEdge(from_race_id, to_race_id, e)
 			check(err)
-			err = g.AddEdge(to_race_id, from_race_id, e)
+			err = g.AddEdge(to_race_id, from_race_id, -e)
 			check(err)
 		}
 
