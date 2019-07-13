@@ -147,6 +147,8 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 		if math.Abs(e) < 400 {
 			err = g.AddEdge(from_race_id, to_race_id, e)
 			check(err)
+			err = g.AddEdge(to_race_id, from_race_id, -e)
+			check(err)
 		}
 
 	}
@@ -156,11 +158,6 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 }
 
 func FindCorrections(g *Graph, base_id int, db *sql.DB) {
-	// v := g.GetIthVertex(0)
-	// fmt.Println(v)
-
-	// base_id := 1010
-	// fmt.Printf("Base is Vertex %v\n", base_id)
 
 	g.Completeness(base_id)
 
@@ -173,13 +170,3 @@ func NumEdges(db *sql.DB) (ret int) {
 	check(err)
 	return
 }
-
-// func (g *Graph) UpdateRace(db *sql.DB, id int, correction float64) (err error) {
-// 	update := `UPDATE races SET correction_graph=$2 WHERE id=$1;`
-// 	_, err = db.Exec(update, id, correction)
-// 	check(err)
-
-// 	fmt.Println(id, correction)
-// 	os.Exit(1)
-// 	return
-// } 
