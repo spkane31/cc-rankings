@@ -40,6 +40,7 @@ func main() {
 	insert_db = false
 	if insert_db {
 
+		fmt.Printf("%v: Inserting new records into database...\n", time.Now().Format("01-02-2006, 15:04:05"))
 		results_dir := "/home/sean/github/cc-rankings/scraper/RaceResults/"
 		// completed_dir := "/home/sean/github/cc-rankings/scraper/Completed/"
 		race_sum := "raceSummary.json"
@@ -168,19 +169,32 @@ func main() {
 			fmt.Printf("Finished %v\n", dir.Name())
 
 		}
+		fmt.Printf("%v: Finished loading new records into database...\n", time.Now().Format("01-02-2006, 15:04:05"))
 
 	}
 
+	fmt.Printf("%v: Resetting correction_graph...\n", time.Now().Format("01-02-2006, 15:04:05"))
+
 	rankings.ResetCorrections(db)
 
-	fmt.Println("\nMen's Graph")
+	fmt.Printf("%v: Building mens corrections graph...\n", time.Now().Format("01-02-2006, 15:04:05"))
+
+	fmt.Println("Men's Graph")
 	male_g := rankings.BuildGraph(db, "MALE", 8000, 10000)
 	rankings.FindCorrections(male_g, 1010, db)
 
-	fmt.Println("\nWomen's Graph")
+	fmt.Printf("%v: Building womens corrections graph...\n", time.Now().Format("01-02-2006, 15:04:05"))
+
+	fmt.Println("Women's Graph")
 	female_g := rankings.BuildGraph(db, "FEMALE", 5000, 6000)
 	rankings.FindCorrections(female_g, 1009, db)
-	os.Exit(1)
+
+	fmt.Printf("%v: Resetting ratings...\n", time.Now().Format("01-02-2006, 15:04:05"))
+	rankings.ResetRatings(db)
+
+	fmt.Printf("%v: Updating ratings...\n", time.Now().Format("01-02-2006, 15:04:05"))
+	
+	rankings.UpdateRatings(db)
 
 	// ComputeAverages(db)
 	// UpdateCorrectionAvg(db)

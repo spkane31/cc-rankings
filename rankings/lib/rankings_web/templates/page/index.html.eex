@@ -11,6 +11,39 @@
   <h3><%=link "Race Instances:", to: Routes.race_instance_path(@conn, :index) %> <%= @instances %>
 </section>
 
+<div>
+  <table class="main-page-top-25" >
+    <tr>
+      <td>Name</td>
+      <td>Rating</td>
+      <td>Race</td>
+    </tr>
+    <%= for result <- @mens do %>
+      <tr>
+        <td><%= link result.runner.first_name <> " " <> result.runner.last_name, to: Routes.runner_path(@conn, :show, result.runner.id) %></td>
+        <td><%= Float.round(result.rating, 2) %></td>
+        <td><%= link result.race_instance.race.name, to: Routes.race_path(@conn, :show, result.race_instance.race.id)%></td>
+      </tr>
+    <% end %>
+  </table>
+  <table class="main-page-top-25" >
+    <tr>
+      <td>Name</td>
+      <td>Rating</td>
+      <td>Race</td>
+    </tr>
+    <%= for result <- @womens do %>
+      <tr>
+        <td><%= link result.runner.first_name <> " " <> result.runner.last_name, to: Routes.runner_path(@conn, :show, result.runner.id) %></td>
+        <td><%= Float.round(result.rating, 2) %></td>
+        <td><%= link result.race_instance.race.name, to: Routes.race_path(@conn, :show, result.race_instance.race.id)%></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
+
+<div></div>
+
 
 <%# <section class="row">
   <article class="column">

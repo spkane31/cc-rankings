@@ -15,6 +15,7 @@
     <td>Time</td>
     <td>Rating</td>
     <td>Correction</td>
+    <td>Place</td>
   </tr>
   <%= for result <- @results do %>
     <tr>
@@ -29,6 +30,7 @@
       <td><%= result.time %></td>
       <td><%= get_rating(result, @runner) %></td>
       <td><%= Float.round(result.race_instance.race.correction_graph, 3) %> seconds</td>
+      <td><%= result.place %>
     </tr>
   <% end %>
 <table>

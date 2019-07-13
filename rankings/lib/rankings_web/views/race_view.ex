@@ -11,4 +11,14 @@ defmodule RankingsWeb.RaceView do
     min = Float.round(time / 60, 0)
     min
   end
+
+  def get_winner(id) do
+    r = Race.get_winner(id)
+    r.time
+  end
+
+  def get_average_time(id) do
+    r = RaceInstance.get_average_time(id)
+    # r.total / r.count
+  end
 end

@@ -1,9 +1,9 @@
 <h1>Race Details</h1>
 <h2><b><%= get_name(@race) %> </b></h2>
 <h3>Course: <%= @race.course %></h3>
-<h3>Distance: <%= @race.distance %>
-<h3>Gender: <%= @race.gender %>
-<h3>Correction Factor: <%= @race.correction_avg %>
+<h3>Distance: <%= @race.distance %> meters</h3>
+<h3>Gender: <%= @race.gender %></h3>
+<h3>Correction Factor: <%= Float.round(@race.correction_graph, 2) %> seconds </h3>
 
 <h2>Race History</h2>
 <table>
@@ -18,8 +18,8 @@
   <tr>
     <td><%= link instance.date, to: Routes.race_instance_path(@conn, :show, instance.id) %></td>
     <td><%= length(instance.instance_results) %></td>
-    <td></td>
-    <td></td>
+    <td><%= get_winner(instance.id) %></td>
+    <td><%= get_average_time(instance.id) %>
   </tr>
 
   <% end %>

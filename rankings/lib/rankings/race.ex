@@ -65,4 +65,12 @@ defmodule Rankings.Race do
     end
     count
   end
+
+  def get_winner(id) do
+    r = from(r in Rankings.Result,
+      where: r.race_instance_id == ^id and
+        r.place == 1,
+      limit: 1)
+    Repo.one(r)
+  end
 end

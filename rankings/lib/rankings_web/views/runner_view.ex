@@ -22,7 +22,7 @@ defmodule RankingsWeb.RunnerView do
       end
     else
       if d == 5000 or d == 6000 do
-        rating = (1300 - t - r.race.correction_graph) / (5000 / 1609)
+        rating = (1350 - t - r.race.correction_graph) / (5000 / 1609)
         Float.round(rating, 3)
       end
     end

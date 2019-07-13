@@ -1,8 +1,9 @@
 defmodule Rankings.RaceInstance do
   use Ecto.Schema
   import Ecto.Query
+  import Integer
 
-  alias Rankings.Result
+  alias Rankings.{Result, Repo}
   alias Rankings
 
   schema "race_instances" do
@@ -31,9 +32,31 @@ defmodule Rankings.RaceInstance do
   def list_race_instances do
     Repo.all(Rankings.RaceInstance)
   end
+
   def get_results(id) do
-    query = from(r in Result, where: r.race_instance_id == ^id, preload: [:runner])
+    query = from(r in Result, where: r.race_instance_id == ^id, preload: [:runner], order_by: [desc: :rating])
     Repo.all(query)
+  end
+
+  def time_to_string(time) do
+    minutes = round(time / 60)
+    m = Integer.to_string(minutes)
+    seconds = round(time - 60 * minutes)
+    s = Integer.to_string(round(time - minutes * 60))
+    if seconds < 10 do
+      m <> ":0" <> s
+    else
+      m <> ":" <> s
+    end
+
+  end
+
+  def get_average_time(id) do
+    r = from(r in Result, where: r.race_instance_id == ^id)
+    results = Repo.all(r)
+    total = Enum.map(results, fn r -> r.time_float end) |> Enum.sum()
+    avg = total / length(results)
+    time_to_string(avg)
   end
 
 end

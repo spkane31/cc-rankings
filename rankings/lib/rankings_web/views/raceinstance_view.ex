@@ -6,6 +6,7 @@ defmodule RankingsWeb.RaceInstanceView do
   alias Rankings.Team
 
   import Float
+  import Ecto.Query
 
   def get_date(%RaceInstance{date: date}) do
     date
@@ -48,6 +49,13 @@ defmodule RankingsWeb.RaceInstanceView do
         Float.round(rating, 3)
       end
     end
+  end
+
+  def get_average_time(%RaceInstance{id: id, instance_results: results}) do #instance) do
+    r = from(r in Result, where: r.race_instance_id == ^id)
+    # r = Repo.all(r)
+    total = Enum.map(results, fn r -> r.time_float end) |> Enum.sum()
+    total / length(results)
   end
 
 end

@@ -11,6 +11,7 @@ defmodule Rankings.Result do
     field :time_float, :float
     field :date, :date
     field :gender, :string
+    field :place, :integer
     belongs_to :runner, Rankings.Runner
     belongs_to :race_instance, Rankings.RaceInstance
   end
@@ -32,5 +33,15 @@ defmodule Rankings.Result do
   def last_n_results(n) do
     q = from(r in Rankings.Result, limit: ^n, order_by: [asc: :scaled_time])
     Repo.all(q)
+  end
+
+  def get_top_25_men do
+    mens = from(r in Rankings.Result, where: r.gender == "MALE", limit: 25, order_by: [desc: :rating])
+    mens = Repo.all(mens) |> Repo.preload([:runner, {:race_instance, :race}])
+  end
+
+  def get_top_25_women do
+    womens = from(r in Rankings.Result, where: r.gender == "FEMALE", limit: 25, order_by: [desc: :rating])
+    womens = Repo.all(womens) |> Repo.preload([:runner, {:race_instance, :race}])
   end
 end

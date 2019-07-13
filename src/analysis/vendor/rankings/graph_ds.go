@@ -416,26 +416,38 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 	for id := range g.vertices {
 		if id != base {
 
-			dist, _, err := g.Dijkstra(id)
-			check(err)
-			if dist[base] == math.Inf(1) {
-				inf_count++
-			} else {
-				// fmt.Println(dist[base])
-				if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
+			// Check if connects to base race first:
+			if edge, has := g.egress[id][base]; has {
+				if math.Abs(edge.weight) > math.Abs(max_correction) {max_correction = edge.weight}
 
-
-				// Update the race in the database
-				if math.Abs(dist[base]) < 400 {				
-					v[i] = dist[base]
+				if math.Abs(edge.weight) < 400 {
+					v[i] = edge.weight
 					i++
-					UpdateRace(db, id, dist[base])
+					UpdateRace(db, id, edge.weight)
 				}
+			} else {
 
-				// fmt.Println(dist)
-				// fmt.Println(dist[base])
-				// os.Exit(1)
+				dist, _, err := g.Dijkstra(id)
+				check(err)
+				if dist[base] == math.Inf(1) {
+					inf_count++
+				} else {
+					// fmt.Println(dist[base])
+					if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
 
+
+					// Update the race in the database
+					if math.Abs(dist[base]) < 400 {				
+						v[i] = dist[base]
+						i++
+						UpdateRace(db, id, dist[base])
+					}
+
+					// fmt.Println(dist)
+					// fmt.Println(dist[base])
+					// os.Exit(1)
+
+				}
 			}
 		}
 	}
