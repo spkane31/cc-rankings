@@ -39,7 +39,7 @@ defmodule Rankings.Runner do
   end
 
   def last_n_runners(n) do
-    q = from(r in Rankings.Runner, limit: ^n)
+    q = from(r in Rankings.Runner, limit: ^n, order_by: :speed_rating)
     Repo.all(q)
   end
 
@@ -55,7 +55,7 @@ defmodule Rankings.Runner do
 
   import Ecto.Query
   def get_athlete_results(id) do
-    Repo.all(from r in Result, where: r.runner_id == ^id)
+    Repo.all(from r in Result, where: r.runner_id == ^id, order_by: [desc: :date])
     |> Repo.preload([ {:race_instance, :race}])
   end
 

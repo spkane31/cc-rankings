@@ -158,10 +158,10 @@ func BuildGraph(db *sql.DB, gender string, reg_dist, extra_dist int) *Graph {
 }
 
 func FindCorrections(g *Graph, base_id int, db *sql.DB) {
+
 	g.Completeness(base_id)
 
 	g.ShortestPaths(base_id, db)
-
 }
 
 func NumEdges(db *sql.DB) (ret int) {

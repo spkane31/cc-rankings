@@ -9,6 +9,8 @@ defmodule Rankings.Result do
     field :time, :string
     field :scaled_time, :float
     field :time_float, :float
+    field :date, :date
+    field :gender, :string
     belongs_to :runner, Rankings.Runner
     belongs_to :race_instance, Rankings.RaceInstance
   end
@@ -28,7 +30,7 @@ defmodule Rankings.Result do
   end
 
   def last_n_results(n) do
-    q = from(r in Rankings.Result, limit: ^n, order_by: :time_float)
+    q = from(r in Rankings.Result, limit: ^n, order_by: [asc: :scaled_time])
     Repo.all(q)
   end
 end

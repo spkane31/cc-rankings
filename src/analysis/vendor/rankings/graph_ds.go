@@ -48,11 +48,11 @@ func (v *vertex) Edges() (edges []edge) {
 	edges = make([]edge, len(v.outTo) + len(v.inFrom))
 	i := 0
 	for to, weight := range v.outTo {
-		edges[i] = edge{v.id, to, weight}
+		edges[i] = edge{v.id, to, weight, true}
 		i++
 	}
 	for from, weight := range v.inFrom {
-		edges[i] = edge{from, v.id, weight}
+		edges[i] = edge{from, v.id, weight, true}
 		i++
 	}
 
@@ -70,7 +70,7 @@ type edge struct {
 	from 		int
 	to 			int
 	weight 	float64
-	// enable bool
+	enable bool
 	// changed bool
 }
 
@@ -170,8 +170,10 @@ func (g *Graph) AddEdge(from, to int, weight float64) error {
 		return fmt.Errorf("Edge from %v to %v is duplicate", from, to)
 	}
 
-	g.egress[from][to] = &edge{from, to, weight}
+	g.egress[from][to] = &edge{from, to, weight, true}
+	// g.egress[to][from] = &edge{to, from, -weight, true}
 	g.ingress[to][from] = g.egress[from][to]
+	// g.ingress[from][to] = g.egress[to][from]
 
 	return nil
 }
@@ -270,7 +272,7 @@ func (g *Graph) AddVertexWithEdges(v Vertex) error {
 			g.ingress[to] = make(map[int]*edge)
 		}
 
-		g.egress[from][to] = &edge{from, to, weight}
+		g.egress[from][to] = &edge{from, to, weight, true}
 		g.ingress[to][from] = g.egress[from][to]
 	}
 	
@@ -410,13 +412,16 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 	v := make(plotter.Values, len(g.vertices)-1)
 
 	i := 0
+	
 	for id := range g.vertices {
 		if id != base {
+
 			dist, _, err := g.Dijkstra(id)
 			check(err)
 			if dist[base] == math.Inf(1) {
 				inf_count++
 			} else {
+				// fmt.Println(dist[base])
 				if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
 
 
@@ -427,21 +432,27 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 					UpdateRace(db, id, dist[base])
 				}
 
+				// fmt.Println(dist)
+				// fmt.Println(dist[base])
+				// os.Exit(1)
 
 			}
 		}
 	}
 
-	p, err := plot.New()
-	check(err)
+	plots_wanted := false 
+	if plots_wanted {
+		p, err := plot.New()
+		check(err)
 
-	h, err := plotter.NewHist(v, int(math.Sqrt(float64(len(g.vertices)-1))))
-	check(err)
+		h, err := plotter.NewHist(v, int(math.Sqrt(float64(len(g.vertices)-1))))
+		check(err)
 
-	p.Add(h)
-	save_file := fmt.Sprintf("hist%v.png", base)
-	err = p.Save(8*vg.Inch, 8*vg.Inch, save_file)
-	check(err)
+		p.Add(h)
+		save_file := fmt.Sprintf("hist%v.png", base)
+		err = p.Save(8*vg.Inch, 8*vg.Inch, save_file)
+		check(err)
+	}
 
 	fmt.Printf("Valid Vertices: %0.4f %%\n", 100 * (1.0 - float64(inf_count)/float64(g.Length())))
 	fmt.Printf("Max Correction: %0.4f\n", max_correction)
@@ -472,6 +483,7 @@ func (g *Graph) Completeness(id int) int {
 
 func (g *Graph) RecursiveConnections(id int, count *map[int]bool) {
 	conns := g.egress[id]
+
 
 	for id, _ := range conns {
 		if _, has := (*count)[id]; !has {

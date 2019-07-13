@@ -187,6 +187,22 @@ func GetRaceByID(db *sql.DB, id int) *Race {
 	return &ret
 }
 
+func ResetCorrections(db *sql.DB) {
+	query := `SELECT id FROM races;`
+	rows, err := db.Query(query)
+	check(err)
+	defer rows.Close()
+
+	update := `UPDATE races SET correction_graph=0 WHERE id=$1;`
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+
+		_, err := db.Exec(update, id)
+		check(err)
+	}
+}
+
 func UpdateAverage(db *sql.DB, id int, average float64) {
 	update := `UPDATE races SET average=$2, updated_at=$3 WHERE id=$1;`
 	_, err := db.Exec(update, id, average, time.Now())

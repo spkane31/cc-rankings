@@ -25,10 +25,10 @@
       <td><%= stringify(result.race_instance.date) %></td>
       <td><%= link result.race_instance.race.name, to: Routes.race_path(@conn, :show, result.race_instance.race.id) %></td>
       <% end %>
-      <td><%= result.distance %>
-      <td><%= result.time %>
-      <td><%= get_rating(result, @runner) %>
-      <td><%= Float.round(result.race_instance.race.correction_avg, 3) %>
+      <td><%= result.distance %></td>
+      <td><%= result.time %></td>
+      <td><%= get_rating(result, @runner) %></td>
+      <td><%= Float.round(result.race_instance.race.correction_graph, 3) %> seconds</td>
     </tr>
   <% end %>
 <table>
