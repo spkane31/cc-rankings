@@ -8,7 +8,7 @@ footer {
   bottom: 0;
   left: 0;
   padding: 1rem;
-  /* background-color: #f4f7fc; */
+  background-color: #f4f7fc;
   text-align: center;
   height: 100px;
 }
@@ -44,12 +44,20 @@ footer {
 
 .main-page-top-25 {
   margin-bottom: 2.5rem;
-  border-spacing: 0;
   width: 45%;
   float: left;
   text-align: left;
   vertical-align: center;
-  border-spacing: 5px;
+  /* border-spacing: 5px; */
+}
+
+.gap-table {
+  margin-bottom: 2.5rem;
+  width: 10%;
+  float: left;
+  text-align: left;
+  vertical-align: center;
+
 }
 
 th, td {

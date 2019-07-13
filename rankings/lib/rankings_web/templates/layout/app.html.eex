@@ -26,9 +26,6 @@
     </main>
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
-
-
-
   <footer>
     <div>Created and Maintained by Sean Kane</div>
     <div>
