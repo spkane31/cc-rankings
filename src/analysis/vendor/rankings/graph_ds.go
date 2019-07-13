@@ -449,7 +449,7 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 		check(err)
 
 		p.Add(h)
-		save_file := fmt.Sprintf("hist%v.png", base)
+		save_file := fmt.Sprintf("plots/hist%v.png", base)
 		err = p.Save(8*vg.Inch, 8*vg.Inch, save_file)
 		check(err)
 	}
@@ -493,11 +493,5 @@ func (g *Graph) RecursiveConnections(id int, count *map[int]bool) {
 			//count += 
 			g.RecursiveConnections(id, count)
 		}
-	}
-}
-
-func (g *Graph) ResetVertices() {
-	for _, vertex := range g.vertices {
-		vertex.enable = true
 	}
 }
