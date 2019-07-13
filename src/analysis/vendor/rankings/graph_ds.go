@@ -392,7 +392,7 @@ func (g *Graph) Dijkstra(source int) (dist map[int]float64, prev map[int]int, er
 	for heap.Num() != 0 {
 		min, _ := heap.ExtractMin()
 		for to, edge := range g.egress[min.(int)] {
-			if dist[min.(int)] + edge.weight < dist[to] {
+			if math.Abs(dist[min.(int)] + edge.weight) < math.Abs(dist[to]) {
 				heap.DecreaseKey(to, dist[min.(int)]+edge.weight)
 				prev[to] = min.(int)
 				dist[to] = dist[min.(int)] + edge.weight
@@ -418,16 +418,17 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 				inf_count++
 			} else {
 				if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
-				
-				v[i] = dist[base]
-				i++
+
 
 				// Update the race in the database
-				UpdateRace(db, id, dist[base])
+				if math.Abs(dist[base]) < 400 {				
+					v[i] = dist[base]
+					i++
+					UpdateRace(db, id, dist[base])
+				}
 
 
 			}
-			// os.Exit(1)
 		}
 	}
 
@@ -442,6 +443,49 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 	err = p.Save(8*vg.Inch, 8*vg.Inch, save_file)
 	check(err)
 
-	fmt.Printf("Valid Vertices: %0.4f %%\n", 100 * float64(inf_count)/float64(g.Length()))
+	fmt.Printf("Valid Vertices: %0.4f %%\n", 100 * (1.0 - float64(inf_count)/float64(g.Length())))
 	fmt.Printf("Max Correction: %0.4f\n", max_correction)
+}
+
+func (g *Graph) Completeness(id int) int {
+	// Computes what percentage of the graph a node can reach
+	// var count map[int]bool
+	count := make(map[int]bool)
+
+	conns := g.egress[id]
+
+	for id, _ := range conns {
+		if _, has := count[id]; !has {
+			// count++
+			count[id] = true
+			// vertex.enable = false
+			//count += 
+			g.RecursiveConnections(id, &count)
+		}
+	}
+	fmt.Printf("Based ID connects to %v nodes.\n", len(count))
+	fmt.Printf("Base ID connects to %0.4f %% of the graph\n", 100.0 * float64(len(count)) / float64(len(g.vertices)))
+
+	g.ResetVertices()
+	return len(count)
+}
+
+func (g *Graph) RecursiveConnections(id int, count *map[int]bool) {
+	conns := g.egress[id]
+
+	for id, _ := range conns {
+		if _, has := (*count)[id]; !has {
+			// count++
+			(*count)[id] = true
+			// vertex.enable = false
+			//count += 
+			g.RecursiveConnections(id, count)
+		}
+	}
+}
+
+func (g *Graph) ResetVertices() {
+	for _, vertex := range g.vertices {
+		vertex.enable = true
+	}
 }

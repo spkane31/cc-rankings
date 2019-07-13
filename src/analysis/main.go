@@ -171,6 +171,8 @@ func main() {
 
 	}
 
+	rankings.ResetCorrections(db)
+
 	fmt.Println("\nMen's Graph")
 	male_g := rankings.BuildGraph(db, "MALE", 8000, 10000)
 	rankings.FindCorrections(male_g, 1010, db)
