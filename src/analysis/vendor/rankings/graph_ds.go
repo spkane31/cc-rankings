@@ -394,10 +394,7 @@ func (g *Graph) Dijkstra(source int) (dist map[int]float64, prev map[int]int, er
 	for heap.Num() != 0 {
 		min, _ := heap.ExtractMin()
 		for to, edge := range g.egress[min.(int)] {
-			if !edge.enable {
-				continue
-			}
-			if math.Abs(dist[min.(int)] + edge.weight) < dist[to] {
+			if math.Abs(dist[min.(int)] + edge.weight) < math.Abs(dist[to]) {
 				heap.DecreaseKey(to, dist[min.(int)]+edge.weight)
 				prev[to] = min.(int)
 				dist[to] = dist[min.(int)] + edge.weight
@@ -426,12 +423,14 @@ func (g *Graph) ShortestPaths(base int, db *sql.DB) {
 			} else {
 				// fmt.Println(dist[base])
 				if math.Abs(dist[base]) > math.Abs(max_correction) {max_correction = dist[base]}
-				
-				v[i] = dist[base]
-				i++
+
 
 				// Update the race in the database
-				UpdateRace(db, id, dist[base])
+				if math.Abs(dist[base]) < 400 {				
+					v[i] = dist[base]
+					i++
+					UpdateRace(db, id, dist[base])
+				}
 
 				// fmt.Println(dist)
 				// fmt.Println(dist[base])
@@ -465,14 +464,14 @@ func (g *Graph) Completeness(id int) int {
 	count := make(map[int]bool)
 
 	conns := g.egress[id]
-	
-	for conn, vertex := range conns {
-		if vertex.enable {
+
+	for id, _ := range conns {
+		if _, has := count[id]; !has {
 			// count++
-			count[conn] = true
-			vertex.enable = false
+			count[id] = true
+			// vertex.enable = false
 			//count += 
-			g.RecursiveConnections(conn, &count)
+			g.RecursiveConnections(id, &count)
 		}
 	}
 	fmt.Printf("Based ID connects to %v nodes.\n", len(count))
@@ -485,13 +484,20 @@ func (g *Graph) Completeness(id int) int {
 func (g *Graph) RecursiveConnections(id int, count *map[int]bool) {
 	conns := g.egress[id]
 
-	for id, vertex := range conns {
-		if vertex.enable {
+
+	for id, _ := range conns {
+		if _, has := (*count)[id]; !has {
 			// count++
 			(*count)[id] = true
-			vertex.enable = false
-			// count += 
+			// vertex.enable = false
+			//count += 
 			g.RecursiveConnections(id, count)
 		}
+	}
+}
+
+func (g *Graph) ResetVertices() {
+	for _, vertex := range g.vertices {
+		vertex.enable = true
 	}
 }

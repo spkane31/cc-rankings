@@ -215,6 +215,22 @@ func UpdateRace(db *sql.DB, id int, correction float64) {
 	check(err)
 }
 
+func ResetCorrections(db *sql.DB) {
+	query := `SELECT id FROM races;`
+	rows, err := db.Query(query)
+	check(err)
+	defer rows.Close()
+
+	update := `UPDATE races SET correction_graph=0 WHERE id=$1;`
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+
+		_, err := db.Exec(update, id)
+		check(err)
+	}
+}
+
 func UpdateStdDev(db *sql.DB, id int, std_dev float64) {
 	update := `UPDATE races SET std_dev=$2, updated_at=$3 WHERE id=$1;`
 	_, err := db.Exec(update, id, std_dev, time.Now())
