@@ -1,4 +1,4 @@
-defmodule Rankings.SNifTest do
+defmodule Rankings.NifTest do
   use Rustler, otp_app: :rankings, crate: "niftest"
 
   # When your NIF is loaded, it will override this function.
