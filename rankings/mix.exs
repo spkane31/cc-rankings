@@ -7,7 +7,8 @@ defmodule Rankings.MixProject do
       version: "0.1.0",
       elixir: "~> 1.5",
       elixirc_paths: elixirc_paths(Mix.env()),
-      compilers: [:phoenix, :gettext] ++ Mix.compilers(),
+      compilers: [:phoenix, :gettext, :rustler] ++ Mix.compilers(),
+      rustler_crates: rustler_crates(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps()
@@ -42,7 +43,8 @@ defmodule Rankings.MixProject do
       {:phoenix_live_reload, "~> 1.2", only: :dev},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:rustler, "~> 0.20.0"}
     ]
   end
 
@@ -57,6 +59,12 @@ defmodule Rankings.MixProject do
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate", "test"]
+    ]
+  end
+
+  defp rustler_crates do
+    [
+      niftest: [path: "native/niftest", mode: if(Mix.env() == :prod, do: :release, else: :debug)]
     ]
   end
 end
