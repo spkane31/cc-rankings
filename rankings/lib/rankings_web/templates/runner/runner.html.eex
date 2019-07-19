@@ -1,1 +1,1 @@
-<strong><%= get_name(@runner) %></strong>
+<%= get_name(@runner) %>

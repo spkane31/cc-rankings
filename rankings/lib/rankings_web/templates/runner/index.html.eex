@@ -5,6 +5,7 @@
     <td>Runner</td>
     <td>Year</td>
     <td>Team</td>
+    <td>Rating</td>
     <td>Link</td>
   </tr>
 
@@ -13,6 +14,7 @@
       <td><%= render "runner.html", runner: runner %>
       <td><%= runner.year %></td>
       <td><%= runner.team.name %></td>
+      <td><%= runner.speed_rating %></td>
       <td><%= link "View", to: Routes.runner_path(@conn, :show, runner.id) %></td>
     </tr>
   <% end %>

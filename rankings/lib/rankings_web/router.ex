@@ -7,6 +7,7 @@ defmodule RankingsWeb.Router do
     plug :fetch_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug RankingsWeb.Auth
   end
 
   pipeline :api do
@@ -18,18 +19,13 @@ defmodule RankingsWeb.Router do
 
     get "/", PageController, :index
 
-    get "/users", UserController, :index
-    get "/users/:id", UserController, :show
-    get "/runners", RunnerController, :index
-    get "/runners/:id", RunnerController, :show
-    get "/teams", TeamController, :index
-    get "/teams/:id", TeamController, :show
-    get "/races", RaceController, :index
-    get "/races/:id", RaceController, :show
-    get "/raceinstances", RaceInstanceController, :index
-    get "/raceinstances/:id", RaceInstanceController, :show
-    get "/results", ResultController, :index
-    get "/results/:id", ResultController, :show
+    resources "/users", UserController, only: [:index, :show, :new, :create]
+    resources "/sessions", SessionController, only: [:new, :create, :delete]
+    resources "/runners", RunnerController, only:  [:index, :show]
+    resources "/teams", TeamController, only: [:index, :show]
+    resources "/races", RaceController,  only: [:index, :show]
+    resources "/raceinstances", RaceInstanceController,  only: [:index, :show]
+    resources "/results", ResultController,  only: [:index, :show]
 
 		get "/search", SearchController, :index
 		post "/search", SearchController, :index

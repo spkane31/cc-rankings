@@ -12,8 +12,11 @@ defmodule Rankings.Runner do
     field :last_name, :string
     field :year, :string
     field :gender, :string
+    field :elo_rating, :float
+    field :speed_rating, :float
     belongs_to :team, Rankings.Team
     has_many :instances, Rankings.Result
+    has_many :edges, Rankings.Edge
   end
 
   def changeset(struct, params) do
