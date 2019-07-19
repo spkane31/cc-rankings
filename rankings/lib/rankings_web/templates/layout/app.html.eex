@@ -17,11 +17,12 @@
               <li>
                 <%= link "Log out", to: Routes.session_path(@conn, :delete, @current_user), method: "delete" %>
               </li>
-            <% else %>
-              <li><%= link "Register", to: Routes.user_path(@conn, :new) %></li>
-              <li><%= link "Log in", to: Routes.session_path(@conn, :new) %><li>
+            <%# <% else %>
+              <%# <li><%= link "Register", to: Routes.user_path(@conn, :new) %></li> 
+              <%# <li><%= link "Log in", to: Routes.session_path(@conn, :new) %></li>
             <% end %>
         <div class="topnav">
+          <%# <button class="foo-button mdc-button">Button</button> %>
           <a class="active" href="/">Home</a>
           <a href="/search">Search</a>
           <a href="/compare">Compare</a>
@@ -38,7 +39,7 @@
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
   </body>
   <footer>
-    <div>Created and Maintained by Sean Kane</div>
+    <div><%= link "Created and Maintained by Sean Kane", to: Routes.session_path(@conn, :new) %></div>
     <div>
       <a href="https://github.com/spkane31/cc-rankings/issues">Issues</a>
        . 

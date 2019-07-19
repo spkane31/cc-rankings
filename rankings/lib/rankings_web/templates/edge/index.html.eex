@@ -1,0 +1,22 @@
+<h1>Listing Edges</h1>
+
+<table>
+  <tr>
+    <td>Runner</td>
+    <td>From Race</td>
+    <td>To Race</td>
+    <td>Difference</td>
+    <td>Edit</td>
+  </tr>
+
+  <%= for edge <- @edges do %>
+    <tr>
+      <td><%= edge.runner.first_name <> " " <> edge.runner.last_name %></td>
+      <td><%= edge.from_race_id %></td>
+      <td><%= edge.to_race_id %></td>
+      <td><%= edge.difference %></td>
+      <td><%= link edge.id, to: Routes.edge_path(@conn, :show, edge.id) %>
+    </tr>
+  <% end %>
+
+</table>

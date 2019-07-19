@@ -26,6 +26,7 @@ defmodule RankingsWeb.Router do
     resources "/races", RaceController,  only: [:index, :show]
     resources "/raceinstances", RaceInstanceController,  only: [:index, :show]
     resources "/results", ResultController,  only: [:index, :show]
+    resources "/edges", EdgeController, only: [:index, :show]
 
 		get "/search", SearchController, :index
 		post "/search", SearchController, :index
