@@ -1,12 +1,12 @@
-<h1>Runner Profile</h1>
-<b><%= get_name(@runner) %> </b> <br>
+<h2>Runner Profile</h2>
+<%= render "runner.html", runner: @runner %><br>
 
 <%= if @team != nil do %>
   <b>Team: </b>
   <%= link @runner.team.name, to: Routes.team_path(@conn, :show, @runner.team.id) %>
 <% end %>
 
-<h2> Recent Results</h1>
+<h3> Recent Results</h3>
 <table>
   <tr>
     <td>Date</td>

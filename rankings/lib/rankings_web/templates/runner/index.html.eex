@@ -10,7 +10,7 @@
 
   <%= for runner <- @runners do %>
     <tr>
-      <td><b><%= get_name(runner) %></b></td>
+      <td><%= render "runner.html", runner: runner %>
       <td><%= runner.year %></td>
       <td><%= runner.team.name %></td>
       <td><%= link "View", to: Routes.runner_path(@conn, :show, runner.id) %></td>
