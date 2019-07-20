@@ -10,7 +10,7 @@
     <td>Average</td>
   </tr>
   <tr>
-    <td><%= @edge.runner.first_name <> " " <> @edge.runner.last_name %></td>
+    <td><%= link @edge.runner.first_name <> " " <> @edge.runner.last_name, to: Routes.runner_path(@conn, :show, @edge.runner_id) %></td>
     <td><%= link @edge.from_race.race.name, to: Routes.race_path(@conn, :show, @edge.from_race_id) %></td>
     <td><%= link @edge.to_race.race.name, to: Routes.race_path(@conn, :show, @edge.to_race_id) %></td>
     <td><%= @edge.difference %></td>

@@ -33,7 +33,11 @@ defmodule Rankings.Team do
   def get_last_n(n) do
     q = from(r in Rankings.Team, limit: ^n)
     Repo.all(q)
+  end
 
+  def get_team_runners(id) do
+    q = from r in Rankings.Runner, where: r.team_id == ^id, order_by: [desc: :year]
+    Repo.all(q)
   end
 
   def list_teams do

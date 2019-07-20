@@ -1,6 +1,8 @@
 <h1>Listing Edges</h1>
 
-<table>
+<section>
+<div>
+<table class="main-page-top-25">
   <tr>
     <td>Runner</td>
     <td>From Race</td>
@@ -11,12 +13,34 @@
 
   <%= for edge <- @edges do %>
     <tr>
-      <td><%= edge.runner.first_name <> " " <> edge.runner.last_name %></td>
+      <td><%= link edge.runner.first_name <> " " <> edge.runner.last_name, to: Routes.runner_path(@conn, :show, edge.runner_id) %></td>
       <td><%= edge.from_race_id %></td>
       <td><%= edge.to_race_id %></td>
       <td><%= edge.difference %></td>
       <td><%= link edge.id, to: Routes.edge_path(@conn, :show, edge.id) %>
     </tr>
   <% end %>
-
 </table>
+<table class="gap-table">
+</table>
+<table class="main-page-top-25">
+  <tr>
+    <td>Runner</td>
+    <td>From Race</td>
+    <td>To Race</td>
+    <td>Difference</td>
+    <td>Edit</td>
+  </tr>
+
+  <%= for edge <- @fast_edges do %>
+    <tr>
+      <td><%= link edge.runner.first_name <> " " <> edge.runner.last_name, to: Routes.runner_path(@conn, :show, edge.runner_id) %></td>
+      <td><%= edge.from_race_id %></td>
+      <td><%= edge.to_race_id %></td>
+      <td><%= edge.difference %></td>
+      <td><%= link edge.id, to: Routes.edge_path(@conn, :show, edge.id) %>
+    </tr>
+  <% end %>
+</table>
+</div>
+</section>

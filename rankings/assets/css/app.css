@@ -1,6 +1,21 @@
 /* This file is for your main application css. */
 
 @import "./phoenix.css";
+html, body {
+  height: 100%;
+  margin: 0;
+}
+.wrapper {
+  min-height: 100%;
+
+  /* Equal to height of footer */
+  /* But also accounting for potential margin-bottom of last child */
+  margin-bottom: -50px;
+}
+.footer,
+.push {
+  height: 50px;
+}
 
 /* Footer */
 footer {
@@ -11,6 +26,7 @@ footer {
   background-color: #f4f7fc;
   text-align: center;
   height: 100px;
+  margin-top: 100px;
 }
 
 /* Navigation Bar */

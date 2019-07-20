@@ -39,24 +39,25 @@ defmodule Rankings.RaceInstance do
   end
 
   def time_to_string(time) do
-    minutes = round(time / 60)
+    minutes = trunc(time / 60)
     m = Integer.to_string(minutes)
-    seconds = round(time - 60 * minutes)
-    s = Integer.to_string(round(time - minutes * 60))
+    seconds = trunc(time - (60 * minutes))
+    s = Integer.to_string(seconds)
+    milli = trunc(10 * (time - trunc(time)))
+    ms = Integer.to_string(milli)
+
     if seconds < 10 do
-      m <> ":0" <> s
+      m <> ":0" <> s <> "." <> ms
     else
-      m <> ":" <> s
+      m <> ":" <> s <> "." <> ms
     end
 
   end
 
   def get_average_time(id) do
-    r = from(r in Result, where: r.race_instance_id == ^id)
-    results = Repo.all(r)
-    total = Enum.map(results, fn r -> r.time_float end) |> Enum.sum()
-    avg = total / length(results)
-    time_to_string(avg)
+    q = from(r in Result, select: avg(r.time_float), where: r.race_instance_id == 84)
+    Repo.one(q)
+    |> time_to_string()
   end
 
 end

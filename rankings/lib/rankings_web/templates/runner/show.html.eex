@@ -34,3 +34,34 @@
     </tr>
   <% end %>
 <table>
+
+<%= if length(@edges) != 0 do %>
+
+<h3>Performance Comparison</h3>
+<table>
+  <tr>
+    <td>Race 1</td>
+    <td>Race 1 Time</td>
+    <td>Race 1 Scaled</td>
+    <td>Race 2</td>
+    <td>Race 2 Time</td>
+    <td>Race 2 Scaled</td>
+    <td>Difference</td>
+    <td>Average Difference</td>
+  </tr>
+
+  <%= for edge <- @edges do %>
+    <tr>
+      <td><%= edge.from_race.race.name %></td>
+      <td><%= get_time(edge.from_race_id, edge.runner_id) %></td>
+      <td><%= get_scaled_time(edge.from_race_id, edge.runner_id) %></td>
+      <td><%= edge.to_race.race.name %></td>
+      <td><%= get_time(edge.to_race_id, edge.runner_id) %></td>
+      <td><%= get_scaled_time(edge.to_race_id, edge.runner_id) %></td>
+      <td><%= round(edge.difference, 2) %></td>
+      <td><%= average_difference(edge.from_race_id, edge.to_race_id) %></td>
+    </tr>
+  <% end %>
+</table>
+
+<% end %>

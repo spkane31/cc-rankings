@@ -11,7 +11,7 @@ defmodule RankingsWeb.TeamController do
 
   def show(conn, %{"id" => id}) do
     team = Team.get_team(id) |> Repo.preload(:runners)
-    runners = team.runners
+    runners = Team.get_team_runners(id)
     render(conn, "show.html", team: team, runners: runners)
   end
 

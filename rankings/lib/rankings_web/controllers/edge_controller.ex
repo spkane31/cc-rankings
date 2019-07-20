@@ -5,7 +5,8 @@ defmodule RankingsWeb.EdgeController do
 
   def index(conn, _params) do
     edges = Edge.slowest_n_edges(100)
-    render(conn, "index.html", edges: edges)
+    fast_edges = Edge.fastest_n_edges(100)
+    render(conn, "index.html", edges: edges, fast_edges: fast_edges)
   end
 
   def show(conn, %{"id" => id}) do

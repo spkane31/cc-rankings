@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
   </head>
   <body>
+    <div class="wrapper">
     <header>
       <section class="container">
         <nav role="navigation">
@@ -37,8 +38,10 @@
       <%= render @view_module, @view_template, assigns %>
     </main>
     <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
-  </body>
-  <footer>
+    <div class="push"></div>
+  </div>
+  <%# </body> %>
+  <footer class="footer">
     <div><%= link "Created and Maintained by Sean Kane", to: Routes.session_path(@conn, :new) %></div>
     <div>
       <a href="https://github.com/spkane31/cc-rankings/issues">Issues</a>
@@ -48,5 +51,6 @@
     <div><a href="https://github.com/spkane31/cc-rankings">Project Home</a></div>
     <div>
   </footer>
+  </body>
 
 </html>

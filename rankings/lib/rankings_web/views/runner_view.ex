@@ -1,9 +1,9 @@
 defmodule RankingsWeb.RunnerView do
   use RankingsWeb, :view
   import Float
+  import Ecto.Query
 
-  alias Rankings.Runner
-  alias Rankings.Result
+  alias Rankings.{Runner, Result, Edge, Repo, RaceInstance}
   alias Date
 
   def get_name(%Runner{first_name: first, last_name: last}) do
@@ -30,6 +30,22 @@ defmodule RankingsWeb.RunnerView do
 
   def stringify(date) do
     Date.to_string(date)
+  end
+
+  def average_difference(from_id, to_id) do
+    round(Edge.get_avg(from_id, to_id), 2)
+  end
+
+  def get_time(race_id, runner_id) do
+    q = from r in Result, where: r.runner_id == ^runner_id and r.race_instance_id == ^race_id
+    r = Repo.one(q)
+    r.time
+  end
+
+  def get_scaled_time(race_id, runner_id) do
+    q = from r in Result, where: r.runner_id == ^runner_id and r.race_instance_id == ^race_id
+    r = Repo.one(q)
+    RaceInstance.time_to_string(r.scaled_time)
   end
 
 end
