@@ -1,0 +1,40 @@
+<h1>
+  Compare two runners
+</h1>
+
+<p>For now only comparison between two runners supported. Stay tuned for more comparisons in the future</p>
+
+<h2>Search for Runner</h2>
+<%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn f -> %>
+  <div>
+    <%= search_input f, :first, placeholder: "First Name" %>
+  </div>
+  <div>
+    <%= search_input f, :last, placeholder: "Last Name" %>
+  </div>
+  <%= submit "Search" %>
+<% end %>
+
+<h2>Results</h2>
+<%= if @runners != nil do %>
+<table>
+  <tr>
+    <td>Name</td>
+    <td>Year</td>
+    <td>Team</td>
+    <td>Select</td>
+  </tr>
+  <%= if length(@runners) != 0 do %>
+    <%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn r -> %>
+      <%= for r <- @runners do %>
+      <tr>
+        <td><%= r.first_name <> " " <> r.last_name %></td>
+        <td><%= r.year %></td>
+        <td><%= r.team.name %></td>
+        <td><%= link submit "Select", to: Routes.compare_path(@conn, :index, r.id) %></td>
+      </tr>
+      <% end %>
+    <% end %>
+  <% end %>
+</table>
+<% end %>

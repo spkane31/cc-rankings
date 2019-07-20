@@ -27,6 +27,13 @@ defmodule RankingsWeb.Router do
     resources "/raceinstances", RaceInstanceController,  only: [:index, :show]
     resources "/results", ResultController,  only: [:index, :show]
     resources "/edges", EdgeController, only: [:index, :show]
+    resources "/about", AboutController, only: [:index]
+    # resources "/compare", CompareController, only: [:index, :show]
+    resources "/virtual", VirtualController, only: [:index]
+    get "/compare", CompareController, :index
+    get "/compare/:id", CompareController, :show
+    get "/compare/:id1/:id2", CompareController, :show
+
 
 		get "/search", SearchController, :index
 		post "/search", SearchController, :index
