@@ -1,40 +1,60 @@
-<h1>
-  Compare two runners
-</h1>
+<h1>Compare two runners</h1>
 
 <p>For now only comparison between two runners supported. Stay tuned for more comparisons in the future</p>
 
+<%= if @id1 != nil do %>
+  <table>
+    <tr>
+      <td>Runner 1: </td>
+      <td><%= @runner1.first_name <> " " <> @runner1.last_name  %></td>
+      <td><%= @runner1.year %>
+      <td><%= @runner1.team.name %>
+    </tr>
+  </table>
+<% end %>
+
 <h2>Search for Runner</h2>
 <%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn f -> %>
+  <%= if @id1 != nil do %>
+  <%= radio_button f, :id1, @id1, name: "id1" %>
+  <% end %>
   <div>
     <%= search_input f, :first, placeholder: "First Name" %>
   </div>
   <div>
     <%= search_input f, :last, placeholder: "Last Name" %>
   </div>
-  <%= submit "Search" %>
+  <%= submit "Search", to: Routes.compare_path(@conn, :index) %>
 <% end %>
 
-<h2>Results</h2>
-<%= if @runners != nil do %>
-<table>
-  <tr>
-    <td>Name</td>
-    <td>Year</td>
-    <td>Team</td>
-    <td>Select</td>
-  </tr>
-  <%= if length(@runners) != 0 do %>
-    <%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn r -> %>
-      <%= for r <- @runners do %>
+
+<%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn f -> %>
+  <h2>Results</h2>
+  <%= if @runners != nil do %>
+    <table>
       <tr>
-        <td><%= r.first_name <> " " <> r.last_name %></td>
-        <td><%= r.year %></td>
-        <td><%= r.team.name %></td>
-        <td><%= link submit "Select", to: Routes.compare_path(@conn, :index, r.id) %></td>
+        <td>Name</td>
+        <td>Year</td>
+        <td>Team</td>
+        <td>Select</td>
       </tr>
-      <% end %>
-    <% end %>
+      <%= if length(@runners) != 0 do %>
+        <%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn r -> %>
+          <%= for r <- @runners do %>
+          <tr>
+            <td><%= r.first_name <> " " <> r.last_name %></td>
+            <td><%= r.year %></td>
+            <td><%= r.team.name %></td>
+            <%= if @id1 == nil do %>
+            <td><%= radio_button f, :id1, r.id, name: "id1" %>
+            <%= else %>
+            <td><%= radio_button f, :id2, r.id, name: "id2" %>
+            <% end %>
+          </tr>
+          <% end %>
+        <% end %>
+      <% end  %>
+    </table>
+    <%= submit "Select" %>
   <% end %>
-</table>
 <% end %>

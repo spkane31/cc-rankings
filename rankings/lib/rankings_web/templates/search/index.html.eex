@@ -1,4 +1,5 @@
 <h2>Search Runners</h2>
+
 <%= form_for @conn, Routes.search_path(@conn, :index), [method: :get], fn f-> %>
   <div>
     <%= search_input f, :first, placeholder: "First Name" %>
