@@ -1,7 +1,7 @@
 <h2>Runner Profile</h2>
 <%= render "runner.html", runner: @runner %><br>
 
-<%= if @team != nil do %>
+<%= if @runner != nil do %>
   <b>Team: </b>
   <%= link @runner.team.name, to: Routes.team_path(@conn, :show, @runner.team.id) %>
 <% end %>

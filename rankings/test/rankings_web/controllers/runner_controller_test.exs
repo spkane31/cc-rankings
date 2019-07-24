@@ -7,7 +7,7 @@ defmodule RankingsWeb.RunnerControllerTest do
   end
 
   test "GET /runners/1", %{conn: conn} do
-    conn = get(conn, "/runners")
+    conn = get(conn, "/runners/10")
     assert html_response(conn, 200) =~ "<!DOCTYPE html>"
   end
 end

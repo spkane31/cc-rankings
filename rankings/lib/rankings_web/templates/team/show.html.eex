@@ -1,4 +1,6 @@
+<%= if @team != nil do %>
 <h1><%= get_name(@team) %> Details</h1>
+<% end %>
 
 <h2>Team Members</h2>
 <table>

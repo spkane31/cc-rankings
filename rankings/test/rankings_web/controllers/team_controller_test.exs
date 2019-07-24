@@ -7,7 +7,7 @@ defmodule RankingsWeb.TeamControllerTest do
   end
 
   test "GET /teams/1", %{conn: conn} do
-    conn = get(conn, "/teams")
+    conn = get(conn, "/teams/1")
     assert html_response(conn, 200) =~ "<!DOCTYPE html>"
   end
 end

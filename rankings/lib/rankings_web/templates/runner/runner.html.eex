@@ -1,1 +1,3 @@
+<%= if @runner != nil do %>
 <%= get_name(@runner) %>
+<% end %>

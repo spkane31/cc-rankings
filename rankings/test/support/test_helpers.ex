@@ -5,6 +5,7 @@ defmodule Rankings.TestHelpers do
     Team,
     RaceInstance,
     Race,
+    Repo,
   }
 
   def runner_fixture(attrs \\ %{}) do
