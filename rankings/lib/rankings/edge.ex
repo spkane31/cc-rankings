@@ -53,4 +53,10 @@ defmodule Rankings.Edge do
     Repo.one(q)
   end
 
+  def get_std_dev(from_id, to_id) do
+    q = from e in Edge, where: e.from_race_id == ^from_id and e.to_race_id == ^to_id, select: fragment("stddev(difference)") #e.difference
+    edges = Repo.one(q)
+
+  end
+
 end

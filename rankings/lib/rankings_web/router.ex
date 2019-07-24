@@ -31,11 +31,10 @@ defmodule RankingsWeb.Router do
     # resources "/compare", CompareController, only: [:index, :show]
     resources "/virtual", VirtualController, only: [:index]
 
-
-    #
     get "/compare", CompareController, :index
+    post "/compare", CompareController, :index
     get "/compare/:id1", CompareController, :first_runner
-    get "/compare/:id1/search", CompareController, :second_search
+    post "/compare/:id1", CompareController, :first_runner
     get "/compare/:id1/:id2", CompareController, :show
 
 

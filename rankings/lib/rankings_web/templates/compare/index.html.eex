@@ -24,7 +24,7 @@
   <%= submit "Search", to: Routes.compare_path(@conn, :index) %>
 <% end %>
 
-<%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn f -> %>
+<%= form_for @conn, Routes.compare_path(@conn, :index), [method: :post], fn f -> %>
   <h2>Results</h2>
   <%= if @runners != nil do %>
     <table>

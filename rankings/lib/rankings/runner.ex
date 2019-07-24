@@ -15,7 +15,7 @@ defmodule Rankings.Runner do
     field :elo_rating, :float
     field :speed_rating, :float
     belongs_to :team, Rankings.Team
-    has_many :instances, Rankings.Result
+    has_many :results, Rankings.Result
     has_many :edges, Rankings.Edge
   end
 
@@ -59,7 +59,7 @@ defmodule Rankings.Runner do
   import Ecto.Query
   def get_athlete_results(id) do
     Repo.all(from r in Result, where: r.runner_id == ^id, order_by: [desc: :date])
-    |> Repo.preload([ {:race_instance, :race}])
+    |> Repo.preload([{:race_instance, :race}])
   end
 
   def get_results(id) do

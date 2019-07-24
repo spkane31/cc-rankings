@@ -24,11 +24,11 @@
             <% end %>
         <div class="topnav">
           <%# <button class="foo-button mdc-button">Button</button> %>
-          <a class="active" href="/">Home</a>
-          <a href="/search">Search</a>
-          <a href="/compare">Compare</a>
-          <a href="/about">About</a>
-          <a href="/virtual">Virtual Race</a>
+          <%= link "Home", to: Routes.page_path(@conn, :index) %>
+          <%= link "Search", to: Routes.search_path(@conn, :index) %>
+          <%= link "Compare", to: Routes.compare_path(@conn, :index) %>
+          <%= link "About", to: Routes.about_path(@conn, :index) %>
+          <%= link "Virtual", to: Routes.virtual_path(@conn, :index) %>
         </div>
       </section>
     </header>

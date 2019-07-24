@@ -37,7 +37,7 @@
 
 <%= if length(@edges) != 0 do %>
 
-<h3>Performance Comparison</h3>
+<h4>Performance Comparison</h4>
 <table>
   <tr>
     <td>Race 1</td>
@@ -48,8 +48,8 @@
     <td>Race 2 Scaled</td>
     <td>Difference</td>
     <td>Average Difference</td>
+    <%# <td>Percentile</td> %>
   </tr>
-
   <%= for edge <- @edges do %>
     <tr>
       <td><%= edge.from_race.race.name %></td>
@@ -60,6 +60,7 @@
       <td><%= get_scaled_time(edge.to_race_id, edge.runner_id) %></td>
       <td><%= round(edge.difference, 2) %></td>
       <td><%= average_difference(edge.from_race_id, edge.to_race_id) %></td>
+      <%# <td><%= percentile(edge.from_race_id, edge.to_race_id, edge.difference) %>
     </tr>
   <% end %>
 </table>
