@@ -24,34 +24,31 @@
   <%= submit "Search", to: Routes.compare_path(@conn, :index) %>
 <% end %>
 
-<%= form_for @conn, Routes.compare_path(@conn, :index), [method: :post], fn f -> %>
-  <h2>Results</h2>
-  <%= if @runners != nil do %>
-    <table>
-      <tr>
-        <td>Name</td>
-        <td>Year</td>
-        <td>Team</td>
-        <td>Select</td>
-      </tr>
-      <%= if length(@runners) != 0 do %>
-        <%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn f -> %>
-          <%= for r <- @runners do %>
-          <tr>
-            <td><%= r.first_name <> " " <> r.last_name %></td>
-            <td><%= r.year %></td>
-            <td><%= r.team.name %></td>
-            <td><%= link "Select", to: Routes.compare_path(@conn, :first_runner, r.id) %>
-            <%= if @id1 == nil do %>
-            <td><%= radio_button f, :id1, r.id, name: "id1" %></td>
-            <% else %>
-            <td><%= radio_button f, :id2, r.id, name: "id2" %></td>
-            <% end %>
-          </tr>
+<h2>Results</h2>
+<%= if @runners != nil do %>
+  <table>
+    <tr>
+      <td>Name</td>
+      <td>Year</td>
+      <td>Team</td>
+      <td>Select</td>
+    </tr>
+    <%= if length(@runners) != 0 do %>
+      <%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn f -> %>
+        <%= for r <- @runners do %>
+        <tr>
+          <td><%= r.first_name <> " " <> r.last_name %></td>
+          <td><%= r.year %></td>
+          <td><%= r.team.name %></td>
+          <td><%= submit "Select", to: Routes.compare_path(@conn, :first_runner, r.id) %>
+          <%= if @id1 == nil do %>
+          <td><%= radio_button f, :id1, r.id, name: "id1" %></td>
+          <% else %>
+          <td><%= radio_button f, :id2, r.id, name: "id2" %></td>
           <% end %>
+        </tr>
         <% end %>
-      <% end  %>
-    </table>
-    <%= submit "Select" %>
-  <% end %>
+      <% end %>
+    <% end  %>
+  </table>
 <% end %>

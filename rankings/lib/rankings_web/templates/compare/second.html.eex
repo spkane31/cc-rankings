@@ -2,25 +2,29 @@
 
 <p>For now only comparison between two runners supported. Stay tuned for more comparisons in the future</p>
 
-<table>
-  <tr>
-    <td>Runner 1: </td>
-    <td><%= @runner1.first_name <> " " <> @runner1.last_name  %></td>
-    <td><%= @runner1.year %>
-    <td><%= @runner1.team.name %>
-  </tr>
-</table>
+<%= if @runner1 != nil do %>
+  <table>
+    <tr>
+      <td>Runner 1: </td>
+      <td><%= @runner1.first_name <> " " <> @runner1.last_name  %></td>
+      <td><%= @runner1.year %>
+      <td><%= @runner1.team.name %>
+    </tr>
+  </table>
+<% end %>
 
-<h2>Search for Runner</h2>
-<%= form_for @conn, Routes.compare_path(@conn, :first_runner, @runner1.id), [method: :get], fn f -> %>
+<%= if @runner1 != nil do %>
+  <h2>Search for Runner</h2>
+  <%= form_for @conn, Routes.compare_path(@conn, :first_runner, @runner1.id), [method: :get], fn f -> %>
 
-  <div>
-    <%= search_input f, :first, placeholder: "First Name" %>
-  </div>
-  <div>
-    <%= search_input f, :last, placeholder: "Last Name" %>
-  </div>
-  <%= submit "Search", to: Routes.compare_path(@conn, :first_runner, @runner1.id) %>
+    <div>
+      <%= search_input f, :first, placeholder: "First Name" %>
+    </div>
+    <div>
+      <%= search_input f, :last, placeholder: "Last Name" %>
+    </div>
+    <%= submit "Search", to: Routes.compare_path(@conn, :first_runner, @runner1.id) %>
+  <% end %>
 <% end %>
 
 <h2>Results</h2>

@@ -1,5 +1,6 @@
 <h1>Comparison</h1>
 
+<%= if @runner1 != nil do %>
 <table>
   <p>Runner Details</p>
   <tr>
@@ -21,7 +22,9 @@
     </tr>
   <% end %>
 </table>
+<% end %>
 
+<%= if @runner2 != nil do %>
 <table>
   <p>Runner Details</p>
   <tr>
@@ -43,3 +46,4 @@
     </tr>
   <% end %>
 </table>
+<% end %>

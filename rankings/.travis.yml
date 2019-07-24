@@ -1,0 +1,18 @@
+language: elixir
+
+elixir:
+  - 1.8.2
+
+addons:
+  postgresql: '10.9'
+
+service:
+  - postgresql
+
+before script:
+  - pg_dump rankings_dev > ../rankings_dump
+  - cp config/travis.exs config/test.exs
+  - mix do ecto.create, ecto.mgirate
+
+script:
+  - mix test
