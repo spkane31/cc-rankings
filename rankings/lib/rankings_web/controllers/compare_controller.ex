@@ -26,20 +26,20 @@ defmodule RankingsWeb.CompareController do
     render(conn, "second.html", runner1: runner1, runners: nil)
   end
 
-  def second_search(conn, %{"id1" => id1}, params) do
+  def second_search(conn, %{"id1" => id1}, %{"first" => first}, %{"last" => last}) do
     IO.puts "second"
 
-    query = Runner.list_runners(params)
+    # query = Runner.list_runners(params)
     # id1 = get_in(params, ["id1"])
     runner1 = find_runner(id1)
 
-    render(conn, "second.html", runner1: runner1, runners: query)
+    render(conn, "second.html", runner1: runner1, runners: nil)
   end
 
-  def show(conn, %{"id1" => id1}, params) do
+  def show(conn, %{"id1" => id1}, %{"id2" => id2}) do
     IO.puts "ghi"
     # id1 = get_in(params, ["id1"])
-    id2 = get_in(params, ["id2"])
+    # id2 = get_in(params, ["id2"])
     render(conn, "index.html", id1: id1, id1: id2)
   end
 

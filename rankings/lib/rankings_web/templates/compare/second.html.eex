@@ -12,7 +12,7 @@
 </table>
 
 <h2>Search for Runner</h2>
-<%= form_for @conn, Routes.compare_path(@conn, :first_runner, @runner1.id), [method: :get], fn f -> %>
+<%= form_for @conn, Routes.compare_path(@conn, :second_search, @runner1.id), [method: :get], fn f -> %>
 
   <div>
     <%= search_input f, :first, placeholder: "First Name" %>
@@ -20,7 +20,7 @@
   <div>
     <%= search_input f, :last, placeholder: "Last Name" %>
   </div>
-  <%= submit "Search", to: Routes.compare_path(@conn, :first_runner, @runner1.id) %>
+  <%= submit "Search", to: Routes.compare_path(@conn, :second_search, @runner1.id) %>
 <% end %>
 
 <%= form_for @conn, Routes.compare_path(@conn, :first_runner, @runner1.id), [method: :get], fn f -> %>

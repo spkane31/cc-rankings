@@ -15,9 +15,6 @@
 
 <h2>Search for Runner</h2>
 <%= form_for @conn, Routes.compare_path(@conn, :index), [method: :get], fn f -> %>
-  <%= if @id1 != nil do %>
-  <%= radio_button f, :id1, @id1, name: "id1" %>
-  <% end %>
   <div>
     <%= search_input f, :first, placeholder: "First Name" %>
   </div>
@@ -44,11 +41,11 @@
             <td><%= r.first_name <> " " <> r.last_name %></td>
             <td><%= r.year %></td>
             <td><%= r.team.name %></td>
-            <td><%= link "Select", to: Routes.compare_path(@conn, :first_runner, @id1) %>
+            <td><%= link "Select", to: Routes.compare_path(@conn, :first_runner, r.id) %>
             <%= if @id1 == nil do %>
-            <td><%= radio_button f, :id1, r.id, name: "id1" %>
+            <td><%= radio_button f, :id1, r.id, name: "id1" %></td>
             <% else %>
-            <td><%= radio_button f, :id2, r.id, name: "id2" %>
+            <td><%= radio_button f, :id2, r.id, name: "id2" %></td>
             <% end %>
           </tr>
           <% end %>
