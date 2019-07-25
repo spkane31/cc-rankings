@@ -5,14 +5,16 @@
     <td>Runner</td>
     <td>Year</td>
     <td>Team</td>
+    <td>Rating</td>
     <td>Link</td>
   </tr>
 
   <%= for runner <- @runners do %>
     <tr>
-      <td><b><%= get_name(runner) %></b></td>
+      <td><%= render "runner.html", runner: runner %>
       <td><%= runner.year %></td>
       <td><%= runner.team.name %></td>
+      <td><%= runner.speed_rating %></td>
       <td><%= link "View", to: Routes.runner_path(@conn, :show, runner.id) %></td>
     </tr>
   <% end %>

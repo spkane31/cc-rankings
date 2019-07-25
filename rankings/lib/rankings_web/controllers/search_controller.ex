@@ -4,10 +4,7 @@ defmodule RankingsWeb.SearchController do
   # import Ecto.Query
 
   alias Rankings.{Team, Runner, Result, Race, RaceInstance}
-  def index(conn, params) do #%{"search" => %{"query" => query}}) do
-    # runners = from r in Runner, select: r.id
-    # q = from r in Runner, where: ilike(r.first_name, ^"%Jack%") # r.id == ^query
-    # results = Repo.all(q) |> Repo.preload(:team)
+  def index(conn, params) do
 
     first = get_in(params, ["first"])
     last = get_in(params, ["last"])

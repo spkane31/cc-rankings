@@ -12,8 +12,11 @@ defmodule Rankings.Runner do
     field :last_name, :string
     field :year, :string
     field :gender, :string
+    field :elo_rating, :float
+    field :speed_rating, :float
     belongs_to :team, Rankings.Team
-    has_many :instances, Rankings.Result
+    has_many :results, Rankings.Result
+    has_many :edges, Rankings.Edge
   end
 
   def changeset(struct, params) do
@@ -44,19 +47,22 @@ defmodule Rankings.Runner do
   end
 
   def get_team_name(id) do
-    r = get_runner(id)
-    r = Repo.preload(r, [:team])
-    if r.team == nil do
+    r = get_runner(id) |> Repo.preload(:team)
+    if r == nil do
       ""
     else
-      r.team.name
+      if r.team == nil do
+        ""
+      else
+        r.team.name
+      end
     end
   end
 
   import Ecto.Query
   def get_athlete_results(id) do
     Repo.all(from r in Result, where: r.runner_id == ^id, order_by: [desc: :date])
-    |> Repo.preload([ {:race_instance, :race}])
+    |> Repo.preload([{:race_instance, :race}])
   end
 
   def get_results(id) do

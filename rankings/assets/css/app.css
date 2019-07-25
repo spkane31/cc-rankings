@@ -1,6 +1,21 @@
 /* This file is for your main application css. */
 
 @import "./phoenix.css";
+html, body {
+  height: 100%;
+  margin: 0;
+}
+.wrapper {
+  min-height: 100%;
+
+  /* Equal to height of footer */
+  /* But also accounting for potential margin-bottom of last child */
+  margin-bottom: -50px;
+}
+.footer,
+.push {
+  height: 50px;
+}
 
 /* Footer */
 footer {
@@ -11,6 +26,7 @@ footer {
   background-color: #f4f7fc;
   text-align: center;
   height: 100px;
+  margin-top: 100px;
 }
 
 /* Navigation Bar */
@@ -34,8 +50,97 @@ footer {
   background-color: #ddd;
   color: black;
 }
-/* 
+ 
 .topnav a.active {
-  background-color: #4CAF50;
+  background-color: #aaa;
   color: white;
-} */
+} 
+
+/* Main Page results tables */
+
+.main-page-top-25 {
+  margin-bottom: 2.5rem;
+  width: 45%;
+  float: left;
+  text-align: left;
+  vertical-align: center;
+  /* border-spacing: 5px; */
+}
+
+.gap-table {
+  margin-bottom: 2.5rem;
+  width: 10%;
+  float: left;
+  text-align: left;
+  vertical-align: center;
+
+}
+
+th, td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Striped table for readability */
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+table {
+  margin-bottom: 2.5rem;
+  border-spacing: 0;
+  width: 50%;
+  height: 75px;
+}
+
+/* Links (used for hiding the log-in w/in my name */
+a {
+  outline: none;
+  text-decoration: none;
+  padding: 2px 1px 0;
+}
+
+a:link {
+  text-decoration: none;
+  font-family: helvetica;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:active {
+  text-decoration: underline;
+}
+
+a:focus {
+  border-bottom: 1px solid;
+  background: #BAE498;
+}
+
+p {
+  font-family: helvetica;
+}
+
+h1 {
+  font: 10;
+}
+
+h2 {
+  font: 10;
+}
+
+h3 {
+  padding: 10px;
+  text-decoration: none;
+  line-height: 1.4;
+}

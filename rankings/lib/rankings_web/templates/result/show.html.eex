@@ -1,5 +1,7 @@
 <h1>Result Details</h1>
 
+<%= if @result != nil do %>
+
 <p>Runner: <%= @result.runner.first_name <> " " <> @result.runner.last_name %></p>
 
 <p>Distance: <%= get_distance(@result) %></p>
@@ -11,3 +13,5 @@
 <p>Date: <%= @result.race_instance.date %></p>
 
 <p>Correction Factor: <%= @result.race_instance.race.correction_avg %>,  <%= @result.race_instance.race.correction_graph %>  </p>
+
+<% end %>

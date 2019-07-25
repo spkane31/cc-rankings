@@ -1,13 +1,19 @@
+<%= if @team != nil do %>
 <h1><%= get_name(@team) %> Details</h1>
+<% end %>
 
 <h2>Team Members</h2>
 <table>
   <tr>
     <td>Name</td>
+    <td>Year</td>
+    <td>Best Rating</td>
   </tr>
   <%= for runner <- @runners do %>
     <tr>
       <td><%= link get_runner_name(runner), to: Routes.runner_path(@conn, :show, runner.id) %></td>
+      <td><%= runner.year %></td>
+      <td><%= best_performance(runner.id) %>
     </tr>
   <% end %>
 </table>

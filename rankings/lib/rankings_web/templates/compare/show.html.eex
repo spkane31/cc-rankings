@@ -1,0 +1,49 @@
+<h1>Comparison</h1>
+
+<%= if @runner1 != nil do %>
+<table>
+  <p>Runner Details</p>
+  <tr>
+    <td><%= @runner1.first_name <> " " <> @runner1.last_name %></td>
+    <td><%= @runner1.team.name %></td>
+    <td><%= @runner1.year %></td>
+    <td><%= @runner1.speed_rating %>
+  </tr>
+</table>
+<table>
+  <%= for result <- @results1 do %>
+    <tr>
+      <td><%= result.date %></td>
+      <td><%= result.race_instance.race.name %>
+      <td><%= result.distance %>
+      <td><%= result.time %></td>
+      <td><%= result.scaled_time %>
+      <td><%= result.rating %>
+    </tr>
+  <% end %>
+</table>
+<% end %>
+
+<%= if @runner2 != nil do %>
+<table>
+  <p>Runner Details</p>
+  <tr>
+    <td><%= @runner2.first_name <> " " <> @runner2.last_name %></td>
+    <td><%= @runner2.team.name %></td>
+    <td><%= @runner2.year %></td>
+    <td><%= @runner2.speed_rating %>
+  </tr>
+</table>
+<table>
+  <%= for result <- @results2 do %>
+    <tr>
+      <td><%= result.date %></td>
+      <td><%= result.race_instance.race.name %>
+      <td><%= result.distance %>
+      <td><%= result.time %></td>
+      <td><%= result.scaled_time %>
+      <td><%= result.rating %>
+    </tr>
+  <% end %>
+</table>
+<% end %>

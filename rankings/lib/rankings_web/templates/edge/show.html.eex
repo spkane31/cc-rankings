@@ -1,0 +1,32 @@
+<h2>Edit Edge</h2>
+
+<table>
+  <tr>
+    <td>Runner</td>
+    <td>From Race Name</td>
+    <td>To Race Name</td>
+    <td>Difference</td>
+    <td>Count</td>
+    <td>Average</td>
+  </tr>
+  <tr>
+    <td><%= link @edge.runner.first_name <> " " <> @edge.runner.last_name, to: Routes.runner_path(@conn, :show, @edge.runner_id) %></td>
+    <td><%= link @edge.from_race.race.name, to: Routes.race_path(@conn, :show, @edge.from_race_id) %></td>
+    <td><%= link @edge.to_race.race.name, to: Routes.race_path(@conn, :show, @edge.to_race_id) %></td>
+    <td><%= @edge.difference %></td>
+    <td><%= @count %></td>
+    <td><%= @avg %></td>
+    <td><%= @edge.from_race_id %></td>
+    <td><%= @edge.to_race_id %></td>
+  </tr>
+  <div></div>
+  <%= for edge <- @sim_edges do %>
+    <tr>
+      <td><%= edge.runner.first_name <> " " <> edge.runner.last_name%></td>
+      <td><%= edge.from_race.race.name %></td>
+      <td><%= edge.to_race.race.name %></td>
+      <td><%= edge.difference %></td>
+    </tr>
+  <% end %>
+
+</table>

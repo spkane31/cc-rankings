@@ -11,10 +11,43 @@
   <h3><%=link "Race Instances:", to: Routes.race_instance_path(@conn, :index) %> <%= @instances %>
 </section>
 
+<div>
+  <table class="main-page-top-25">
+    <tr>
+      <td>Name</td>
+      <td>Rating</td>
+      <td>Race</td>
+    </tr>
+    <%= for result <- @mens do %>
+      <tr>
+        <td><%= link result.runner.first_name <> " " <> result.runner.last_name, to: Routes.runner_path(@conn, :show, result.runner.id) %></td>
+        <td><%= Float.round(result.rating, 2) %></td>
+        <td><%= link result.race_instance.race.name, to: Routes.race_path(@conn, :show, result.race_instance.race.id)%></td>
+      </tr>
+    <% end %>
+  </table>
+  <table class="gap-table">
+  </table>
+  <table class="main-page-top-25" >
+    <tr>
+      <td>Name</td>
+      <td>Rating</td>
+      <td>Race</td>
+    </tr>
+    <%= for result <- @womens do %>
+      <tr>
+        <td><%= link result.runner.first_name <> " " <> result.runner.last_name, to: Routes.runner_path(@conn, :show, result.runner.id) %></td>
+        <td><%= Float.round(result.rating, 2) %></td>
+        <td><%= link result.race_instance.race.name, to: Routes.race_path(@conn, :show, result.race_instance.race.id)%></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
 
-<%# <section class="row">
-  <article class="column">
-    <h2>Resources</h2>
+
+<section class="row">
+  <%# <article class="column"> %>
+    <%# <h2>Resources</h2>
     <ul>
       <li>
         <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
@@ -25,20 +58,26 @@
       <li>
         <a href="https://github.com/phoenixframework/phoenix/blob/v1.4/CHANGELOG.md">v1.4 Changelog</a>
       </li>
-    </ul>
-  </article>
+    </ul> %>
+  <%# </article> %>
   <article class="column">
-    <h2>Help</h2>
+    <%# <h2>Help</h2> %>
     <ul>
-      <li>
+      <%# <li>
         <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
       </li>
       <li>
         <a href="https://webchat.freenode.net/?channels=elixir-lang">#elixir-lang on Freenode IRC</a>
+      </li> %>
+      <li>
+        <a href="https://twitter.com/seankane942">Twitter @cc-rankings</a>
       </li>
       <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
+        <a href="/about">Read more about how ratings are calculated</a>
+      </li>
+      <li>
+        <a href="https://www.letsrun.com/news/2006/09/wejo-speaks-why-i-sucked-in-college/">One of my favorite training articles</a>
       </li>
     </ul>
   </article>
-</section> %>
+</section>

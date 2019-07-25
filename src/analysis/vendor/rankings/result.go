@@ -268,3 +268,58 @@ func GetEdgeInformation(db *sql.DB, result_a, result_b int) (int, int, float64) 
 
 	return race_id_a, race_id_b, scaled_b - scaled_a
 }
+
+func UpdateRatings(db *sql.DB) {
+	query := `SELECT id, correction_graph FROM races WHERE correction_graph != 0;`
+	rows, err := db.Query(query)
+	check(err)
+	defer rows.Close()
+
+	// TODO - Do I want to keep race_instances or move to something else?
+	resultsQuery := `SELECT id, scaled_time, gender FROM results WHERE race_instance_id =$1;`
+	updateQuery := `UPDATE results SET rating=$2 WHERE id=$1;`
+	for rows.Next() {
+		// Get information for the race
+		var id int
+		var correction_graph float64
+		err = rows.Scan(&id, &correction_graph)
+		check(err)
+
+		// Get information for all of the result
+		results, err := db.Query(resultsQuery, id) 
+		check(err)
+		defer results.Close()
+
+		for results.Next() {
+			var result_id int
+			var rating float64
+			var scaled_time float64
+			var gender string
+
+			err = results.Scan(&result_id, &scaled_time, &gender)
+
+			if scaled_time != 0 {
+				check(err)
+
+				if gender == "MALE" {
+					rating = (1900 - scaled_time - correction_graph) / (8000.0 / 1609.0)
+				} else if gender == "FEMALE" {
+					rating = (1350 - scaled_time - correction_graph) / (5000.0 / 1609.0)
+				}
+
+				_, err := db.Exec(updateQuery, result_id, rating)
+				check(err)
+			} else {
+				_, err := db.Exec(updateQuery, result_id, rating)
+				check(err)
+			}
+
+		}
+	}
+}
+
+func ResetRatings(db *sql.DB) {
+	update := `UPDATE results SET rating=0;`
+	_, err := db.Exec(update)
+	check(err)
+}
