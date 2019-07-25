@@ -1,6 +1,5 @@
 # Rankings
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/spkane31/cc-rankings.svg)](https://greenkeeper.io/)
 [![Build Status](https://travis-ci.org/spkane31/cc-rankings.svg?branch=master)](https://travis-ci.org/spkane31/cc-rankings)
 
 This is a project which will rank collegiate cross country performances based on relative performances.
