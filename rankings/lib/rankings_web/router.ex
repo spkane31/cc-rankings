@@ -21,7 +21,7 @@ defmodule RankingsWeb.Router do
 
     resources "/users", UserController, only: [:index, :show, :new, :create]
     resources "/sessions", SessionController, only: [:new, :create, :delete]
-    resources "/runners", RunnerController, only:  [:index, :show]
+    resources "/runners", RunnerController, only:  [:index, :show, :edit]
     resources "/teams", TeamController, only: [:index, :show]
     resources "/races", RaceController,  only: [:index, :show]
     resources "/raceinstances", RaceInstanceController,  only: [:index, :show]
