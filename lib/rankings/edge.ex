@@ -1,8 +1,8 @@
 defmodule Rankings.Edge do
   use Ecto.Schema
-  import Ecto.{Query, Changeset}
+  import Ecto.{Query}
 
-  alias Rankings.{Repo, Race, Runner, Edge, RaceInstance}
+  alias Rankings.{Repo, Edge, RaceInstance}
 
   schema "edges" do
     belongs_to :from_race, RaceInstance
@@ -55,8 +55,7 @@ defmodule Rankings.Edge do
 
   def get_std_dev(from_id, to_id) do
     q = from e in Edge, where: e.from_race_id == ^from_id and e.to_race_id == ^to_id, select: fragment("stddev(difference)") #e.difference
-    edges = Repo.one(q)
-
+    Repo.one(q)
   end
 
 end

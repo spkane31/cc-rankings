@@ -4,7 +4,7 @@ use Mix.Config
 config :rankings, Rankings.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
-  password: "postgres",
+  password: "",
   database: "rankings_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox

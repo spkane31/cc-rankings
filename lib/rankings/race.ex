@@ -57,10 +57,11 @@ defmodule Rankings.Race do
     where: ilike(r.name, ^wildcard)
   end
 
+  # There's definitely a better way to do this
   def get_runner_count(id) do
     r = get_race(id) |> Repo.preload([{:instances, :instance_results}])
     count = 0
-    for instance <- @r do
+    for instance <- r do
       count = count + length(instance.results)
     end
     count

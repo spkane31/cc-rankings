@@ -37,11 +37,11 @@ defmodule Rankings.Result do
 
   def get_top_25_men do
     mens = from(r in Rankings.Result, where: r.gender == "MALE", limit: 25, order_by: [desc: :rating])
-    mens = Repo.all(mens) |> Repo.preload([:runner, {:race_instance, :race}])
+    Repo.all(mens) |> Repo.preload([:runner, {:race_instance, :race}])
   end
 
   def get_top_25_women do
     womens = from(r in Rankings.Result, where: r.gender == "FEMALE", limit: 25, order_by: [desc: :rating])
-    womens = Repo.all(womens) |> Repo.preload([:runner, {:race_instance, :race}])
+    Repo.all(womens) |> Repo.preload([:runner, {:race_instance, :race}])
   end
 end

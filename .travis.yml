@@ -10,7 +10,8 @@ service:
   - postgresql
 
 before script:
-  - cp config/travis.exs config/test.exs
+  - psql -c 'create database rankings_test;' -U postgres
+  # - cp config/test.exs config/travis.exs
 
 script:
   - mix deps.get --only test

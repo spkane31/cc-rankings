@@ -1,7 +1,6 @@
 defmodule Rankings.RaceInstance do
   use Ecto.Schema
   import Ecto.Query
-  import Integer
 
   alias Rankings.{Result, Repo}
   alias Rankings
@@ -55,7 +54,7 @@ defmodule Rankings.RaceInstance do
   end
 
   def get_average_time(id) do
-    q = from(r in Result, select: avg(r.time_float), where: r.race_instance_id == 84)
+    q = from(r in Result, select: avg(r.time_float), where: r.race_instance_id == ^id)
     Repo.one(q)
     |> time_to_string()
   end
