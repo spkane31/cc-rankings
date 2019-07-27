@@ -10,6 +10,7 @@ defmodule Rankings.MixProject do
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      # rustler_crates: rustler_crates(),
       deps: deps()
     ]
   end
@@ -44,7 +45,22 @@ defmodule Rankings.MixProject do
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
       {:pbkdf2_elixir, "~> 1.0"},
-      {:statistics, "~> 0.5.0"}
+      {:statistics, "~> 0.5.0"},
+      {:rustler, "~> 0.20.0"}
+    ]
+  end
+
+  # defp rustler_crates do
+  #   [
+  #     niftest: [path: "native/niftest", mode: if(Mix.env() == :prod, do: :release, else: :debug)]
+  #   ]
+  # end
+
+  defp aliases do
+    [
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
 
@@ -54,11 +70,4 @@ defmodule Rankings.MixProject do
   #     $ mix ecto.setup
   #
   # See the documentation for `Mix` for more info on aliases.
-  defp aliases do
-    [
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
-      "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate", "test"]
-    ]
-  end
 end
