@@ -12,7 +12,7 @@ config :rankings, Rankings.Repo,
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :rankings, RankingsWeb.Endpoint,
-  http: [port: 4002],
+  http: [port: 5432],
   server: false
 
 # Print only warnings and errors during test
